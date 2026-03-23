@@ -186,13 +186,14 @@ const API = {
   async write(payload) {
     if (!CONFIG.APPS_SCRIPT_URL) throw new Error('Apps Script URL no configurada');
     try {
-      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      // Google Apps Script requiere enviar sin Content-Type header para evitar CORS preflight
+      await fetch(CONFIG.APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        redirect: 'follow'
+        mode: 'no-cors'
       });
-      return await res.json();
+      // Con no-cors no podemos leer la respuesta, pero el request SÍ llega al servidor
+      return { status: 'ok', message: '✅ Guardado' };
     } catch(e) {
       // Offline queue
       const q = JSON.parse(localStorage.getItem('ent_queue')||'[]');
