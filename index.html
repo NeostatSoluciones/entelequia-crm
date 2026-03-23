@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0f0d">
+  <title>🌿 Entelequia® CRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0f0d;--s1:#0d1a12;--s2:#111f17;--s3:#162b1e;--bd:#1e3a28;--ac:#7dcea0;--ac2:#2d6b45;--ac3:#1a4a2e;--tx:#e8ede9;--t2:#c8e0d0;--t3:#8a9a8e;--t4:#5a8a6a;--rd:#ef4444;--yw:#f59e0b;--gn:#22c55e;--bl:#3b82f6;--tl:#10b981;--gy:#6b7280}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow-x:hidden}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+    input,select,textarea,button{font-family:inherit}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fi{animation:fadeIn .3s ease both}.su{animation:slideUp .35s ease both}
+    
+    .hdr{background:linear-gradient(135deg,#0d1f15,#142b1c);padding:13px 16px;border-bottom:1px solid var(--bd);text-align:center;position:sticky;top:0;z-index:100}
+    .hdr h1{font-family:'Playfair Display',serif;font-size:19px;color:var(--ac);letter-spacing:2px}
+    .hdr p{font-size:9px;color:var(--t4);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+    
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(to top,var(--bg) 85%,transparent);padding:6px 8px 10px;display:flex;justify-content:center;gap:2px}
+    .bnav button{flex:1;max-width:80px;padding:7px 4px;border-radius:10px;border:none;cursor:pointer;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--t4);transition:.2s}
+    .bnav button.on{background:var(--ac3);color:var(--ac)}
+    .bnav button span{font-size:18px}
+    
+    .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;animation:slideUp .3s;box-shadow:0 8px 24px rgba(0,0,0,.5);white-space:nowrap}
+    .toast-ok{background:var(--ac3);color:var(--ac);border:1px solid var(--ac2)}
+    .toast-err{background:#2d1a1a;color:#f87171;border:1px solid #6b2d2d}
+    
+    .inp{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--bd);background:var(--s2);color:var(--tx);font-size:14px;outline:none;-webkit-appearance:none;transition:border .2s}
+    .inp:focus{border-color:var(--ac2)}
+    select.inp{padding-right:32px}
+    textarea.inp{resize:vertical;min-height:50px}
+    
+    .lbl{display:block;font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;font-weight:600}
+    .fld{margin-bottom:10px}
+    
+    .card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:8px;transition:border .2s;cursor:pointer}
+    .card:active{border-color:var(--ac2)}
+    
+    .sec{background:var(--s1);border:1px solid var(--bd);border-radius:13px;padding:15px;margin-bottom:12px}
+    .sec-t{font-size:13px;font-weight:700;color:var(--ac);margin-bottom:11px;display:flex;align-items:center;gap:6px}
+    
+    .btn{width:100%;padding:13px;border-radius:11px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn:active{transform:scale(.98)}
+    .btn-p{background:linear-gradient(135deg,var(--ac3),var(--ac2));color:var(--tx)}
+    .btn-s{background:transparent;border:1px solid var(--bd);color:var(--t4)}
+    .btn:disabled{opacity:.5;cursor:wait}
+    
+    .pill{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;white-space:nowrap}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .full{grid-column:1/-1}
+    
+    .modal-bg{position:fixed;inset:0;background:rgba(10,15,13,.93);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+    .modal{background:var(--s2);border:1px solid var(--bd);border-radius:17px 17px 0 0;width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:18px 16px 22px}
+    
+    .login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+    .login-box{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:28px 22px;width:100%;max-width:380px;text-align:center}
+    
+    .empty{text-align:center;padding:40px 20px;color:var(--t4);font-size:13px;line-height:1.6}
+    .loading{text-align:center;padding:50px;color:var(--t4)}
+    .spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 10px}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:7px;margin-bottom:14px}
+    .stat{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px;position:relative;overflow:hidden}
+    .stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;opacity:.5}
+    .stat-n{font-size:24px;font-weight:700;font-family:'Playfair Display',serif}
+    .stat-l{font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+    
+    .funnel-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+    .funnel-lbl{width:70px;font-size:10px;color:var(--t3);text-align:right;flex-shrink:0}
+    .funnel-bar{flex:1;background:var(--s2);border-radius:5px;height:22px;overflow:hidden}
+    .funnel-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;transition:width .5s ease}
+    .funnel-fill span{font-size:10px;font-weight:700}
+
+    .tbl{width:100%;border-collapse:separate;border-spacing:0 3px;min-width:420px}
+    .tbl th{text-align:center;padding:5px 6px;font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+    .tbl th:first-child{text-align:left}
+    .tbl td{padding:8px 6px;font-size:11px;background:var(--s2)}
+    .tbl td:first-child{border-radius:6px 0 0 6px;font-weight:600;color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tbl td:last-child{border-radius:0 6px 6px 0}
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+// ============================================================
+// 🌿 CONFIGURACIÓN — EDITA ESTOS 3 VALORES
+// ============================================================
+const CONFIG = {
+  // 1. Tu API Key de Google Cloud (para LEER el Sheet)
+  SHEETS_API_KEY: 'AIzaSyBdffYFD_Y9E0gtKiNuo7diiajaTqrvIMA',
+  
+  // 2. El ID de tu Google Sheet (la parte larga de la URL)
+  SPREADSHEET_ID: '1v_LZmlLd9oSLznirdKj_tm_S_ywQKW-LXFl0CAVtjw4',
+  
+  // 3. La URL de tu Apps Script (para ESCRIBIR al Sheet)
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxs_1pXXgm2x56rbJfP7CsAnN3N74_QRzGaM1UHum_DD4TmUeIpdMZccibGj_LQbTY4MQ/exec',
+};
+
+// ============================================================
+// CONSTANTES DEL NEGOCIO
+// ============================================================
+const AGENTS = [
+  { id: 'Edith Gutiérrez', zona: 'Condesa', pin: '1234' },
+  { id: 'Alberto Ruvalcaba', zona: 'Col. Juárez', pin: '2345' },
+  { id: 'Agente 3', zona: 'Polanco Norte', pin: '3456' },
+  { id: 'Agente 4', zona: 'Polanco Sur', pin: '4567' },
+  { id: 'Agente 5', zona: 'Roma Norte', pin: '5678' },
+  { id: 'Supervisor', zona: 'Todas', pin: '0000', role: 'admin' },
+];
+
+const GIROS = ['Cafetería','Restaurante','Bar / Cantina','Café / Wine Bar','Bistrot','Hotel Boutique','Nevería / Café','Panadería / Repostería','Cocina Económica','Food Truck','Juguería','Taquería','Comida Rápida','Pizzería','Sushi / Japonés','Heladería','Catering / Banquetes','Otro'];
+const COLONIAS = ['Condesa','Col. Juárez','Polanco','Roma Norte','Roma Sur','Nápoles','Del Valle','Coyoacán','San Ángel','Santa Fe','Otra'];
+const ESTADOS = [
+  {v:'🔴 Pendiente',s:'Pendiente',c:'#ef4444'},
+  {v:'🟡 En Proceso',s:'En Proceso',c:'#f59e0b'},
+  {v:'🟢 Interesado',s:'Interesado',c:'#22c55e'},
+  {v:'🔵 Cliente Nuevo',s:'Cliente Nuevo',c:'#3b82f6'},
+  {v:'🌿 Cliente Entelequia',s:'Entelequia',c:'#10b981'},
+  {v:'⚫ Descartado',s:'Descartado',c:'#6b7280'},
+];
+const PRIORIDADES = [{v:'🟢 Alta',c:'#22c55e'},{v:'🟡 Media',c:'#f59e0b'},{v:'🔴 Baja',c:'#ef4444'}];
+const INTERES_OPTS = ['Alto','Medio','Bajo','Sin interés'];
+const RESULTADO_OPTS = ['Muestra entregada','Cotización enviada','Pendiente decisión','Cerrado ganado','Cerrado perdido','Re-agendar','No disponible'];
+
+const PRODUCTOS = [
+  {cat:'Vasos',items:['Vaso 8oz','Vaso 12oz','Vaso 16oz','Vaso 22oz']},
+  {cat:'Platos',items:['Plato 7"','Plato 9"','Plato compartido','Bowl 12oz','Bowl 16oz']},
+  {cat:'Cubiertos',items:['Tenedor','Cuchillo','Cuchara','Kit cubiertos']},
+  {cat:'Contenedores',items:['Contenedor 8x8','Contenedor 9x6','Clamshell 6"','Clamshell 9"']},
+  {cat:'Otros',items:['Popote','Bolsa kraft','Servilleta','Charola']},
+];
+
+// ============================================================
+// API FUNCTIONS
+// ============================================================
+const API = {
+  // LEER via Google Sheets API (directo, rápido)
+  async read() {
+    if (!CONFIG.SHEETS_API_KEY || !CONFIG.SPREADSHEET_ID) return [];
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/Registros!A2:AM1000?key=${CONFIG.SHEETS_API_KEY}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) return [];
+      return data.values.map((row, i) => ({
+        _row: i + 2,
+        timestamp: row[0] || '',
+        id: row[1] || '',
+        agente: row[2] || '',
+        dia: row[3] || '',
+        negocio: row[4] || '',
+        direccion: row[5] || '',
+        colonia: row[6] || '',
+        giro: row[7] || '',
+        contacto_nombre: row[8] || '',
+        contacto_puesto: row[9] || '',
+        telefono: row[10] || '',
+        email: row[11] || '',
+        estado: row[12] || '',
+        prioridad: row[13] || '',
+        productos_interes: row[14] || '',
+        volumen_estimado: row[15] || '',
+        presupuesto: row[16] || '',
+        competencia_actual: row[17] || '',
+        v1_fecha: row[18]||'', v1_resultado: row[19]||'', v1_interes: row[20]||'', v1_notas: row[21]||'',
+        v2_fecha: row[22]||'', v2_resultado: row[23]||'', v2_interes: row[24]||'', v2_notas: row[25]||'',
+        v3_fecha: row[26]||'', v3_resultado: row[27]||'', v3_interes: row[28]||'', v3_notas: row[29]||'',
+        cotiz_solicitada: row[30]||'', cotiz_monto: row[31]||'', cotiz_productos: row[32]||'', cotiz_estatus: row[33]||'',
+        notas: row[34] || '',
+        latitud: row[35]||'', longitud: row[36]||'',
+      }));
+    } catch(e) { console.error('Read error:', e); return []; }
+  },
+
+  // ESCRIBIR via Apps Script
+  async write(payload) {
+    if (!CONFIG.APPS_SCRIPT_URL) throw new Error('Apps Script URL no configurada');
+    try {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      });
+      return await res.json();
+    } catch(e) {
+      // Offline queue
+      const q = JSON.parse(localStorage.getItem('ent_queue')||'[]');
+      q.push({payload, ts: Date.now()});
+      localStorage.setItem('ent_queue', JSON.stringify(q));
+      throw e;
+    }
+  },
+
+  async getStats() {
+    if (!CONFIG.APPS_SCRIPT_URL) return null;
+    try {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=stats', {redirect:'follow'});
+      return await res.json();
+    } catch { return null; }
+  },
+
+  async getAgentStats() {
+    if (!CONFIG.APPS_SCRIPT_URL) return null;
+    try {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=agents', {redirect:'follow'});
+      return await res.json();
+    } catch { return null; }
+  },
+
+  async syncQueue() {
+    const q = JSON.parse(localStorage.getItem('ent_queue')||'[]');
+    if (!q.length) return 0;
+    let ok = 0; const fail = [];
+    for (const item of q) {
+      try { await this.write(item.payload); ok++; } catch { fail.push(item); }
+    }
+    localStorage.setItem('ent_queue', JSON.stringify(fail));
+    return ok;
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  user: JSON.parse(localStorage.getItem('ent_user')||'null'),
+  view: 'dashboard',
+  records: [],
+  loading: false,
+  toast: null,
+};
+
+function setState(patch) {
+  Object.assign(state, patch);
+  render();
+}
+
+function toast(msg, type='ok') {
+  state.toast = {msg, type};
+  render();
+  setTimeout(() => { state.toast = null; render(); }, 3000);
+}
+
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  if (!state.user) { app.innerHTML = renderLogin(); return; }
+  
+  const isAdmin = state.user.role === 'admin';
+  
+  app.innerHTML = `
+    <div class="hdr">
+      <h1>🌿 ENTELEQUIA®</h1>
+      <p>CRM Campo CDMX · ${state.user.id}${isAdmin ? ' (Supervisor)' : ' — ' + state.user.zona}</p>
+    </div>
+    <div style="padding:10px 12px 85px">
+      ${state.view === 'dashboard' ? renderDashboard() : ''}
+      ${state.view === 'nuevo' ? renderNuevo() : ''}
+      ${state.view === 'registros' ? renderRegistros() : ''}
+      ${state.view === 'cotizar' ? renderCotizar() : ''}
+      ${state.view === 'config' ? renderConfig() : ''}
+    </div>
+    <div class="bnav">
+      ${[
+        {k:'dashboard',i:'📊',l:'Panel'},
+        {k:'nuevo',i:'➕',l:'Nuevo'},
+        {k:'registros',i:'📋',l:'Lista'},
+        {k:'cotizar',i:'💰',l:'Cotizar'},
+        {k:'config',i:'⚙️',l:'Config'},
+      ].map(t => `<button class="${state.view===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}
+    </div>
+    ${state.toast ? `<div class="toast toast-${state.toast.type}">${state.toast.msg}</div>` : ''}
+  `;
+}
+
+function nav(v) { setState({view:v}); if(v==='dashboard'||v==='registros') loadRecords(); }
+
+// ============================================================
+// LOGIN
+// ============================================================
+function renderLogin() {
+  return `
+  <div class="login-wrap">
+    <div class="login-box fi">
+      <div style="font-size:36px;margin-bottom:8px">🌿</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ac);margin-bottom:4px">ENTELEQUIA®</div>
+      <div style="font-size:10px;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px">CRM de Campo CDMX</div>
+      
+      <div class="fld">
+        <label class="lbl">Selecciona tu nombre</label>
+        <select class="inp" id="login-agent">
+          <option value="">Seleccionar agente...</option>
+          ${AGENTS.map(a => `<option value="${a.id}">${a.id} — ${a.zona}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fld">
+        <label class="lbl">PIN de acceso</label>
+        <input class="inp" type="password" id="login-pin" placeholder="4 dígitos" maxlength="4" inputmode="numeric" pattern="[0-9]*" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-p" onclick="doLogin()" style="margin-top:8px">Ingresar</button>
+      <div id="login-err" style="margin-top:10px;font-size:12px;color:var(--rd);display:none"></div>
+    </div>
+  </div>`;
+}
+
+function doLogin() {
+  const agentId = document.getElementById('login-agent').value;
+  const pin = document.getElementById('login-pin').value;
+  const agent = AGENTS.find(a => a.id === agentId);
+  const err = document.getElementById('login-err');
+  
+  if (!agent) { err.style.display='block'; err.textContent='Selecciona un agente'; return; }
+  if (pin !== agent.pin) { err.style.display='block'; err.textContent='PIN incorrecto'; return; }
+  
+  localStorage.setItem('ent_user', JSON.stringify(agent));
+  state.user = agent;
+  state.view = 'dashboard';
+  loadRecords();
+}
+
+function logout() {
+  localStorage.removeItem('ent_user');
+  state.user = null;
+  render();
+}
+
+// ============================================================
+// DATA
+// ============================================================
+async function loadRecords() {
+  setState({loading:true});
+  const records = await API.read();
+  setState({records, loading:false});
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const r = state.records;
+  const isAdmin = state.user.role === 'admin';
+  const mine = isAdmin ? r : r.filter(x => x.agente === state.user.id);
+  
+  const s = {
+    total: mine.length,
+    pendiente: mine.filter(x=>(x.estado||'').includes('Pendiente')).length,
+    proceso: mine.filter(x=>(x.estado||'').includes('Proceso')).length,
+    interesado: mine.filter(x=>(x.estado||'').includes('Interesado')).length,
+    clientes: mine.filter(x=>(x.estado||'').includes('Cliente')||(x.estado||'').includes('Entelequia')).length,
+    cotizaciones: mine.filter(x=>x.cotiz_solicitada==='Sí').length,
+    hoy: mine.filter(x=>{try{return (x.timestamp||'').substring(0,10)===new Date().toISOString().substring(0,10)}catch{return false}}).length,
+  };
+  
+  // Agent breakdown for admin
+  let agentTable = '';
+  if (isAdmin) {
+    const byAgent = {};
+    r.forEach(x => {
+      const a = x.agente || 'Sin agente';
+      if (!byAgent[a]) byAgent[a] = {n:a, t:0, p:0, pr:0, cl:0, co:0};
+      byAgent[a].t++;
+      if((x.estado||'').includes('Pendiente')) byAgent[a].p++;
+      if((x.estado||'').includes('Proceso')) byAgent[a].pr++;
+      if((x.estado||'').includes('Cliente')||(x.estado||'').includes('Entelequia')) byAgent[a].cl++;
+      if(x.cotiz_solicitada==='Sí') byAgent[a].co++;
+    });
+    const agents = Object.values(byAgent);
+    agentTable = `
+    <div class="sec">
+      <div class="sec-t">👥 Por Agente</div>
+      <div style="overflow-x:auto;margin:0 -6px">
+        <table class="tbl">
+          <thead><tr><th>Agente</th><th>Total</th><th>🔴</th><th>🟡</th><th>🟢</th><th>💰</th><th>%</th></tr></thead>
+          <tbody>${agents.map(a => `<tr>
+            <td>${a.n.split(' ')[0]}</td>
+            <td style="text-align:center;font-weight:700;color:var(--ac)">${a.t}</td>
+            <td style="text-align:center;color:var(--rd)">${a.p}</td>
+            <td style="text-align:center;color:var(--yw)">${a.pr}</td>
+            <td style="text-align:center;color:var(--gn)">${a.cl}</td>
+            <td style="text-align:center;color:var(--bl)">${a.co}</td>
+            <td style="text-align:center;font-weight:700;color:${a.cl>0?'var(--gn)':'var(--gy)'}">${a.t>0?((a.cl/a.t)*100).toFixed(1):'0.0'}%</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+  
+  return `
+  <div class="fi">
+    <div class="stat-grid">
+      ${statCard('Total',s.total,'var(--ac)','📊')}
+      ${statCard('Hoy',s.hoy,'var(--bl)','📝')}
+      ${statCard('Pendientes',s.pendiente,'var(--rd)','🔴')}
+      ${statCard('En Proceso',s.proceso,'var(--yw)','🟡')}
+      ${statCard('Interesados',s.interesado,'var(--gn)','🟢')}
+      ${statCard('Clientes',s.clientes,'var(--tl)','🌿')}
+      ${statCard('Cotizaciones',s.cotizaciones,'var(--bl)','💰')}
+    </div>
+    
+    <div class="sec">
+      <div class="sec-t">📊 Funnel</div>
+      ${funnelRow('Pendientes',s.pendiente,s.total,'var(--rd)')}
+      ${funnelRow('En Proceso',s.proceso,s.total,'var(--yw)')}
+      ${funnelRow('Interesados',s.interesado,s.total,'var(--gn)')}
+      ${funnelRow('Clientes',s.clientes,s.total,'var(--tl)')}
+    </div>
+    
+    ${agentTable}
+    
+    <button class="btn btn-s" onclick="loadRecords()" style="font-size:12px;padding:10px">🔄 Actualizar</button>
+  </div>`;
+}
+
+function statCard(l,v,c,i) {
+  return `<div class="stat" style="--c:${c}"><div style="position:absolute;top:0;left:0;right:0;height:2.5px;background:${c};opacity:.5"></div><div class="stat-l">${i} ${l}</div><div class="stat-n" style="color:${c}">${v}</div></div>`;
+}
+function funnelRow(l,v,max,c) {
+  const pct = max>0?(v/max)*100:0;
+  return `<div class="funnel-row"><div class="funnel-lbl">${l}</div><div class="funnel-bar"><div class="funnel-fill" style="width:${pct}%;background:${c}33;min-width:${v>0?'24px':'0'}"><span style="color:${c}">${v}</span></div></div></div>`;
+}
+
+// ============================================================
+// NUEVO REGISTRO
+// ============================================================
+function renderNuevo() {
+  return `
+  <div class="fi">
+    <div class="sec">
+      <div class="sec-t">📋 Datos del Negocio</div>
+      <div class="grid2">
+        <div class="fld">
+          <label class="lbl">Día de Ruta</label>
+          <select class="inp" id="n-dia"><option>1/4</option><option>2/4</option><option>3/4</option><option>4/4</option></select>
+        </div>
+        <div class="fld">
+          <label class="lbl">Prioridad</label>
+          <select class="inp" id="n-prioridad">${PRIORIDADES.map(p=>`<option value="${p.v}">${p.v}</option>`).join('')}</select>
+        </div>
+        <div class="fld full">
+          <label class="lbl">Nombre del Negocio *</label>
+          <input class="inp" id="n-negocio" placeholder="Ej: Café La Ventana">
+        </div>
+        <div class="fld full">
+          <label class="lbl">Dirección *</label>
+          <input class="inp" id="n-dir" placeholder="Calle, número y referencias">
+        </div>
+        <div class="fld">
+          <label class="lbl">Colonia</label>
+          <select class="inp" id="n-col"><option value="">Seleccionar...</option>${COLONIAS.map(c=>`<option>${c}</option>`).join('')}</select>
+        </div>
+        <div class="fld">
+          <label class="lbl">Giro</label>
+          <select class="inp" id="n-giro"><option value="">Seleccionar...</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sec">
+      <div class="sec-t">👤 Contacto</div>
+      <div class="grid2">
+        <div class="fld">
+          <label class="lbl">Nombre</label>
+          <input class="inp" id="n-cnom" placeholder="Nombre del contacto">
+        </div>
+        <div class="fld">
+          <label class="lbl">Puesto</label>
+          <input class="inp" id="n-cpue" placeholder="Dueño, Gerente...">
+        </div>
+        <div class="fld">
+          <label class="lbl">Teléfono</label>
+          <input class="inp" type="tel" id="n-tel" placeholder="55-XXXX-XXXX">
+        </div>
+        <div class="fld">
+          <label class="lbl">Email</label>
+          <input class="inp" type="email" id="n-email" placeholder="correo@negocio.com">
+        </div>
+      </div>
+    </div>
+    
+    <div class="sec">
+      <div class="sec-t">🌿 Tipificación Comercial</div>
+      <div class="fld">
+        <label class="lbl">Productos de Interés</label>
+        <div id="n-prods" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px"></div>
+        <select class="inp" onchange="addProduct(this.value);this.value=''">
+          <option value="">+ Agregar producto...</option>
+          ${PRODUCTOS.map(cat => `<optgroup label="${cat.cat}">${cat.items.map(p=>`<option>${p}</option>`).join('')}</optgroup>`).join('')}
+        </select>
+      </div>
+      <div class="grid2">
+        <div class="fld">
+          <label class="lbl">Volumen Estimado / Sem</label>
+          <input class="inp" id="n-vol" placeholder="Ej: 500 vasos/sem">
+        </div>
+        <div class="fld">
+          <label class="lbl">Presupuesto Mensual</label>
+          <input class="inp" id="n-pres" placeholder="$0">
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lbl">Competencia Actual</label>
+        <input class="inp" id="n-comp" placeholder="¿Qué desechables usa actualmente?">
+      </div>
+      <div class="fld">
+        <label class="lbl">Notas</label>
+        <textarea class="inp" id="n-notas" placeholder="Observaciones, horarios, preferencias..."></textarea>
+      </div>
+    </div>
+    
+    <div class="sec" style="display:flex;align-items:center;gap:10px">
+      <button class="btn btn-s" onclick="getGeo()" style="width:auto;padding:10px 14px;font-size:12px;white-space:nowrap">📍 GPS</button>
+      <span style="font-size:11px;color:var(--t4)" id="n-geo">Opcional</span>
+      <input type="hidden" id="n-lat"><input type="hidden" id="n-lng">
+    </div>
+    
+    <button class="btn btn-p" onclick="submitNuevo()" id="n-btn">✅ Registrar Negocio</button>
+  </div>`;
+}
+
+let selectedProducts = [];
+
+function addProduct(p) {
+  if (!p || selectedProducts.includes(p)) return;
+  selectedProducts.push(p);
+  updateProductPills();
+}
+
+function removeProduct(p) {
+  selectedProducts = selectedProducts.filter(x => x !== p);
+  updateProductPills();
+}
+
+function updateProductPills() {
+  const el = document.getElementById('n-prods');
+  if (!el) return;
+  el.innerHTML = selectedProducts.map(p => 
+    `<span style="background:var(--ac3);color:var(--ac);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px" onclick="removeProduct('${p}')">${p} ✕</span>`
+  ).join('');
+}
+
+function getGeo() {
+  const el = document.getElementById('n-geo');
+  el.textContent = '⏳ Obteniendo...';
+  navigator.geolocation?.getCurrentPosition(
+    p => {
+      document.getElementById('n-lat').value = p.coords.latitude.toFixed(6);
+      document.getElementById('n-lng').value = p.coords.longitude.toFixed(6);
+      el.textContent = `✅ ${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`;
+    },
+    e => { el.textContent = '❌ ' + e.message; },
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+async function submitNuevo() {
+  const neg = document.getElementById('n-negocio').value.trim();
+  const dir = document.getElementById('n-dir').value.trim();
+  if (!neg || !dir) { toast('⚠️ Completa Negocio y Dirección','err'); return; }
+  
+  const btn = document.getElementById('n-btn');
+  btn.disabled = true; btn.textContent = '⏳ Guardando...';
+  
+  const data = {
+    action: 'create',
+    agente: state.user.id,
+    dia: document.getElementById('n-dia').value,
+    negocio: neg,
+    direccion: dir,
+    colonia: document.getElementById('n-col').value,
+    giro: document.getElementById('n-giro').value,
+    contacto_nombre: document.getElementById('n-cnom').value,
+    contacto_puesto: document.getElementById('n-cpue').value,
+    telefono: document.getElementById('n-tel').value,
+    email: document.getElementById('n-email').value,
+    prioridad: document.getElementById('n-prioridad').value,
+    productos_interes: selectedProducts.join(', '),
+    volumen_estimado: document.getElementById('n-vol').value,
+    presupuesto: document.getElementById('n-pres').value,
+    competencia_actual: document.getElementById('n-comp').value,
+    notas: document.getElementById('n-notas').value,
+    latitud: document.getElementById('n-lat').value,
+    longitud: document.getElementById('n-lng').value,
+  };
+  
+  // Local backup
+  const loc = JSON.parse(localStorage.getItem('ent_local')||'[]');
+  loc.push({...data, timestamp: new Date().toISOString()});
+  localStorage.setItem('ent_local', JSON.stringify(loc));
+  
+  try {
+    await API.write(data);
+    toast('✅ Negocio registrado');
+    selectedProducts = [];
+    setState({view:'nuevo'}); // re-render clean form
+  } catch {
+    toast('📱 Guardado offline','err');
+  }
+  btn.disabled = false; btn.textContent = '✅ Registrar Negocio';
+}
+
+// ============================================================
+// REGISTROS
+// ============================================================
+let filterEstado = 'all';
+let searchQ = '';
+
+function renderRegistros() {
+  const isAdmin = state.user.role === 'admin';
+  let recs = isAdmin ? state.records : state.records.filter(x => x.agente === state.user.id);
+  
+  if (filterEstado !== 'all') recs = recs.filter(x => (x.estado||'').includes(filterEstado));
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    recs = recs.filter(x => (x.negocio||'').toLowerCase().includes(q) || (x.direccion||'').toLowerCase().includes(q) || (x.colonia||'').toLowerCase().includes(q));
+  }
+  
+  if (state.loading) return `<div class="loading"><div class="spin"></div>Cargando registros...</div>`;
+  
+  return `
+  <div class="fi">
+    <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+      <input class="inp" placeholder="🔍 Buscar..." value="${searchQ}" oninput="searchQ=this.value;render()" style="flex:1 1 120px;padding:8px 10px;font-size:12px">
+      <select class="inp" onchange="filterEstado=this.value;render()" style="width:auto;flex:0 1 auto;padding:8px 8px;font-size:11px">
+        <option value="all">Estado</option>
+        ${ESTADOS.map(e=>`<option value="${e.s}" ${filterEstado===e.s?'selected':''}>${e.s}</option>`).join('')}
+      </select>
+    </div>
+    <div style="font-size:11px;color:var(--t4);margin-bottom:6px">${recs.length} registros <button onclick="loadRecords()" style="background:none;border:none;color:var(--ac);cursor:pointer;font-size:11px">🔄</button></div>
+    ${recs.length === 0 ? '<div class="empty">Sin registros encontrados</div>' : ''}
+    ${recs.map((r,i) => {
+      const color = ESTADOS.find(e => (r.estado||'').includes(e.s))?.c || '#6b7280';
+      const visits = [r.v1_fecha,r.v2_fecha,r.v3_fecha].filter(Boolean).length;
+      const hasCotiz = r.cotiz_solicitada === 'Sí';
+      return `<div class="card su" style="border-left:4px solid ${color};animation-delay:${Math.min(i,12)*.03}s" onclick="openDetail('${r.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.negocio}</div>
+            <div style="font-size:10px;color:var(--t4);margin-top:2px">${r.giro} · ${r.colonia}</div>
+          </div>
+          <div style="display:flex;gap:3px;margin-left:6px">
+            <span class="pill" style="background:${color}22;color:${color}">${(r.estado||'').replace(/[🔴🟡🟢🔵🌿⚫]\s?/g,'')}</span>
+            ${hasCotiz?`<span class="pill" style="background:#3b82f622;color:#3b82f6">💰</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:5px;font-size:10px;color:var(--t3)">
+          <span>📍 ${(r.direccion||'').substring(0,22)}${(r.direccion||'').length>22?'...':''}</span>
+          <span>🔄 V${visits}/3</span>
+          ${r.contacto_nombre?`<span>👤 ${r.contacto_nombre.split(' ')[0]}</span>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ============================================================
+// DETAIL MODAL
+// ============================================================
+let detailRecord = null;
+
+function openDetail(id) {
+  detailRecord = state.records.find(r => r.id === id);
+  if (!detailRecord) return;
+  renderDetailModal();
+}
+
+function closeDetail() {
+  document.getElementById('detail-modal')?.remove();
+  detailRecord = null;
+}
+
+function renderDetailModal() {
+  const r = detailRecord;
+  const color = ESTADOS.find(e => (r.estado||'').includes(e.s))?.c || '#6b7280';
+  
+  const modal = document.createElement('div');
+  modal.id = 'detail-modal';
+  modal.className = 'modal-bg';
+  modal.onclick = e => { if(e.target===modal) closeDetail(); };
+  
+  modal.innerHTML = `
+  <div class="modal su">
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--t2)">${r.negocio}</div>
+        <div style="font-size:11px;color:var(--t4);margin-top:3px">${r.giro} · ${r.colonia} · 📍 ${r.direccion}</div>
+        ${r.contacto_nombre?`<div style="font-size:11px;color:var(--t4)">👤 ${r.contacto_nombre} (${r.contacto_puesto||'—'}) · 📞 ${r.telefono||'—'}</div>`:''}
+      </div>
+      <button onclick="closeDetail()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:20px;padding:0 4px">✕</button>
+    </div>
+    
+    <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap">
+      <span class="pill" style="background:${color}22;color:${color}">${r.estado}</span>
+      <span class="pill" style="background:var(--s1)">${r.prioridad}</span>
+      ${r.productos_interes?`<span class="pill" style="background:var(--ac3);color:var(--ac)">🌿 ${r.productos_interes}</span>`:''}
+      ${r.cotiz_solicitada==='Sí'?`<span class="pill" style="background:#3b82f622;color:#3b82f6">💰 ${r.cotiz_estatus||'Pendiente'}</span>`:''}
+    </div>
+    
+    ${r.volumen_estimado||r.presupuesto||r.competencia_actual ? `
+    <div style="background:var(--s1);border-radius:8px;padding:10px;margin-bottom:10px;font-size:11px;color:var(--t3)">
+      ${r.volumen_estimado?`📦 Vol: ${r.volumen_estimado} · `:''}${r.presupuesto?`💵 Ppto: ${r.presupuesto} · `:''}${r.competencia_actual?`⚔️ Comp: ${r.competencia_actual}`:''}
+    </div>` : ''}
+    
+    <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:8px">🔄 Visitas</div>
+    ${[1,2,3].map(n => {
+      const f = r[`v${n}_fecha`], res = r[`v${n}_resultado`], int = r[`v${n}_interes`], not = r[`v${n}_notas`];
+      const done = Boolean(f);
+      return `
+      <div style="background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:10px;margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${done?'6':'0'}px">
+          <span style="font-size:11px;font-weight:700;color:${done?'var(--ac)':'var(--t4)'}">${done?'✅':'⬜'} Visita ${n}</span>
+          ${!done?`<button onclick="openVisitForm(${n})" style="padding:3px 10px;border-radius:5px;border:none;background:var(--ac3);color:var(--ac);cursor:pointer;font-size:10px;font-weight:600">+ Registrar</button>`:''}
+        </div>
+        ${done?`<div style="font-size:11px;color:var(--t3)">📅 ${String(f).substring(0,10)} · ${res} · Interés: ${int}${not?' · '+not:''}</div>`:''}
+      </div>`;
+    }).join('')}
+    
+    ${r.notas?`<div style="margin-top:6px;padding:8px 10px;background:var(--s1);border-radius:7px;font-size:11px;color:var(--t3);border-left:2px solid var(--ac2)">💬 ${r.notas}</div>`:''}
+  </div>`;
+  
+  document.body.appendChild(modal);
+}
+
+function openVisitForm(num) {
+  closeDetail();
+  const r = detailRecord;
+  const modal = document.createElement('div');
+  modal.id = 'visit-modal';
+  modal.className = 'modal-bg';
+  modal.onclick = e => { if(e.target===modal) modal.remove(); };
+  
+  modal.innerHTML = `
+  <div class="modal su">
+    <div style="display:flex;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:700;color:var(--ac)">🔄 Visita ${num} — ${r.negocio}</div>
+      <button onclick="this.closest('.modal-bg').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:20px">✕</button>
+    </div>
+    <div class="grid2">
+      <div class="fld"><label class="lbl">Fecha</label><input class="inp" type="date" id="vf-fecha" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fld"><label class="lbl">Interés</label><select class="inp" id="vf-int"><option value="">—</option>${INTERES_OPTS.map(i=>`<option>${i}</option>`).join('')}</select></div>
+      <div class="fld full"><label class="lbl">Resultado</label><select class="inp" id="vf-res"><option value="">Seleccionar...</option>${RESULTADO_OPTS.map(r=>`<option>${r}</option>`).join('')}</select></div>
+      <div class="fld full"><label class="lbl">Notas de la visita</label><textarea class="inp" id="vf-notas" rows="2" placeholder="Detalles..."></textarea></div>
+      <div class="fld full"><label class="lbl">Nuevo estado general</label><select class="inp" id="vf-est"><option value="">No cambiar</option>${ESTADOS.map(e=>`<option value="${e.v}">${e.v}</option>`).join('')}</select></div>
+    </div>
+    <button class="btn btn-p" onclick="submitVisit('${r.id}',${num})" id="vf-btn" style="margin-top:6px">💾 Guardar Visita ${num}</button>
+  </div>`;
+  
+  document.body.appendChild(modal);
+}
+
+async function submitVisit(id, num) {
+  const btn = document.getElementById('vf-btn');
+  btn.disabled = true; btn.textContent = '⏳...';
+  try {
+    await API.write({
+      action: 'update_visit',
+      id: id,
+      visit_number: num,
+      fecha: document.getElementById('vf-fecha').value,
+      interes: document.getElementById('vf-int').value,
+      resultado: document.getElementById('vf-res').value,
+      notas_visita: document.getElementById('vf-notas').value,
+      nuevo_estado: document.getElementById('vf-est').value,
+    });
+    toast('✅ Visita ' + num + ' registrada');
+    document.getElementById('visit-modal')?.remove();
+    loadRecords();
+  } catch { toast('❌ Error al guardar','err'); }
+  btn.disabled = false;
+}
+
+// ============================================================
+// COTIZAR
+// ============================================================
+function renderCotizar() {
+  const mine = state.user.role === 'admin' ? state.records : state.records.filter(x => x.agente === state.user.id);
+  const sinCotiz = mine.filter(x => x.cotiz_solicitada !== 'Sí' && !(x.estado||'').includes('Descartado'));
+  const conCotiz = mine.filter(x => x.cotiz_solicitada === 'Sí');
+  
+  return `
+  <div class="fi">
+    <div class="sec">
+      <div class="sec-t">💰 Solicitar Cotización</div>
+      <div class="fld">
+        <label class="lbl">Seleccionar Negocio</label>
+        <select class="inp" id="q-negocio">
+          <option value="">Seleccionar...</option>
+          ${sinCotiz.map(r=>`<option value="${r.id}">${r.negocio} — ${r.colonia}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fld">
+        <label class="lbl">Productos a Cotizar</label>
+        <div id="q-prods" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px"></div>
+        <select class="inp" onchange="addQProduct(this.value);this.value=''">
+          <option value="">+ Agregar producto...</option>
+          ${PRODUCTOS.map(cat => `<optgroup label="${cat.cat}">${cat.items.map(p=>`<option>${p}</option>`).join('')}</optgroup>`).join('')}
+        </select>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label class="lbl">Monto Estimado</label><input class="inp" id="q-monto" placeholder="$0"></div>
+        <div class="fld"><label class="lbl">Volumen</label><input class="inp" id="q-vol" placeholder="Ej: 1,000 pz/sem"></div>
+      </div>
+      <button class="btn btn-p" onclick="submitQuote()" id="q-btn">📋 Solicitar Cotización</button>
+    </div>
+    
+    ${conCotiz.length > 0 ? `
+    <div class="sec">
+      <div class="sec-t">📋 Cotizaciones Activas (${conCotiz.length})</div>
+      ${conCotiz.map(r => {
+        const estColor = (r.cotiz_estatus||'').includes('Aprobada') ? 'var(--gn)' : (r.cotiz_estatus||'').includes('Rechazada') ? 'var(--rd)' : 'var(--yw)';
+        return `<div style="background:var(--s2);border-radius:8px;padding:10px;margin-bottom:6px;border-left:3px solid ${estColor}">
+          <div style="font-size:12px;font-weight:600;color:var(--t2)">${r.negocio}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">💰 ${r.cotiz_monto||'—'} · 🌿 ${r.cotiz_productos||'—'} · <span style="color:${estColor}">${r.cotiz_estatus||'Pendiente'}</span></div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+  </div>`;
+}
+
+let qProducts = [];
+function addQProduct(p) { if(!p||qProducts.includes(p))return; qProducts.push(p); updateQPills(); }
+function removeQProduct(p) { qProducts=qProducts.filter(x=>x!==p); updateQPills(); }
+function updateQPills() {
+  const el=document.getElementById('q-prods'); if(!el)return;
+  el.innerHTML=qProducts.map(p=>`<span style="background:var(--ac3);color:var(--ac);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer" onclick="removeQProduct('${p}')">${p} ✕</span>`).join('');
+}
+
+async function submitQuote() {
+  const id = document.getElementById('q-negocio').value;
+  if (!id) { toast('⚠️ Selecciona un negocio','err'); return; }
+  if (!qProducts.length) { toast('⚠️ Agrega al menos un producto','err'); return; }
+  
+  const btn = document.getElementById('q-btn');
+  btn.disabled = true; btn.textContent = '⏳...';
+  try {
+    await API.write({
+      action: 'request_quote',
+      id: id,
+      productos: qProducts.join(', '),
+      monto: document.getElementById('q-monto').value,
+    });
+    toast('✅ Cotización solicitada');
+    qProducts = [];
+    loadRecords();
+  } catch { toast('❌ Error','err'); }
+  btn.disabled = false; btn.textContent = '📋 Solicitar Cotización';
+}
+
+// ============================================================
+// CONFIG
+// ============================================================
+function renderConfig() {
+  const queue = JSON.parse(localStorage.getItem('ent_queue')||'[]');
+  const local = JSON.parse(localStorage.getItem('ent_local')||'[]');
+  const cfgSaved = CONFIG.SHEETS_API_KEY && CONFIG.SPREADSHEET_ID && CONFIG.APPS_SCRIPT_URL;
+  
+  return `
+  <div class="fi">
+    <div class="sec">
+      <div class="sec-t">⚙️ Estado del Sistema</div>
+      <div style="font-size:12px;color:var(--t3);line-height:1.8">
+        👤 Sesión: <strong style="color:var(--t2)">${state.user.id}</strong> (${state.user.zona})<br>
+        📊 Registros cargados: <strong style="color:var(--ac)">${state.records.length}</strong><br>
+        📱 Registros locales: ${local.length}<br>
+        ⏳ Pendientes offline: ${queue.length}<br>
+        🔌 API: ${cfgSaved ? '<span style="color:var(--gn)">Configurada</span>' : '<span style="color:var(--rd)">No configurada</span>'}
+      </div>
+      ${queue.length > 0 ? `<button class="btn btn-s" onclick="doSync()" style="margin-top:8px;font-size:12px;padding:9px">🔄 Sincronizar ${queue.length} pendiente(s)</button>` : ''}
+    </div>
+    
+    <div class="sec">
+      <div class="sec-t">📱 Instalar como App</div>
+      <div style="font-size:12px;color:var(--t3);line-height:1.8">
+        <strong>iPhone:</strong> Safari → Compartir → "Agregar a inicio"<br>
+        <strong>Android:</strong> Chrome → ⋮ → "Agregar a inicio"
+      </div>
+    </div>
+    
+    <button class="btn btn-s" onclick="if(confirm('¿Cerrar sesión?'))logout()" style="color:var(--rd);border-color:#6b2d2d;margin-top:4px">🚪 Cerrar Sesión</button>
+  </div>`;
+}
+
+async function doSync() {
+  const n = await API.syncQueue();
+  if (n > 0) { toast(`✅ ${n} sincronizado(s)`); loadRecords(); }
+  else toast('✅ Todo sincronizado');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+render();
+if (state.user) loadRecords();
+</script>
+</body>
+</html>
