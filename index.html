@@ -420,7 +420,8 @@ function sugeridosH(){
     </div>
     <input class="inp" placeholder="🔍 Buscar negocio, dirección o giro..." value="${S.sugSearch}" oninput="S.sugSearch=this.value;R()" style="margin-bottom:5px;font-size:11px">
     <div style="font-size:8px;color:var(--t4);margin-bottom:4px">${pendientes.length} pendiente(s) · ${visitadosList.length} visitado(s)</div>
-    ${pendientes.length===0&&!S.sugSearch?'<div class="empty">🎉 ¡Todos visitados! Agrega negocios nuevos desde 📝 Registrar</div>':''}
+    ${S.sugeridos.length===0?'<div class="empty">📋 Sin negocios sugeridos cargados.<br><br><span style="font-size:8px;color:var(--t4)">El supervisor debe pegar los datos en la pestaña<br>"Sugeridos_'+S.u.id.split(' ')[0]+'" del Google Sheet</span></div>':''}
+    ${S.sugeridos.length>0&&pendientes.length===0&&!S.sugSearch?'<div class="empty">🎉 ¡Todos visitados! Agrega negocios nuevos desde 📝 Registrar</div>':''}
     ${pendientes.slice(0,50).map(s=>{
       const idx=S.sugeridos.indexOf(s);
       const mUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s.negocio+' '+s.direccion+' '+s.colonia+' CDMX');
@@ -468,12 +469,41 @@ function quickVisit(idx){
 }
 
 // CONFIG
-function configH(){return `<div class="fi">
+function configH(){
+  const isA=S.u.r==='admin';
+  return `<div class="fi">
   <div class="sec"><div class="sec-t">⚙️ Sistema</div><div style="font-size:9px;color:var(--t3);line-height:1.6">
-    👤 ${S.u.id} · ${S.u.z}<br>📦 Productos: ${S.costos.length}<br>📋 Registros: ${S.registros.length}</div></div>
-  <div class="sec"><div class="sec-t">📱 Instalar</div><div style="font-size:9px;color:var(--t3)"><strong>iPhone:</strong> Safari → Compartir → Agregar<br><strong>Android:</strong> Chrome → ⋮ → Agregar</div></div>
+    👤 ${S.u.id} · ${S.u.z}<br>📦 Productos: ${S.costos.length}<br>📋 Registros: ${S.registros.length}${isA?'<br>🗺️ Agentes: 5':''}
+  </div></div>
+  ${isA?`
+  <div class="sec" style="border-color:var(--rd)"><div class="sec-t" style="color:var(--rd)">🗑️ Administración</div>
+    <div style="font-size:9px;color:var(--t3);margin-bottom:8px">Borrar registros de prueba antes de iniciar operación real.</div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <button class="btn btn-s" onclick="resetAgent('Edith Gutiérrez')" style="font-size:10px;padding:8px;border-color:var(--rd)30;color:var(--rd)">🗑️ Borrar registros de Edith</button>
+      <button class="btn btn-s" onclick="resetAgent('Alberto Ruvalcaba')" style="font-size:10px;padding:8px;border-color:var(--rd)30;color:var(--rd)">🗑️ Borrar registros de Alberto</button>
+      <button class="btn btn-s" onclick="resetAgent('Agente 3')" style="font-size:10px;padding:8px;border-color:var(--rd)30;color:var(--rd)">🗑️ Borrar registros de Agente 3</button>
+      <button class="btn btn-s" onclick="resetAgent('Agente 4')" style="font-size:10px;padding:8px;border-color:var(--rd)30;color:var(--rd)">🗑️ Borrar registros de Agente 4</button>
+      <button class="btn btn-s" onclick="resetAgent('Agente 5')" style="font-size:10px;padding:8px;border-color:var(--rd)30;color:var(--rd)">🗑️ Borrar registros de Agente 5</button>
+      <div style="margin-top:6px;border-top:1px solid var(--rd)30;padding-top:6px">
+        <button class="btn btn-s" onclick="resetAll()" style="font-size:11px;padding:10px;border-color:var(--rd);color:var(--rd);font-weight:800">⚠️ BORRAR TODO (todos los agentes + cotizaciones)</button>
+      </div>
+    </div>
+  </div>`:''}
+  <div class="sec"><div class="sec-t">📱 Instalar como App</div><div style="font-size:9px;color:var(--t3)"><strong>iPhone:</strong> Safari → Compartir → Agregar a inicio<br><strong>Android:</strong> Chrome → ⋮ → Agregar a inicio</div></div>
   <button class="btn btn-s" onclick="if(confirm('¿Cerrar sesión?')){localStorage.removeItem('e5u');S.u=null;R();}" style="color:var(--rd);border-color:#e74c3c25">🚪 Cerrar Sesión</button>
 </div>`;}
+
+async function resetAgent(agente){
+  if(!confirm('¿Borrar TODOS los registros de '+agente+'? Esto no se puede deshacer.'))return;
+  await apiP({action:'resetear_agente',agente:agente});
+  toast('🗑️ Registros de '+agente+' borrados');load();
+}
+async function resetAll(){
+  if(!confirm('⚠️ ¿Borrar TODOS los registros de TODOS los agentes + cotizaciones + seguimientos?'))return;
+  if(!confirm('¿ESTÁS SEGURO? Esto borra todo y no se puede deshacer.'))return;
+  await apiP({action:'resetear_todo'});
+  toast('🗑️ Todo reseteado');load();
+}
 
 R();if(S.u)load();
 </script></body></html>
