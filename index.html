@@ -70,7 +70,7 @@ const RES_O=['Catálogo dejado','Muestra entregada','Cotización en sitio','Coti
 async function apiG(a,x=''){try{const r=await fetch(CFG.URL+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
 async function apiP(d){try{await fetch(CFG.URL,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
 
-let S={u:JSON.parse(localStorage.getItem('e5u')||'null'),v:'registrar',registros:[],costos:[],agentsData:null,toast:null,loading:false,qItems:[],qSearch:'',gpsLat:'',gpsLng:'',gpsStatus:''};
+let S={u:JSON.parse(localStorage.getItem('e5u')||'null'),v:'registrar',registros:[],costos:[],agentsData:null,toast:null,loading:false,qItems:[],qSearch:'',gpsLat:'',gpsLng:'',gpsStatus:'',sugeridos:[],sugSearch:''};
 const set=p=>{Object.assign(S,p);R();};
 const toast=(m,t='ok')=>{S.toast={m,t};R();setTimeout(()=>{S.toast=null;R();},2200);};
 
@@ -83,6 +83,8 @@ async function load(){
     const res=await apiG('registros','&agente='+encodeURIComponent(S.u.id));
     if(res?.registros)S.registros=res.registros;
   }
+  const sug=await apiG('sugeridos','&agente='+encodeURIComponent(S.u.id));
+  if(sug?.sugeridos)S.sugeridos=sug.sugeridos;
   const cos=await apiG('costos');
   if(cos?.productos)S.costos=cos.productos;
   set({loading:false});
@@ -95,14 +97,14 @@ function R(){
   const tabs=isA?[
     {k:'dashboard',i:'📊',l:'Dashboard'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'seguimientos',i:'🔔',l:'Seguim.'},{k:'config',i:'⚙️',l:'Config'}
   ]:[
-    {k:'registrar',i:'📝',l:'Registrar'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'misvisitas',i:'📋',l:'Mis Visitas'},{k:'config',i:'⚙️',l:'Config'}
+    {k:'registrar',i:'📝',l:'Registrar'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'misvisitas',i:'📋',l:'Mis Visitas'},{k:'sugeridos',i:'🗺️',l:'Sugeridos'},{k:'config',i:'⚙️',l:'Config'}
   ];
   a.innerHTML=`
     <div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat</h1><p>${S.u.id} · ${S.u.z}</p></div></div>
     <div style="padding:5px 7px 70px">${
       S.v==='registrar'?registrarH():
       S.v==='cotizar'?cotizarH():
-      S.v==='misvisitas'?misVisitasH():
+      S.v==='misvisitas'?misVisitasH():S.v==='sugeridos'?sugeridosH():
       S.v==='dashboard'?dashboardH():
       S.v==='seguimientos'?seguimientosH():
       configH()
@@ -374,6 +376,36 @@ async function submitQ(){const b=document.getElementById('qb');b.disabled=true;b
     productos_detalle:S.qItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),
     cantidad_piezas:S.qItems.reduce((s,i)=>s+i.piezas,0),total:total.toFixed(2)});
   toast('✅ Cotización guardada');S.qItems=[];R();}
+
+// ============ SUGERIDOS ============
+function sugeridosH(){
+  let list=S.sugeridos;
+  if(S.sugSearch){const q=S.sugSearch.toLowerCase();list=list.filter(s=>(s.negocio||'').toLowerCase().includes(q)||(s.direccion||'').toLowerCase().includes(q)||(s.giro||'').toLowerCase().includes(q));}
+  return `<div class="fi">
+    <div class="sec" style="background:var(--ac3);border-color:var(--ac)">
+      <div style="font-size:11px;font-weight:700;color:var(--ac2)">🗺️ Negocios Sugeridos — ${S.u.z}</div>
+      <div style="font-size:8px;color:var(--t4)">${S.sugeridos.length} negocios mapeados en tu zona. Toca uno para registrarlo.</div>
+    </div>
+    <input class="inp" placeholder="🔍 Buscar negocio, dirección o giro..." value="${S.sugSearch}" oninput="S.sugSearch=this.value;R()" style="margin-bottom:5px;font-size:11px">
+    <div style="font-size:8px;color:var(--t4);margin-bottom:4px">${list.length} resultado(s)</div>
+    ${list.slice(0,50).map((s,i)=>`<div class="cd" onclick="useSugerido(${S.sugeridos.indexOf(s)})" style="border-left:3px solid var(--ac)">
+      <div style="font-size:11px;font-weight:700;color:var(--t2)">${s.negocio}</div>
+      <div style="font-size:8px;color:var(--t4)">📍 ${s.direccion} · ${s.colonia} · ${s.giro}</div>
+      ${s.telefono?`<div style="font-size:8px;color:var(--t3)">📞 ${s.telefono}</div>`:''}
+    </div>`).join('')}
+    ${list.length>50?'<div style="font-size:8px;color:var(--t4);text-align:center;padding:6px">Mostrando 50/'+list.length+'</div>':''}
+  </div>`;
+}
+function useSugerido(idx){
+  const s=S.sugeridos[idx];if(!s)return;
+  S.v='registrar';S.gpsLat='';S.gpsLng='';S.gpsStatus='';R();
+  setTimeout(()=>{
+    const ne=document.getElementById('r-neg');if(ne)ne.value=s.negocio;
+    const gi=document.getElementById('r-giro');if(gi){for(let o of gi.options){if(s.giro&&s.giro.toLowerCase().includes(o.value.toLowerCase().split('/')[0].trim().substring(0,4))){gi.value=o.value;break;}}}
+    const te=document.getElementById('r-tel');if(te&&s.telefono)te.value=s.telefono;
+  },100);
+  toast('📋 '+s.negocio+' cargado — completa y registra');
+}
 
 // CONFIG
 function configH(){return `<div class="fi">
