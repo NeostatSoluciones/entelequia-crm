@@ -83,21 +83,99 @@ function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></d
     </div>`;}).join('')}</div>`;}
 
 function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
+  // Get history for this business
+  const hist=S.reg.filter(r=>r.negocio===b.negocio);
+  const vn=b.visitas+1;
   const m=document.createElement('div');m.id='sm';m.className='mbg';m.onclick=e=>{if(e.target===m)m.remove();};
-  m.innerHTML=`<div class="mdl"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div style="font-size:14px;font-weight:800;color:var(--ac2)">${b.negocio}</div><div style="font-size:9px;color:var(--t4)">${b.giro} · ${b.visitas} visita(s) previas</div></div><button onclick="document.getElementById('sm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:14px">✕</button></div>
-    ${b.maps?`<a href="${b.maps}" target="_blank" style="display:block;font-size:10px;color:var(--ac);text-decoration:none;margin-bottom:6px">📍 Ver ubicación en Maps</a>`:''}
-    <div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📝 Registrar seguimiento (visita #${b.visitas+1})</div>
-    <div class="g2">
-      <div class="fld"><label class="lbl">Interés</label><select class="inp" id="si"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
-      <div class="fld"><label class="lbl">Resultado</label><select class="inp" id="sr"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
-      <div class="fld full"><label class="lbl">Productos</label><input class="inp" id="sp" placeholder="Productos de interés..."></div>
-      <div class="fld"><label class="lbl">Cotización $</label><input class="inp" type="number" id="sq" placeholder="0" inputmode="numeric"></div>
-      <div class="fld"><label class="lbl">Próxima visita</label><input class="inp" type="date" id="sd"></div>
-      <div class="fld full"><label class="lbl">Notas</label><textarea class="inp" id="so" rows="2" placeholder="Observaciones..."></textarea></div>
+  m.innerHTML=`<div class="mdl">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--ac2)">${b.negocio}</div><div style="font-size:9px;color:var(--t4)">${b.giro} ${b.maps?'· 📍':''}${hist.length>0?' · '+hist[hist.length-1].fecha:''}</div></div>
+      <button onclick="document.getElementById('sm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px">✕</button>
     </div>
-    <div class="sec" style="background:var(--ac3);margin-top:4px"><div class="sec-t" style="font-size:9px">📍 Ubicación</div><div class="gps-btn" onclick="ggSeg()" id="sgb"><span>📍</span><div><div style="font-weight:700">Capturar GPS</div></div></div><div id="sgl"></div></div>
-    <button class="btn btn-p" onclick="doSeg('${b.negocio}','${b.giro}',${b.visitas+1})" id="sb" style="margin-top:6px">✅ GUARDAR SEGUIMIENTO</button>
+    ${b.maps?`<a href="${b.maps}" target="_blank" style="display:inline-block;font-size:9px;color:var(--ac);text-decoration:none;margin-bottom:6px">📍 Ver en Google Maps →</a>`:''}
+    <div style="background:linear-gradient(135deg,#2da0d1,#1d7ba3);border-radius:10px;padding:12px;margin-bottom:8px;text-align:center;color:#fff">
+      <div style="font-size:38px;font-weight:800;line-height:1">${vn}</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;opacity:.85">VISITA #${vn}</div>
+      <div style="font-size:8px;opacity:.65;margin-top:2px">${b.visitas} visita(s) previas registradas</div>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:8px">
+      <button onclick="showHist('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:9px;font-weight:700;cursor:pointer">📋 Historial</button>
+      <button onclick="showSegCot('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--yw);background:#fff9e6;color:#92600a;font-size:9px;font-weight:700;cursor:pointer">💰 Nueva Cotización</button>
+    </div>
+    <div id="seg-content">
+      <div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📝 Tipificar visita</div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Interés</label><select class="inp" id="si"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Resultado</label><select class="inp" id="sr"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
+        <div class="fld full"><label class="lbl">Productos</label><input class="inp" id="sp" placeholder="Productos de interés..."></div>
+        <div class="fld"><label class="lbl">Cotización $</label><input class="inp" type="number" id="sq" placeholder="0" inputmode="numeric"></div>
+        <div class="fld"><label class="lbl">Próxima visita</label><input class="inp" type="date" id="sd"></div>
+        <div class="fld full"><label class="lbl">Notas</label><textarea class="inp" id="so" rows="2" placeholder="Observaciones..."></textarea></div>
+      </div>
+      <div style="background:var(--ac3);border-radius:8px;padding:8px;margin-top:4px"><div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">📍 Ubicación</div><div class="gps-btn" onclick="ggSeg()" id="sgb"><span>📍</span><div><div style="font-weight:700">Capturar GPS</div></div></div><div id="sgl"></div></div>
+    </div>
+    <div id="seg-hist" style="display:none"></div>
+    <div id="seg-cot" style="display:none"></div>
+    <button class="btn btn-p" onclick="doSeg('${b.negocio.replace(/'/g,"\\'")}','${b.giro.replace(/'/g,"\\'")}',${vn})" id="sb" style="margin-top:8px">✅ GUARDAR SEGUIMIENTO (Visita #${vn})</button>
   </div>`;document.body.appendChild(m);}
+
+function showHist(neg){
+  const hist=S.reg.filter(r=>r.negocio===neg);
+  const el=document.getElementById('seg-hist');
+  const ct=document.getElementById('seg-content');
+  const co=document.getElementById('seg-cot');
+  if(el.style.display==='none'){el.style.display='block';ct.style.display='none';co.style.display='none';
+    el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📋 Historial de ${neg} (${hist.length} registros)</div>
+      ${hist.length===0?'<div class="empty">Sin registros previos</div>':''}
+      ${hist.map(r=>{const ic=r.interes?.includes('Alto')?'var(--gn)':r.interes?.includes('Medio')?'var(--yw)':'var(--t4)';
+        return `<div style="padding:6px 0;border-bottom:1px solid var(--s2)">
+          <div style="display:flex;justify-content:space-between"><div style="font-size:10px;font-weight:600;color:var(--t2)">Visita · ${r.fecha||''} ${r.hora||''}</div><span class="pill" style="background:${ic}15;color:${ic}">${r.interes?.split('—')[0]||'—'}</span></div>
+          ${r.resultado?`<div style="font-size:8px;color:var(--t3)">→ ${r.resultado}</div>`:''}
+          ${r.maps?`<a href="${r.maps}" target="_blank" style="font-size:8px;color:var(--ac);text-decoration:none">📍</a>`:''}
+        </div>`;}).join('')}
+      <button onclick="document.getElementById('seg-hist').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:6px;font-size:9px;padding:7px">← Volver a tipificar</button>`;}
+  else{el.style.display='none';ct.style.display='block';}}
+
+var segQItems=[];
+function showSegCot(neg){
+  const el=document.getElementById('seg-cot');
+  const ct=document.getElementById('seg-content');
+  const hi=document.getElementById('seg-hist');
+  segQItems=[];
+  if(el.style.display==='none'){el.style.display='block';ct.style.display='none';hi.style.display='none';renderSegCot(neg);}
+  else{el.style.display='none';ct.style.display='block';}}
+
+function renderSegCot(neg){
+  const el=document.getElementById('seg-cot');
+  const total=segQItems.reduce((s,i)=>s+i.total,0);
+  const pzT=segQItems.reduce((s,i)=>s+i.pz,0);
+  let prods=S.cos;const sq=document.getElementById('scqs')?.value||'';
+  if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
+  el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--yw);margin-bottom:6px">💰 Cotización para ${neg}</div>
+    ${segQItems.length>0?`<div style="margin-bottom:6px">${segQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><div style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</div><div style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</div></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="segQItems.splice(${i},1);renderSegCot('${neg.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;border-top:2px solid var(--bd);padding-top:4px;margin-top:3px"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+      <div style="padding:4px 6px;background:#fff9e6;border:1px solid #f39c1233;border-radius:4px;font-size:8px;color:#92600a;margin-top:3px">💡 IVA incluido · Envío GRATIS > $2,500</div>
+      <button onclick="saveSegCot('${neg.replace(/'/g,"\\'")}')" class="btn btn-p" style="margin-top:5px;font-size:11px;padding:9px" id="scb">📋 Guardar Cotización</button></div>`:''}
+    <input class="inp" placeholder="🔍 SKU o nombre..." id="scqs" oninput="renderSegCot('${neg.replace(/'/g,"\\'")}')" style="margin-bottom:4px;font-size:11px" value="${sq}">
+    <div style="max-height:200px;overflow-y:auto">${prods.slice(0,30).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openSegCalc(${ri},'${neg.replace(/'/g,"\\'")}')"><div style="font-size:8px;font-weight:700;color:var(--ac2);min-width:45px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>
+    <button onclick="document.getElementById('seg-cot').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:6px;font-size:9px;padding:7px">← Volver</button>`;}
+
+function openSegCalc(idx,neg){const p=S.cos[idx];if(!p)return;
+  const c=document.createElement('div');c.id='scm';c.className='mbg';c.style.zIndex='300';c.onclick=e=>{if(e.target===c)c.remove();};
+  c.innerHTML=`<div class="mdl"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div><div style="font-size:11px;font-weight:800;color:var(--ac2)">${p.sku}</div><div style="font-size:9px;color:var(--t3)">${p.producto}</div></div><button onclick="document.getElementById('scm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:14px">✕</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px"><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/CAJA</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/PZ</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div>
+    <div class="g2"><div class="fld"><label class="lbl">Compra por</label><select class="inp" id="sct" onchange="scc(${idx})">${p.pz_emp>0?`<option value="empaque">Empaque (${p.pz_emp} pz)</option>`:''}${p.pz_caja>0?`<option value="caja">Caja (${p.pz_caja} pz)</option>`:''}</select></div><div class="fld"><label class="lbl">Cantidad</label><input class="inp" type="number" id="scq" value="1" min="1" oninput="scc(${idx})" inputmode="numeric"></div></div>
+    <div style="background:var(--s2);border-radius:7px;padding:8px;margin:5px 0;display:flex;justify-content:space-between"><div><div style="font-size:7px;color:var(--t4);font-weight:700">PIEZAS</div><div style="font-size:13px;font-weight:800" id="scpz">0</div></div><div style="text-align:right"><div style="font-size:7px;color:var(--t4);font-weight:700">TOTAL (IVA INCL.)</div><div style="font-size:16px;font-weight:800;color:var(--ac2)" id="sctt">$0</div></div></div>
+    <button class="btn btn-p" onclick="addSegQ(${idx},'${neg.replace(/'/g,"\\'")}')">➕ Agregar</button></div>`;
+  document.body.appendChild(c);scc(idx);}
+
+function scc(i){const p=S.cos[i],t=document.getElementById('sct')?.value||'caja',q=parseInt(document.getElementById('scq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);document.getElementById('scpz').textContent=(pz*q).toLocaleString();document.getElementById('sctt').textContent='$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});}
+
+function addSegQ(i,neg){const p=S.cos[i],t=document.getElementById('sct')?.value||'caja',q=parseInt(document.getElementById('scq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);segQItems.push({sku:p.sku,tipo:t,qty:q,pz:pz*q,total:pr*q});document.getElementById('scm')?.remove();toast('✅ '+p.sku);renderSegCot(neg);}
+
+async function saveSegCot(neg){const b=document.getElementById('scb');if(b){b.disabled=true;b.textContent='⏳...';}
+  await pf({action:'save_quote',agente:S.u.id,negocio:neg,productos_detalle:segQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:segQItems.reduce((s,i)=>s+i.pz,0),total:segQItems.reduce((s,i)=>s+i.total,0).toFixed(2)});
+  toast('✅ Cotización guardada para '+neg);segQItems=[];document.getElementById('seg-cot').style.display='none';document.getElementById('seg-content').style.display='block';}
 
 var segLat='',segLng='';
 function ggSeg(){segLat='';segLng='';const g=document.getElementById('sgb');if(g)g.innerHTML='<span>⏳</span><div>Obteniendo...</div>';navigator.geolocation?.getCurrentPosition(p=>{segLat=p.coords.latitude.toFixed(6);segLng=p.coords.longitude.toFixed(6);const b=document.getElementById('sgb');if(b)b.innerHTML='<span>✅</span><div><div style="font-weight:700">'+segLat+', '+segLng+'</div></div>';const l=document.getElementById('sgl');if(l)l.innerHTML='<a href="https://www.google.com/maps?q='+segLat+','+segLng+'" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>';},e=>{const b=document.getElementById('sgb');if(b)b.innerHTML='<span>❌</span><div>'+e.message+'</div>';},{enableHighAccuracy:true,timeout:10000});}
