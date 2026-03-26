@@ -72,13 +72,15 @@ function cotizarH(){const items=S.qi,total=items.reduce((s,i)=>s+i.total,0),pzT=
   const negocios=S.reg.map(r=>r.negocio).filter((v,i,a)=>v&&a.indexOf(v)===i);
   let prods=S.cos;if(S.qs){const q=S.qs.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
   return `<div class="fi">
-  ${items.length>0?`<div class="sec" style="border-color:var(--ac)"><div class="sec-t">🧾 Pre-Cotización</div>
-    <div class="fld"><label class="lbl">Negocio *</label><select class="inp" id="qn"><option value="">Seleccionar negocio visitado...</option>${negocios.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>
+  <div class="sec" style="border-color:var(--ac)"><div class="sec-t">💰 Cotización</div>
+    <div class="fld"><label class="lbl">Negocio visitado *</label><select class="inp" id="qn"><option value="">Seleccionar negocio...</option>${negocios.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>
+    ${negocios.length===0?'<div style="font-size:9px;color:var(--yw);margin-top:2px">⚠️ Primero registra visitas para asociar la cotización</div>':''}
+  </div>
+  ${items.length>0?`<div class="sec"><div class="sec-t">🧾 Productos (${items.length})</div>
     ${items.map((it,i)=>`<div class="ql"><div style="flex:1"><div style="font-size:10px;font-weight:700;color:var(--ac2)">${it.sku}</div><div style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</div></div><div style="font-size:11px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="S.qi.splice(${i},1);R()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:11px;margin-left:2px">✕</button></div>`).join('')}
     <div style="border-top:2px solid var(--bd);padding-top:5px;margin-top:3px;display:flex;justify-content:space-between"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz</div><div style="font-size:16px;font-weight:800;color:var(--ac2)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
     <div style="margin-top:4px;padding:5px;background:#fff9e6;border:1px solid #f39c1233;border-radius:5px;font-size:8px;color:#92600a">💡 <b>IVA incluido</b> · Envío <b>GRATIS</b> > $2,500 CDMX/EdoMex</div></div>
-    <button class="btn btn-p" onclick="sQ()" id="qb" style="margin-bottom:8px">📋 Guardar Cotización</button>`:
-    `${negocios.length===0?'<div class="sec"><div class="empty">Primero registra visitas para poder cotizar</div></div>':''}`}
+    <button class="btn btn-p" onclick="sQ()" id="qb" style="margin-bottom:8px">📋 Guardar Cotización</button>`:''}
   <div class="sec"><div class="sec-t">📦 Catálogo (${S.cos.length})</div>
     ${S.cos.length===0?'<div class="empty">Catálogo vacío — el supervisor debe cargar los productos en el Sheet</div>':''}
     <input class="inp" placeholder="🔍 SKU o nombre..." value="${S.qs}" oninput="S.qs=this.value;R()" style="margin-bottom:4px;font-size:11px">
