@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#f5f7fa"><title>Entelequia® CRM</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#f5f7fa"><title>Entelequia® CRM</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><style>
 :root{--bg:#f5f7fa;--s2:#f0f2f5;--bd:#d5dce6;--ac:#2da0d1;--ac2:#1d7ba3;--ac3:#e8f4f9;--tx:#1a2332;--t2:#2c3e50;--t3:#5a6d80;--t4:#7a8fa3;--rd:#e74c3c;--yw:#f39c12;--gn:#27ae60;--tl:#1abc9c}*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow-x:hidden}body{font-family:'Inter',system-ui;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}input,select,textarea,button{font-family:inherit}@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fi{animation:su .2s ease both}
 .hdr{background:#fff;padding:8px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:center;gap:7px;position:sticky;top:0;z-index:100}.hdr img{height:28px}.hdr-t h1{font-size:9px;color:var(--ac2);letter-spacing:3px;font-weight:800}.hdr-t p{font-size:7px;color:var(--t4);letter-spacing:1.2px}
 .bn{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(to top,var(--bg) 92%,transparent);padding:2px 2px 5px;display:flex;justify-content:center;gap:1px}.bn button{flex:1;max-width:72px;padding:4px 2px;border-radius:8px;border:none;cursor:pointer;font-size:6.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;background:transparent;color:var(--t4)}.bn button.on{background:var(--ac3);color:var(--ac2)}.bn button span{font-size:14px}
@@ -119,10 +119,12 @@ function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
       <div style="font-size:10px;font-weight:700;letter-spacing:1px;opacity:.85">VISITA #${vn}</div>
       <div style="font-size:8px;opacity:.65;margin-top:2px">${b.visitas} visita(s) previas registradas</div>
     </div>
-    <div style="display:flex;gap:4px;margin-bottom:8px">
-      <button onclick="showHist('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:9px;font-weight:700;cursor:pointer">📋 Historial</button>
-      <button onclick="showSegCot('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--yw);background:#fff9e6;color:#92600a;font-size:9px;font-weight:700;cursor:pointer">💰 Nueva Cotización</button>
+    <div style="display:flex;gap:3px;margin-bottom:8px">
+      <button onclick="showHist('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:8px;font-weight:700;cursor:pointer">📋 Historial</button>
+      <button onclick="showSegCot('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--yw);background:#fff9e6;color:#92600a;font-size:8px;font-weight:700;cursor:pointer">💰 Cotización</button>
+      <button onclick="showVenta('${b.negocio.replace(/'/g,"\\'")}','${(b.giro||'').replace(/'/g,"\\'")}','${(b.maps||'').replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--gn);background:#eafaf1;color:var(--gn);font-size:8px;font-weight:700;cursor:pointer">🛒 Venta</button>
     </div>
+    <div id="seg-venta" style="display:none"></div>
     <div id="seg-content">
       <div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📝 Tipificar visita</div>
       <div class="g2">
@@ -186,6 +188,58 @@ function replicarCot(cotIdx,neg){
   toast('🔄 Cotización replicada — edita y guarda');
 }
 
+// === REGISTRAR VENTA ===
+var ventaQItems=[];
+function showVenta(neg,giro,maps){
+  const el=document.getElementById('seg-venta');
+  const ct=document.getElementById('seg-content');
+  const hi=document.getElementById('seg-hist');
+  const co=document.getElementById('seg-cot');
+  ventaQItems=[];
+  if(el.style.display==='none'){el.style.display='block';ct.style.display='none';hi.style.display='none';co.style.display='none';renderVenta(neg,giro,maps);}
+  else{el.style.display='none';ct.style.display='block';}}
+
+function renderVenta(neg,giro,maps){
+  const el=document.getElementById('seg-venta');if(!el)return;
+  const total=ventaQItems.reduce((s,i)=>s+i.total,0);
+  const pzT=ventaQItems.reduce((s,i)=>s+i.pz,0);
+  const sq=document.getElementById('vqs')?.value||'';
+  let prods=S.cos;if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
+  el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--gn);margin-bottom:6px">🛒 Registrar Venta — ${neg}</div>
+    ${ventaQItems.length>0?`<div style="margin-bottom:6px">${ventaQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><span style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</span> <span style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</span></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="ventaQItems.splice(${i},1);renderVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;border-top:2px solid var(--bd);padding-top:4px"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz</div><div style="font-size:14px;font-weight:800;color:var(--gn)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div>`:''}
+    <div class="g2" style="margin-bottom:6px">
+      <div class="fld"><label class="lbl">Forma de Pago</label><select class="inp" id="vfp"><option value="">—</option><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Crédito 15 días</option><option>Crédito 30 días</option></select></div>
+      <div class="fld"><label class="lbl">Contacto</label><input class="inp" id="vco" placeholder="Nombre"></div>
+      <div class="fld full"><label class="lbl">Notas de venta</label><textarea class="inp" id="vno" rows="1" placeholder="Factura, entrega..."></textarea></div>
+    </div>
+    <input class="inp" placeholder="🔍 Agregar productos..." id="vqs" oninput="renderVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="margin-bottom:4px;font-size:10px" value="${sq}">
+    <div style="max-height:160px;overflow-y:auto">${prods.slice(0,25).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openVentaCalc(${ri},'${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="padding:4px 6px"><div style="font-size:7px;font-weight:700;color:var(--ac2);min-width:40px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>
+    ${ventaQItems.length>0?`<button onclick="saveVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" class="btn btn-p" style="margin-top:6px;background:linear-gradient(135deg,#27ae60,#1abc9c)" id="svb">🛒 CONFIRMAR VENTA · $${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</button>`:''}
+    <button onclick="document.getElementById('seg-venta').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:4px;font-size:9px;padding:7px">← Volver</button>`;}
+
+function openVentaCalc(idx,neg,giro,maps){const p=S.cos[idx];if(!p)return;
+  const c=document.createElement('div');c.id='vcm';c.className='mbg';c.style.zIndex='300';c.onclick=e=>{if(e.target===c)c.remove();};
+  c.innerHTML=`<div class="mdl"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div><div style="font-size:11px;font-weight:800;color:var(--gn)">${p.sku}</div><div style="font-size:9px;color:var(--t3)">${p.producto}</div></div><button onclick="document.getElementById('vcm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:14px">✕</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px"><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/CAJA</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/PZ</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div>
+    <div class="g2"><div class="fld"><label class="lbl">Compra por</label><select class="inp" id="vct" onchange="vcc(${idx})">${p.pz_emp>0?`<option value="empaque">Empaque (${p.pz_emp} pz)</option>`:''}${p.pz_caja>0?`<option value="caja">Caja (${p.pz_caja} pz)</option>`:''}</select></div><div class="fld"><label class="lbl">Cantidad</label><input class="inp" type="number" id="vcq" value="1" min="1" oninput="vcc(${idx})" inputmode="numeric"></div></div>
+    <div style="background:var(--s2);border-radius:7px;padding:8px;margin:4px 0;display:flex;justify-content:space-between"><div><div style="font-size:7px;color:var(--t4);font-weight:700">PIEZAS</div><div style="font-size:13px;font-weight:800" id="vcpz">0</div></div><div style="text-align:right"><div style="font-size:7px;color:var(--t4);font-weight:700">TOTAL</div><div style="font-size:16px;font-weight:800;color:var(--gn)" id="vctt">$0</div></div></div>
+    <button class="btn btn-p" style="background:linear-gradient(135deg,#27ae60,#1abc9c)" onclick="addVQ(${idx},'${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')">➕ Agregar</button></div>`;
+  document.body.appendChild(c);vcc(idx);}
+
+function vcc(i){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja',q=parseInt(document.getElementById('vcq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);document.getElementById('vcpz').textContent=(pz*q).toLocaleString();document.getElementById('vctt').textContent='$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});}
+
+function addVQ(i,neg,giro,maps){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja',q=parseInt(document.getElementById('vcq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);ventaQItems.push({sku:p.sku,tipo:t,qty:q,pz:pz*q,total:pr*q});document.getElementById('vcm')?.remove();toast('✅ '+p.sku);renderVenta(neg,giro,maps);}
+
+async function saveVenta(neg,giro,maps){const b=document.getElementById('svb');if(b){b.disabled=true;b.textContent='⏳...';}
+  const total=ventaQItems.reduce((s,i)=>s+i.total,0);
+  await pf({action:'registrar_venta',agente:S.u.id,negocio:neg,giro:giro,contacto:document.getElementById('vco')?.value||'',
+    productos:ventaQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),
+    cantidad:ventaQItems.reduce((s,i)=>s+i.pz,0),total:total.toFixed(2),
+    forma_pago:document.getElementById('vfp')?.value||'',notas:document.getElementById('vno')?.value||'',maps:maps});
+  toast('🛒 ¡Venta registrada! $'+total.toLocaleString('es-MX',{minimumFractionDigits:2}));
+  ventaQItems=[];document.getElementById('sm')?.remove();load();}
+
 var segQItems=[];
 function showSegCot(neg){
   const el=document.getElementById('seg-cot');
@@ -244,29 +298,48 @@ async function doSeg(neg,giro,vn){const b=document.getElementById('sb');b.disabl
   av(neg);document.getElementById('sm')?.remove();toast('✅ Seguimiento #'+vn);segLat='';segLng='';load();}
 
 // === SUGERIDOS ===
-function sugeridosH(){const all=ms(),vis=mv(),h=ch();let list=all;if(S.ss){const q=S.ss.toLowerCase();list=list.filter(s=>(s.n||'').toLowerCase().includes(q)||(s.d||'').toLowerCase().includes(q));}const pend=list.filter(s=>!vis.includes(s.n||'')),done=list.filter(s=>vis.includes(s.n||''));return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;font-weight:700;color:var(--ac2)">🗺️ ${S.u.z}</div><div style="font-size:8px;color:var(--t4)">${all.length} sugeridos · ${vis.length} visitados</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div>${all.length===0?'<div class="empty">🗺️ Zona nueva — registra desde 📝</div>':''}<input class="inp" placeholder="🔍 Buscar..." value="${S.ss}" oninput="S.ss=this.value;R()" style="margin-bottom:4px;font-size:11px">${pend.slice(0,60).map(s=>{const i=all.indexOf(s),mu='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.n||'')+' '+(s.d||'')+' '+(s.c||'')+' CDMX');return `<div class="cd" style="border-left:3px solid var(--ac)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1;min-width:0" onclick="uS(${i})"><div style="font-size:11px;font-weight:700;color:var(--t2)">${s.n||''}</div><div style="font-size:8px;color:var(--t4)">📍 ${s.d||''} · ${s.c||''}</div></div><div style="display:flex;gap:3px"><a href="${mu}" target="_blank" onclick="event.stopPropagation()" style="padding:3px 5px;border-radius:4px;background:#4285f412;color:#4285f4;font-size:8px;font-weight:600;text-decoration:none">📍</a><button onclick="event.stopPropagation();qV(${i})" style="padding:3px 5px;border-radius:4px;border:none;background:#27ae6015;color:var(--gn);cursor:pointer;font-size:8px;font-weight:600">✓</button></div></div></div>`;}).join('')}${done.length>0?`<div style="margin-top:6px;font-size:9px;font-weight:700;color:var(--gn);margin-bottom:3px">✅ Visitados (${done.length})</div>${done.slice(0,15).map(s=>`<div class="cd" style="border-left:3px solid var(--gn);opacity:.5"><div style="font-size:10px;color:var(--t3)">✅ ${s.n||''}</div></div>`).join('')}`:''}</div>`;}
+function sugeridosH(){const all=ms(),vis=mv(),h=ch();let list=all;if(S.ss){const q=S.ss.toLowerCase();list=list.filter(s=>(s.n||'').toLowerCase().includes(q)||(s.d||'').toLowerCase().includes(q));}const pend=list.filter(s=>!vis.includes(s.n||'')),done=list.filter(s=>vis.includes(s.n||''));
+  const centers={'CONDESA':[19.4115,-99.1733],'COL. JUÁREZ':[19.4270,-99.1570],'ROMA NORTE':[19.4180,-99.1610],'ROMA SUR':[19.4060,-99.1610],'POLANCO':[19.4330,-99.1950]};
+  const ct=centers[S.u.z]||[19.42,-99.17];
+  setTimeout(()=>{
+    const mapEl=document.getElementById('zmap');if(!mapEl||mapEl._leaflet_id)return;
+    const map=L.map('zmap').setView(ct,15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:18}).addTo(map);
+    // Add pins for visited businesses that have coords in registros
+    S.reg.forEach(r=>{if(r.maps){const m=r.maps.match(/q=([0-9.-]+),([0-9.-]+)/);if(m){const lat=parseFloat(m[1]),lng=parseFloat(m[2]);
+      const isVenta=r.resultado?.includes('VENTA');
+      const color=isVenta?'#27ae60':r.interes?.includes('Alto')?'#27ae60':r.interes?.includes('Medio')?'#f39c12':'#2da0d1';
+      L.circleMarker([lat,lng],{radius:6,fillColor:color,color:'#fff',weight:2,fillOpacity:.9}).bindPopup('<b>'+r.negocio+'</b><br>'+r.giro+'<br>'+(r.interes||'')+'<br>'+(r.resultado||'')).addTo(map);}}});
+    // Zone marker
+    L.marker(ct).addTo(map).bindPopup('<b>📍 '+S.u.z+'</b><br>'+S.u.nm).openPopup();
+  },200);
+  return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;font-weight:700;color:var(--ac2)">🗺️ ${S.u.z}</div><div style="font-size:8px;color:var(--t4)">${all.length} sugeridos · ${vis.length} visitados · ${(ZC[S.u.z]||[]).join(', ')}</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div>
+  <div id="zmap" style="height:220px;border-radius:10px;border:1px solid var(--bd);margin-bottom:7px;z-index:1"></div>
+  <div style="display:flex;gap:6px;margin-bottom:6px;font-size:8px;color:var(--t4)"><span>🔵 Visitado</span><span>🟡 Medio</span><span>🟢 Alto/Venta</span><span>📍 Centro zona</span></div>
+  ${all.length===0?'<div class="empty">🗺️ Zona nueva — registra desde 📝</div>':''}<input class="inp" placeholder="🔍 Buscar..." value="${S.ss}" oninput="S.ss=this.value;R()" style="margin-bottom:4px;font-size:11px">${pend.slice(0,50).map(s=>{const i=all.indexOf(s),mu='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.n||'')+' '+(s.d||'')+' '+(s.c||'')+' CDMX');return `<div class="cd" style="border-left:3px solid var(--ac)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1;min-width:0" onclick="uS(${i})"><div style="font-size:11px;font-weight:700;color:var(--t2)">${s.n||''}</div><div style="font-size:8px;color:var(--t4)">📍 ${s.d||''} · ${s.c||''}</div></div><div style="display:flex;gap:3px"><a href="${mu}" target="_blank" onclick="event.stopPropagation()" style="padding:3px 5px;border-radius:4px;background:#4285f412;color:#4285f4;font-size:8px;font-weight:600;text-decoration:none">📍</a><button onclick="event.stopPropagation();qV(${i})" style="padding:3px 5px;border-radius:4px;border:none;background:#27ae6015;color:var(--gn);cursor:pointer;font-size:8px;font-weight:600">✓</button></div></div></div>`;}).join('')}${done.length>0?`<div style="margin-top:6px;font-size:9px;font-weight:700;color:var(--gn);margin-bottom:3px">✅ Visitados (${done.length})</div>${done.slice(0,15).map(s=>`<div class="cd" style="border-left:3px solid var(--gn);opacity:.5"><div style="font-size:10px;color:var(--t3)">✅ ${s.n||''}</div></div>`).join('')}`:''}</div>`;}
 function uS(i){const s=ms()[i];if(!s)return;S.form={rn:s.n||'',rg:'',re:'',rt:s.t||'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''};S.lat='';S.lng='';S.gs='';S.v='registrar';R();toast('📋 '+(s.n||''));}
 function qV(i){const s=ms()[i];if(!s)return;av(s.n||'');toast('✅ '+(s.n||''));R();}
 
 // === DASHBOARD SUPERVISOR ===
 function dashboardH(){if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;if(!S.ad)return `<div class="empty">Sin datos <button onclick="load()" class="btn btn-s" style="width:auto;padding:5px 10px;font-size:9px;margin-top:5px">🔄</button></div>`;
   const A=S.ad;let tH=0,tS=0,tM=0,tA=0,tI=0,tC=0,tV=0;
-  Object.values(A).forEach(a=>{tH+=a.hoy||0;tS+=a.semana||0;tM+=a.mes||0;tA+=a.total||0;tI+=a.intAlto||0;tC+=a.cotiz||0;});
+  Object.values(A).forEach(a=>{tH+=a.hoy||0;tS+=a.semana||0;tM+=a.mes||0;tA+=a.total||0;tI+=a.intAlto||0;tC+=a.cotiz||0;tV+=a.ventas||0;});
   // Count "Venta cerrada" across all
   const periodo=S.dv;
   return `<div class="fi">
   <div style="display:flex;gap:3px;margin-bottom:6px">${['hoy','semana','mes'].map(p=>`<button class="dp ${S.dv===p?'on':''}" onclick="S.dv='${p}';R()">${p==='hoy'?'📅 Hoy':p==='semana'?'📆 Semana':'📊 Mes'}</button>`).join('')}<button onclick="load()" class="dp" style="margin-left:auto">🔄</button></div>
-  <div class="stg">${stc('Visitas',periodo==='hoy'?tH:periodo==='semana'?tS:tM,'var(--ac)')}${stc('Int.Alto',tI,'var(--gn)')}${stc('Cotizaciones',tC,'var(--yw)')}${stc('Total',tA,'var(--t3)')}</div>
+  <div class="stg">${stc('Visitas',periodo==='hoy'?tH:periodo==='semana'?tS:tM,'var(--ac)')}${stc('Int.Alto',tI,'var(--gn)')}${stc('Cotizaciones',tC,'var(--yw)')}${stc('Cotiz.',tC,'var(--yw)')}${stc('Ventas',tV,'var(--gn)')}${stc('Cotiz.',tC,'var(--yw)')}${stc('Ventas',tV,'#1abc9c')}${stc('Total',tA,'var(--t3)')}</div>
   <div class="sec"><div class="sec-t">👥 ${periodo==='hoy'?'Hoy':periodo==='semana'?'Esta Semana':'Este Mes'}</div>
   ${Object.entries(A).map(([id,a])=>{const sc=a.semaforo==='⭐'?'var(--gn)':a.semaforo==='🟢'?'var(--gn)':a.semaforo==='🟡'?'var(--yw)':'var(--rd)';
     const val=periodo==='hoy'?a.hoy:periodo==='semana'?a.semana:a.mes;
     return `<div class="ag-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><div><div style="font-size:12px;font-weight:700;color:var(--t2)">${a.nombre||id}</div><div style="font-size:8px;color:var(--t4)">${a.zona}</div></div><div class="sem" style="background:${sc}18">${a.semaforo}</div></div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;text-align:center">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">
       <div><div style="font-size:14px;font-weight:800;color:var(--ac)">${val||0}</div><div style="font-size:6px;color:var(--t4)">VISITAS</div></div>
       <div><div style="font-size:14px;font-weight:800;color:${sc}">${a.prom||0}</div><div style="font-size:6px;color:var(--t4)">PROM/DÍA</div></div>
       <div><div style="font-size:14px;font-weight:800;color:var(--gn)">${a.intAlto||0}</div><div style="font-size:6px;color:var(--t4)">INT.ALTO</div></div>
       <div><div style="font-size:14px;font-weight:800;color:var(--yw)">${a.cotiz||0}</div><div style="font-size:6px;color:var(--t4)">COTIZ.</div></div>
       <div><div style="font-size:14px;font-weight:800;color:var(--gn)">${a.total>0?Math.round((a.intAlto||0)/a.total*100):0}%</div><div style="font-size:6px;color:var(--t4)">CONV.</div></div>
+      <div><div style="font-size:14px;font-weight:800;color:#1abc9c">${a.ventas||0}</div><div style="font-size:6px;color:var(--t4)">VENTAS</div></div>
     </div></div>`;}).join('')}</div>
   <div class="sec"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;text-align:center;font-size:9px">
     <div style="background:#e74c3c12;padding:5px;border-radius:5px">🔴 <20</div><div style="background:#f39c1212;padding:5px;border-radius:5px">🟡 20-29</div>
