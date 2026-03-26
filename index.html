@@ -45,7 +45,7 @@ function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.
 async function load(){S.ld=true;R();
   if(S.u?.r==='admin'){const r=await gf('all_agents');if(r?.agents)S.ad=r.agents;}
   else{const r=await gf('registros','&agente='+encodeURIComponent(S.u.id));if(r?.registros)S.reg=r.registros;}
-  const c=await gf('costos');if(c?.productos)S.cos=c.productos;S.ld=false;R();if(S.v==='registrar')restoreForm();}
+  const c=await gf('costos');if(c?.productos)S.cos=c.productos;S.ld=false;R();if(S.v==='registrar'){restoreForm();registrarReady();}}
 
 function R(){if(S.v==='registrar')saveForm();const a=document.getElementById('app');if(!S.u){a.innerHTML=loginH();return;}const isA=S.u.r==='admin';
   const tabs=isA?[{k:'dashboard',i:'📊',l:'Dashboard'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'config',i:'⚙️',l:'Admin'}]
@@ -53,7 +53,7 @@ function R(){if(S.v==='registrar')saveForm();const a=document.getElementById('ap
   a.innerHTML=`<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat</h1><p>${S.u.nm} · ${S.u.z}</p></div></div><div style="padding:5px 7px 70px">${
     S.v==='registrar'?registrarH():S.v==='seguimiento'?seguimientoH():S.v==='sugeridos'?sugeridosH():S.v==='cotizar'?cotizarH():S.v==='dashboard'?dashboardH():configH()
   }</div><div class="bn">${tabs.map(t=>`<button class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
-  if(S.v==='registrar')restoreForm();}
+  if(S.v==='registrar'){restoreForm();registrarReady();}}
 function nav(v){if(S.v==='registrar')saveForm();S.v=v;R();if(v!=='registrar')load();}
 
 // === LOGIN ===
@@ -65,18 +65,26 @@ function registrarH(){const cols=ZC[S.u.z]||[];const h=ch();return `<div class="
       <input type="file" accept="image/*" capture="environment" id="rph" onchange="previewPhoto(this,'rpv')" style="display:none">
       <div onclick="document.getElementById('rph').click()" style="border:2px dashed var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;color:var(--t4);font-size:10px" id="rpv">📷 Toca para abrir la cámara<br><span style="font-size:8px">Foto del local, fachada o menú</span></div>
     </div>
-    <div class="sec"><div class="sec-t" onclick="document.getElementById('cot-inline').style.display=document.getElementById('cot-inline').style.display==='none'?'block':'none'" style="cursor:pointer">💰 Generar Cotización <span style="font-size:8px;color:var(--t4)">▼ (opcional)</span></div>
-      <div id="cot-inline" style="display:none"><div id="cot-inline-content"></div>
-        <button onclick="openInlineCot()" class="btn btn-s" style="font-size:9px;padding:7px;margin-top:4px">📦 Abrir Cotizador</button>
-      </div>
+    <div class="sec"><div class="sec-t">💰 Cotización (opcional)</div>
+      <div id="cot-inline-content"></div>
+      <input class="inp" placeholder="🔍 SKU o nombre..." id="icqs" oninput="renderInlineCatalog()" style="margin-bottom:4px;font-size:10px">
+      <div id="cot-inline-catalog"></div>
     </div>
+    <div id="cot-save-wrap" style="display:none"><button class="btn btn-s" onclick="saveInlineCot()" id="cot-save-btn" style="font-size:11px;padding:10px;margin-bottom:6px;border-color:var(--yw);color:#92600a;font-weight:800">💰 GUARDAR COTIZACIÓN</button></div>
     <button class="btn btn-p" onclick="doReg()" id="rb" style="font-size:14px;padding:13px">✅ REGISTRAR VISITA</button></div>`;}
+
+// Auto-render catalog on registrar load
+function registrarReady(){setTimeout(function(){renderInlineCot(document.getElementById('cot-inline-content'));renderInlineCatalog();},100);}
+
+function renderInlineCatalog(){
+  const el=document.getElementById('cot-inline-catalog');if(!el)return;
+  const sq=document.getElementById('icqs')?.value||'';
+  let prods=S.cos;if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
+  el.innerHTML=`<div style="max-height:200px;overflow-y:auto">${prods.slice(0,30).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openInlineCalc(${ri})"><div style="font-size:7px;font-weight:700;color:var(--ac2);min-width:45px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}${prods.length>30?`<div style="font-size:8px;color:var(--t4);text-align:center;padding:4px">30/${prods.length}</div>`:''}</div>`;}
+
 function gg(){saveForm();const g=document.getElementById('gb');if(g)g.innerHTML='<span>⏳</span><div>Obteniendo...</div>';navigator.geolocation?.getCurrentPosition(p=>{S.lat=p.coords.latitude.toFixed(6);S.lng=p.coords.longitude.toFixed(6);S.gs='✅ '+S.lat+', '+S.lng;const b=document.getElementById('gb');if(b)b.innerHTML='<span>✅</span><div><div style="font-weight:700">Capturada</div><div style="font-size:9px;color:var(--t3)">'+S.lat+', '+S.lng+'</div></div>';const l=document.getElementById('gl');if(l)l.innerHTML='<a href="https://www.google.com/maps?q='+S.lat+','+S.lng+'" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>';},e=>{const b=document.getElementById('gb');if(b)b.innerHTML='<span>❌</span><div>'+e.message+'</div>';},{enableHighAccuracy:true,timeout:10000});}
-async function doReg(){const n=document.getElementById('rn').value.trim(),g=document.getElementById('rg').value;if(!n){toast('⚠️ Nombre','err');return;}if(!g){toast('⚠️ Giro','err');return;}const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳...';const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';if(photoData.reg){await pf({action:'upload_photo',agente:S.u.id,negocio:n,photo:photoData.reg});photoData.reg=null;}
-  if(inlineQItems.length>0){await pf({action:'save_quote',agente:S.u.id,negocio:n,productos_detalle:inlineQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:inlineQItems.reduce((s,i)=>s+i.pz,0),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2)});
-    const cotC3=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');cotC3.push({negocio:n,fecha:new Date().toISOString().split('T')[0],productos:inlineQItems.map(i=>i.sku+' x'+i.qty).join(', '),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2),items:[...inlineQItems]});localStorage.setItem('cots_'+S.u?.id,JSON.stringify(cotC3));
-    inlineQItems=[];}
-  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:document.getElementById('rp').value,proxima_visita:pv,notas:document.getElementById('ro').value});av(n);toast('✅ Visita #'+ch());S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''};S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
+async function doReg(){const n=document.getElementById('rn').value.trim(),g=document.getElementById('rg').value;if(!n){toast('⚠️ Nombre','err');return;}const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳...';const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';if(photoData.reg){await pf({action:'upload_photo',agente:S.u.id,negocio:n,photo:photoData.reg});photoData.reg=null;}
+  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:document.getElementById('rp').value,proxima_visita:pv,notas:document.getElementById('ro').value});av(n);inlineQItems=[];toast('✅ Visita #'+ch());S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''};S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
 
 // === SEGUIMIENTO (visitas subsecuentes) ===
 function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
@@ -333,11 +341,26 @@ function openInlineCot(){
 function renderInlineCot(el){
   if(!el)return;
   const total=inlineQItems.reduce((s,i)=>s+i.total,0);
-  let prods=S.cos;const sq=document.getElementById('icqs')?.value||'';
-  if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
-  el.innerHTML=`${inlineQItems.length>0?`<div style="margin-bottom:5px">${inlineQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><span style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</span> <span style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s)</span></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="inlineQItems.splice(${i},1);renderInlineCot(document.getElementById('cot-inline-content'))" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}<div style="text-align:right;font-size:13px;font-weight:800;color:var(--ac2);margin-top:3px">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><div style="font-size:7px;color:#92600a;margin-top:2px">💡 IVA incluido · Envío GRATIS > $2,500</div></div>`:''}
-    <input class="inp" placeholder="🔍 SKU o nombre..." id="icqs" oninput="renderInlineCot(document.getElementById('cot-inline-content'))" style="margin-bottom:4px;font-size:10px" value="${sq}">
-    <div style="max-height:180px;overflow-y:auto">${prods.slice(0,25).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openInlineCalc(${ri})"><div style="font-size:7px;font-weight:700;color:var(--ac2);min-width:45px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>`;
+  const pzT=inlineQItems.reduce((s,i)=>s+i.pz,0);
+  // Show/hide save button
+  const sw=document.getElementById('cot-save-wrap');if(sw)sw.style.display=inlineQItems.length>0?'block':'none';
+  if(inlineQItems.length===0){el.innerHTML='';return;}
+  el.innerHTML=`<div style="margin-bottom:6px">${inlineQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><span style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</span> <span style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</span></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="inlineQItems.splice(${i},1);renderInlineCot(document.getElementById('cot-inline-content'))" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
+    <div style="display:flex;justify-content:space-between;border-top:2px solid var(--bd);padding-top:4px;margin-top:3px"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz · ${inlineQItems.length} prod.</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+    <div style="font-size:7px;color:#92600a;margin-top:2px">💡 IVA incluido · Envío GRATIS > $2,500</div></div>`;
+  // Also refresh catalog
+  renderInlineCatalog();
+}
+
+async function saveInlineCot(){
+  const neg=document.getElementById('rn')?.value?.trim();
+  if(!neg){toast('⚠️ Primero escribe el nombre del negocio','err');return;}
+  if(inlineQItems.length===0){toast('⚠️ Agrega productos','err');return;}
+  const b=document.getElementById('cot-save-btn');if(b){b.disabled=true;b.textContent='⏳...';}
+  await pf({action:'save_quote',agente:S.u.id,negocio:neg,productos_detalle:inlineQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:inlineQItems.reduce((s,i)=>s+i.pz,0),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2)});
+  const cc=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');cc.push({negocio:neg,fecha:new Date().toISOString().split('T')[0],productos:inlineQItems.map(i=>i.sku+' x'+i.qty).join(', '),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2),items:[...inlineQItems]});localStorage.setItem('cots_'+S.u?.id,JSON.stringify(cc));
+  toast('✅ Cotización guardada para '+neg);inlineQItems=[];renderInlineCot(document.getElementById('cot-inline-content'));
+  if(b){b.disabled=false;b.textContent='💰 GUARDAR COTIZACIÓN';}
 }
 function openInlineCalc(idx){const p=S.cos[idx];if(!p)return;
   const c=document.createElement('div');c.id='icm';c.className='mbg';c.onclick=e=>{if(e.target===c)c.remove();};
