@@ -73,7 +73,9 @@ function registrarH(){const cols=ZC[S.u.z]||[];const h=ch();return `<div class="
     <button class="btn btn-p" onclick="doReg()" id="rb" style="font-size:14px;padding:13px">✅ REGISTRAR VISITA</button></div>`;}
 function gg(){saveForm();const g=document.getElementById('gb');if(g)g.innerHTML='<span>⏳</span><div>Obteniendo...</div>';navigator.geolocation?.getCurrentPosition(p=>{S.lat=p.coords.latitude.toFixed(6);S.lng=p.coords.longitude.toFixed(6);S.gs='✅ '+S.lat+', '+S.lng;const b=document.getElementById('gb');if(b)b.innerHTML='<span>✅</span><div><div style="font-weight:700">Capturada</div><div style="font-size:9px;color:var(--t3)">'+S.lat+', '+S.lng+'</div></div>';const l=document.getElementById('gl');if(l)l.innerHTML='<a href="https://www.google.com/maps?q='+S.lat+','+S.lng+'" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>';},e=>{const b=document.getElementById('gb');if(b)b.innerHTML='<span>❌</span><div>'+e.message+'</div>';},{enableHighAccuracy:true,timeout:10000});}
 async function doReg(){const n=document.getElementById('rn').value.trim(),g=document.getElementById('rg').value;if(!n){toast('⚠️ Nombre','err');return;}if(!g){toast('⚠️ Giro','err');return;}const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳...';const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';if(photoData.reg){await pf({action:'upload_photo',agente:S.u.id,negocio:n,photo:photoData.reg});photoData.reg=null;}
-  if(inlineQItems.length>0){await pf({action:'save_quote',agente:S.u.id,negocio:n,productos_detalle:inlineQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:inlineQItems.reduce((s,i)=>s+i.pz,0),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2)});inlineQItems=[];}
+  if(inlineQItems.length>0){await pf({action:'save_quote',agente:S.u.id,negocio:n,productos_detalle:inlineQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:inlineQItems.reduce((s,i)=>s+i.pz,0),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2)});
+    const cotC3=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');cotC3.push({negocio:n,fecha:new Date().toISOString().split('T')[0],productos:inlineQItems.map(i=>i.sku+' x'+i.qty).join(', '),total:inlineQItems.reduce((s,i)=>s+i.total,0).toFixed(2),items:[...inlineQItems]});localStorage.setItem('cots_'+S.u?.id,JSON.stringify(cotC3));
+    inlineQItems=[];}
   await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:document.getElementById('rp').value,proxima_visita:pv,notas:document.getElementById('ro').value});av(n);toast('✅ Visita #'+ch());S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''};S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
 
 // === SEGUIMIENTO (visitas subsecuentes) ===
@@ -100,7 +102,7 @@ function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
   const m=document.createElement('div');m.id='sm';m.className='mbg';m.onclick=e=>{if(e.target===m)m.remove();};
   m.innerHTML=`<div class="mdl">
     <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-      <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--ac2)">${b.negocio}</div><div style="font-size:9px;color:var(--t4)">${b.giro} ${b.maps?'· 📍':''}${hist.length>0?' · '+hist[hist.length-1].fecha:''}</div></div>
+      <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--ac2)">${b.negocio}</div><div style="font-size:9px;color:var(--t4)">${b.giro} ${b.maps?'· 📍':''}${hist.length>0?' · '+(hist[hist.length-1].fecha||'').substring(0,10):''}</div></div>
       <button onclick="document.getElementById('sm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px">✕</button>
     </div>
     ${b.maps?`<a href="${b.maps}" target="_blank" style="display:inline-block;font-size:9px;color:var(--ac);text-decoration:none;margin-bottom:6px">📍 Ver en Google Maps →</a>`:''}
@@ -140,17 +142,41 @@ function showHist(neg){
   const el=document.getElementById('seg-hist');
   const ct=document.getElementById('seg-content');
   const co=document.getElementById('seg-cot');
+  const cotCache=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
+  const cotBiz=cotCache.filter(c=>c.negocio===neg);
   if(el.style.display==='none'){el.style.display='block';ct.style.display='none';co.style.display='none';
-    el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📋 Historial de ${neg} (${hist.length} registros)</div>
-      ${hist.length===0?'<div class="empty">Sin registros previos</div>':''}
+    el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--ac2);margin-bottom:8px">📋 Historial de ${neg}</div>
+      <div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">🔄 Visitas (${hist.length})</div>
+      ${hist.length===0?'<div style="font-size:9px;color:var(--t4);padding:6px 0">Sin visitas previas</div>':''}
       ${hist.map(r=>{const ic=r.interes?.includes('Alto')?'var(--gn)':r.interes?.includes('Medio')?'var(--yw)':'var(--t4)';
-        return `<div style="padding:6px 0;border-bottom:1px solid var(--s2)">
-          <div style="display:flex;justify-content:space-between"><div style="font-size:10px;font-weight:600;color:var(--t2)">Visita · ${r.fecha||''} ${r.hora||''}</div><span class="pill" style="background:${ic}15;color:${ic}">${r.interes?.split('—')[0]||'—'}</span></div>
+        return `<div style="padding:5px 0;border-bottom:1px solid var(--s2)">
+          <div style="display:flex;justify-content:space-between"><div style="font-size:10px;font-weight:600;color:var(--t2)">${(r.fecha||'').substring(0,10)} ${r.hora||''}</div><span class="pill" style="background:${ic}15;color:${ic}">${r.interes?.split('—')[0]||'—'}</span></div>
           ${r.resultado?`<div style="font-size:8px;color:var(--t3)">→ ${r.resultado}</div>`:''}
-          ${r.maps?`<a href="${r.maps}" target="_blank" style="font-size:8px;color:var(--ac);text-decoration:none">📍</a>`:''}
         </div>`;}).join('')}
-      <button onclick="document.getElementById('seg-hist').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:6px;font-size:9px;padding:7px">← Volver a tipificar</button>`;}
+      <div style="font-size:9px;font-weight:700;color:var(--yw);margin:10px 0 4px">💰 Cotizaciones (${cotBiz.length})</div>
+      ${cotBiz.length===0?'<div style="font-size:9px;color:var(--t4);padding:6px 0">Sin cotizaciones guardadas</div>':''}
+      ${cotBiz.map((c,ci)=>`<div style="padding:7px;background:var(--s2);border-radius:7px;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="flex:1"><div style="font-size:12px;font-weight:800;color:var(--ac2)">$`+String(parseFloat(c.total||0).toLocaleString('es-MX',{minimumFractionDigits:2}))+`</div>
+          <div style="font-size:8px;color:var(--t4)">${c.fecha||''}</div>
+          <div style="font-size:8px;color:var(--t3)">${c.productos||''}</div></div>
+          <button onclick="replicarCot(${ci},'${neg.replace(/'/g,"\\\\'")}')" style="padding:4px 8px;border-radius:5px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);cursor:pointer;font-size:8px;font-weight:700;white-space:nowrap">🔄 Replicar</button>
+        </div></div>`).join('')}
+      <button onclick="document.getElementById('seg-hist').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:8px;font-size:9px;padding:7px">← Volver a tipificar</button>`;}
   else{el.style.display='none';ct.style.display='block';}}
+
+function replicarCot(cotIdx,neg){
+  const cotCache=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
+  const biz=cotCache.filter(x=>x.negocio===neg);
+  const c=biz[cotIdx];
+  if(!c||!c.items){toast('Sin productos para replicar','err');return;}
+  segQItems=[...c.items];
+  document.getElementById('seg-hist').style.display='none';
+  document.getElementById('seg-cot').style.display='block';
+  document.getElementById('seg-content').style.display='none';
+  renderSegCot(neg);
+  toast('🔄 Cotización replicada — edita y guarda');
+}
 
 var segQItems=[];
 function showSegCot(neg){
@@ -191,6 +217,10 @@ function addSegQ(i,neg){const p=S.cos[i],t=document.getElementById('sct')?.value
 
 async function saveSegCot(neg){const b=document.getElementById('scb');if(b){b.disabled=true;b.textContent='⏳...';}
   await pf({action:'save_quote',agente:S.u.id,negocio:neg,productos_detalle:segQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:segQItems.reduce((s,i)=>s+i.pz,0),total:segQItems.reduce((s,i)=>s+i.total,0).toFixed(2)});
+  // Save to local cache for history
+  const cotCache=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
+  cotCache.push({negocio:neg,fecha:new Date().toISOString().split('T')[0],productos:segQItems.map(i=>i.sku+' x'+i.qty).join(', '),total:segQItems.reduce((s,i)=>s+i.total,0).toFixed(2),items:[...segQItems]});
+  localStorage.setItem('cots_'+S.u?.id,JSON.stringify(cotCache));
   toast('✅ Cotización guardada para '+neg);segQItems=[];document.getElementById('seg-cot').style.display='none';document.getElementById('seg-content').style.display='block';}
 
 var segLat='',segLng='';
@@ -257,7 +287,10 @@ function oC(i){const p=S.cos[i];if(!p)return;const m=document.createElement('div
 
 function cc(i){const p=S.cos[i],t=document.getElementById('ct')?.value||'caja',q=parseInt(document.getElementById('cq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);document.getElementById('cpz').textContent=(pz*q).toLocaleString();document.getElementById('ctt').textContent='$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});}
 function aQ(i){const p=S.cos[i],t=document.getElementById('ct')?.value||'caja',q=parseInt(document.getElementById('cq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);S.qi.push({sku:p.sku,tipo:t,qty:q,pz:pz*q,total:pr*q});document.getElementById('cm')?.remove();toast('✅ '+p.sku);R();}
-async function sQ(){const neg=document.getElementById('qn')?.value;if(!neg){toast('⚠️ Selecciona negocio','err');return;}const b=document.getElementById('qb');b.disabled=true;b.textContent='⏳...';await pf({action:'save_quote',agente:S.u.id,negocio:neg,productos_detalle:S.qi.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:S.qi.reduce((s,i)=>s+i.pz,0),total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2)});toast('✅ Cotización guardada');S.qi=[];R();}
+async function sQ(){const neg=document.getElementById('qn')?.value;if(!neg){toast('⚠️ Selecciona negocio','err');return;}const b=document.getElementById('qb');b.disabled=true;b.textContent='⏳...';await pf({action:'save_quote',agente:S.u.id,negocio:neg,productos_detalle:S.qi.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:S.qi.reduce((s,i)=>s+i.pz,0),total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2)});const cotC2=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
+  cotC2.push({negocio:neg,fecha:new Date().toISOString().split('T')[0],productos:S.qi.map(i=>i.sku+' x'+i.qty).join(', '),total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2),items:[...S.qi]});
+  localStorage.setItem('cots_'+S.u?.id,JSON.stringify(cotC2));
+  toast('✅ Cotización guardada');S.qi=[];R();}
 
 // === CONFIG ===
 function configH(){const isA=S.u.r==='admin';return `<div class="fi"><div class="sec"><div class="sec-t">⚙️ Sistema</div><div style="font-size:9px;color:var(--t3);line-height:1.6">👤 ${S.u.nm} · ${S.u.z}<br>📦 Productos: ${S.cos.length}${!isA?'<br>📋 Registros: '+S.reg.length+' · 🗺️ Sugeridos: '+ms().length:''}</div></div>${isA?`<div class="sec" style="border-color:var(--rd)"><div class="sec-t" style="color:var(--rd)">🗑️ Admin</div>${AG.filter(a=>!a.r).map(a=>`<button class="btn btn-s" onclick="rAg('${a.id}')" style="font-size:9px;padding:7px;border-color:var(--rd)20;color:var(--rd);margin-bottom:3px">🗑️ ${a.nm}</button>`).join('')}<button class="btn btn-s" onclick="rAll()" style="font-size:10px;padding:9px;border-color:var(--rd);color:var(--rd);font-weight:800;margin-top:6px">⚠️ BORRAR TODO</button></div>`:''}<div class="sec"><div class="sec-t">📱 Instalar</div><div style="font-size:9px;color:var(--t3)"><b>iPhone:</b> Safari → Compartir → Agregar a inicio<br><b>Android:</b> Chrome → ⋮ → Agregar a inicio</div></div><button class="btn btn-s" onclick="if(confirm('¿Cerrar sesión?')){localStorage.removeItem('ecrm4');S.u=null;R();}" style="color:var(--rd);border-color:#e74c3c25">🚪 Cerrar Sesión</button></div>`;}
