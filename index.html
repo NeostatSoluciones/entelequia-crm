@@ -35,7 +35,7 @@ let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
 function ms(){return SUG[S.u?.id]||[];}function mv(){return JSON.parse(localStorage.getItem('v_'+S.u?.id)||'[]');}
 function av(n){const v=mv();if(!v.includes(n)){v.push(n);localStorage.setItem('v_'+S.u.id,JSON.stringify(v));}const d=new Date().toISOString().split('T')[0],k='c_'+d;localStorage.setItem(k,String((parseInt(localStorage.getItem(k)||'0'))+1));}
-function ch(){return parseInt(localStorage.getItem('c_'+new Date().toISOString().split('T')[0])||'0');}
+function ch(){const hoy=new Date().toISOString().split('T')[0];return S.reg.filter(r=>(r.fecha||'').substring(0,10)===hoy).length;}
 function saveForm(){['rn','rg','re','rt','rc','rv','ri','rr','rp','rx','rd','ro'].forEach(id=>{const el=document.getElementById(id);if(el)S.form[id]=el.value;});}
 function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr','rp','rx','rd','ro'].forEach(id=>{const el=document.getElementById(id);if(el&&S.form[id])el.value=S.form[id];});if(S.form.rx==='si'){const fp=document.getElementById('rf');if(fp)fp.style.display='block';}},50);}
 
