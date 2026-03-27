@@ -53,7 +53,7 @@ function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr',
 
 // Get unique businesses from registros
 function getBizInfo(neg){const r=S.reg.filter(x=>x.negocio===neg);const last=r[r.length-1]||{};return{contacto:last.encargado||'',telefono:last.telefono||'',giro:last.giro||'',maps:last.maps||''};}
-function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.negocio;if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',interes:'',resultado:'',maps:r.maps||''};biz[k].visitas++;biz[k].ultimo=r.fecha||'';biz[k].interes=r.interes||biz[k].interes;biz[k].resultado=r.resultado||biz[k].resultado;if(r.maps)biz[k].maps=r.maps;});return Object.values(biz);}
+function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.negocio;if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',interes:'',resultado:'',maps:r.maps||'',encargado:'',telefono:'',colonia:'',email:'',rfc:''};biz[k].visitas++;biz[k].ultimo=r.fecha||'';biz[k].interes=r.interes||biz[k].interes;biz[k].resultado=r.resultado||biz[k].resultado;if(r.maps)biz[k].maps=r.maps;if(r.encargado)biz[k].encargado=r.encargado;if(r.telefono)biz[k].telefono=r.telefono;if(r.colonia)biz[k].colonia=r.colonia;if(r.email)biz[k].email=r.email;const nm=r.notas||'';const rm=nm.match(/RFC:\s*([A-Z0-9]+)/i);if(rm)biz[k].rfc=rm[1];});return Object.values(biz);}
 
 async function load(){S.ld=true;R();
   if(S.u?.r==='admin'){const r=await gf('all_agents');if(r?.agents)S.ad=r.agents;}
@@ -126,7 +126,15 @@ function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
       <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--ac2)">${b.negocio}</div><div style="font-size:9px;color:var(--t4)">${b.giro} ${b.maps?'· 📍':''}${hist.length>0?' · '+(hist[hist.length-1].fecha||'').substring(0,10):''}</div></div>
       <button onclick="document.getElementById('sm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px">✕</button>
     </div>
-    ${b.maps?`<a href="${b.maps}" target="_blank" style="display:inline-block;font-size:9px;color:var(--ac);text-decoration:none;margin-bottom:6px">📍 Ver en Google Maps →</a>`:''}
+    ${b.maps?`<a href="${b.maps}" target="_blank" style="display:inline-block;font-size:9px;color:var(--ac);text-decoration:none;margin-bottom:4px">📍 Maps →</a>`:''}
+    <div class="sec" style="padding:8px;margin-bottom:6px"><div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">📇 Datos del negocio <span style="font-size:7px;color:var(--t4)">(editable)</span></div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="seg_enc" value="${b.encargado||''}" placeholder="Nombre" style="font-size:11px;padding:6px 8px"></div>
+        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" id="seg_tel" value="${b.telefono||''}" placeholder="55-XXXX" type="tel" style="font-size:11px;padding:6px 8px"></div>
+        <div class="fld"><label class="lbl">RFC</label><input class="inp" id="seg_rfc" value="${b.rfc||''}" placeholder="XAXX010101000" maxlength="13" style="font-size:11px;padding:6px 8px;text-transform:uppercase"></div>
+        <div class="fld"><label class="lbl">Email</label><input class="inp" id="seg_email" value="${b.email||''}" placeholder="correo@..." type="email" style="font-size:11px;padding:6px 8px"></div>
+      </div>
+    </div>
     <div style="background:linear-gradient(135deg,#2da0d1,#1d7ba3);border-radius:10px;padding:12px;margin-bottom:8px;text-align:center;color:#fff">
       <div style="font-size:38px;font-weight:800;line-height:1">${vn}</div>
       <div style="font-size:10px;font-weight:700;letter-spacing:1px;opacity:.85">VISITA #${vn}</div>
@@ -455,7 +463,10 @@ function ggSeg(){segLat='';segLng='';const g=document.getElementById('sgb');if(g
 
 async function doSeg(neg,giro,vn){const b=document.getElementById('sb');b.disabled=true;b.textContent='⏳...';
   if(photoData.seg){await pf({action:'upload_photo',agente:S.u.id,negocio:neg,photo:photoData.seg});photoData.seg=null;}
+  const enc=document.getElementById('seg_enc')?.value||'',tel=document.getElementById('seg_tel')?.value||'',rfc=document.getElementById('seg_rfc')?.value||'',eml=document.getElementById('seg_email')?.value||'';
+  if(enc||tel||rfc||eml){await pf({action:'update_negocio',agente:S.u.id,negocio:neg,encargado:enc,telefono:tel,rfc:rfc,email:eml});}
   await pf({action:'registrar_visita',agente:S.u.id,negocio:neg,giro:giro,num_visita:String(vn),
+    encargado:enc,telefono:tel,
     interes:document.getElementById('si')?.value||'',resultado:document.getElementById('sr')?.value||'',
     productos:document.getElementById('sp')?.value||'',recordatorio:document.getElementById('srm')?.value||'',stock_cliente:document.getElementById('ssk')?.value||'',
     proxima_visita:document.getElementById('sd')?.value||'',notas:document.getElementById('so')?.value||'',
