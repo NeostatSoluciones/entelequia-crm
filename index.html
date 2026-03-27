@@ -132,11 +132,13 @@ function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
       <div style="font-size:10px;font-weight:700;letter-spacing:1px;opacity:.85">VISITA #${vn}</div>
       <div style="font-size:8px;opacity:.65;margin-top:2px">${b.visitas} visita(s) previas registradas</div>
     </div>
-    <div style="display:flex;gap:3px;margin-bottom:8px">
-      <button onclick="showHist('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:8px;font-weight:700;cursor:pointer">📋 Historial</button>
-      <button onclick="showSegCot('${b.negocio.replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--yw);background:#fff9e6;color:#92600a;font-size:8px;font-weight:700;cursor:pointer">💰 Cotización</button>
-      <button onclick="showVenta('${b.negocio.replace(/'/g,"\\'")}','${(b.giro||'').replace(/'/g,"\\'")}','${(b.maps||'').replace(/'/g,"\\'")}')" style="flex:1;padding:7px;border-radius:7px;border:1px solid var(--gn);background:#eafaf1;color:var(--gn);font-size:8px;font-weight:700;cursor:pointer">🛒 Venta</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:8px">
+      <button onclick="showHist('${b.negocio.replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:8px;font-weight:700;cursor:pointer">📋 Historial</button>
+      <button onclick="showSegCot('${b.negocio.replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--yw);background:#fff9e6;color:#92600a;font-size:8px;font-weight:700;cursor:pointer">💰 Cotización</button>
+      <button onclick="showVenta('${b.negocio.replace(/'/g,"\\'")}','${(b.giro||'').replace(/'/g,"\\'")}','${(b.maps||'').replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--gn);background:#eafaf1;color:var(--gn);font-size:8px;font-weight:700;cursor:pointer">🛒 Venta</button>
+      <button onclick="showEditBiz('${b.negocio.replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--t4);background:var(--s2);color:var(--t3);font-size:8px;font-weight:700;cursor:pointer">✏️ Editar datos</button>
     </div>
+    <div id="seg-edit" style="display:none"></div>
     <div id="seg-venta" style="display:none"></div>
     <div id="seg-content">
       <div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📝 Tipificar visita</div>
@@ -201,8 +203,102 @@ function replicarCot(cotIdx,neg){
   toast('🔄 Cotización replicada — edita y guarda');
 }
 
+
+// === EDITAR DATOS DEL NEGOCIO ===
+function showEditBiz(neg){
+  const el=document.getElementById('seg-edit');
+  const ct=document.getElementById('seg-content');
+  const hi=document.getElementById('seg-hist');
+  const co=document.getElementById('seg-cot');
+  const vt=document.getElementById('seg-venta');
+  if(el.style.display==='none'){
+    el.style.display='block';ct.style.display='none';hi.style.display='none';co.style.display='none';vt.style.display='none';
+    // Pre-fill from last known data
+    const hist=S.reg.filter(r=>r.negocio===neg);
+    const last=hist[hist.length-1]||{};
+    // Check localStorage for saved edits
+    const saved=JSON.parse(localStorage.getItem('biz_'+S.u?.id+'_'+neg)||'{}');
+    el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:8px">✏️ Editar datos — ${neg}</div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="be" value="${saved.encargado||''}" placeholder="Nombre del contacto"></div>
+        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" type="tel" id="bt" value="${saved.telefono||''}" placeholder="55-XXXX-XXXX"></div>
+        <div class="fld"><label class="lbl">Email</label><input class="inp" type="email" id="bm" value="${saved.email||''}" placeholder="correo@empresa.com"></div>
+        <div class="fld"><label class="lbl">Colonia</label><input class="inp" id="bc" value="${saved.colonia||''}" placeholder="Colonia"></div>
+        <div class="fld"><label class="lbl">Dirección</label><input class="inp" id="bd" value="${saved.direccion||''}" placeholder="Calle y número"></div>
+        <div class="fld"><label class="lbl">RFC (factura)</label><input class="inp" id="br" value="${saved.rfc||''}" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div>
+        <div class="fld full"><label class="lbl">Razón Social</label><input class="inp" id="brs" value="${saved.razon||''}" placeholder="Nombre fiscal completo"></div>
+      </div>
+      <button onclick="saveBizEdit('${neg.replace(/'/g,"\\'")}')" class="btn btn-p" style="margin-top:6px;font-size:11px">💾 Guardar datos</button>
+      <button onclick="document.getElementById('seg-edit').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:4px;font-size:9px;padding:7px">← Volver</button>`;
+  } else {el.style.display='none';ct.style.display='block';}
+}
+
+function saveBizEdit(neg){
+  const data={
+    encargado:document.getElementById('be')?.value||'',
+    telefono:document.getElementById('bt')?.value||'',
+    email:document.getElementById('bm')?.value||'',
+    colonia:document.getElementById('bc')?.value||'',
+    direccion:document.getElementById('bd')?.value||'',
+    rfc:document.getElementById('br')?.value?.toUpperCase()||'',
+    razon:document.getElementById('brs')?.value||''
+  };
+  localStorage.setItem('biz_'+S.u?.id+'_'+neg,JSON.stringify(data));
+  // Also update on server
+  pf({action:'update_biz',agente:S.u.id,negocio:neg,...data});
+  toast('✅ Datos actualizados');
+  document.getElementById('seg-edit').style.display='none';
+  document.getElementById('seg-content').style.display='block';
+}
+
 // === REGISTRAR VENTA ===
 var ventaQItems=[];
+// === EDITAR DATOS DEL NEGOCIO ===
+function showEditBiz(neg){
+  const el=document.getElementById('seg-edit');
+  const ct=document.getElementById('seg-content');
+  const hi=document.getElementById('seg-hist');
+  const co=document.getElementById('seg-cot');
+  const vt=document.getElementById('seg-venta');
+  // Load saved edits or from reg data
+  const saved=JSON.parse(localStorage.getItem('biz_'+S.u?.id+'_'+neg)||'{}');
+  const lastReg=S.reg.filter(r=>r.negocio===neg).slice(-1)[0]||{};
+  if(el.style.display==='none'){
+    el.style.display='block';ct.style.display='none';hi.style.display='none';co.style.display='none';if(vt)vt.style.display='none';
+    el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--ac2);margin-bottom:8px">✏️ Editar datos — ${neg}</div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="edn" value="${saved.encargado||''}" placeholder="Nombre del contacto"></div>
+        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" type="tel" id="edt" value="${saved.telefono||''}" placeholder="55-XXXX-XXXX"></div>
+        <div class="fld"><label class="lbl">Email</label><input class="inp" type="email" id="ede" value="${saved.email||''}" placeholder="correo@empresa.com"></div>
+        <div class="fld"><label class="lbl">Colonia</label><input class="inp" id="edc" value="${saved.colonia||''}" placeholder="Colonia"></div>
+        <div class="fld"><label class="lbl">Dirección</label><input class="inp" id="edd" value="${saved.direccion||''}" placeholder="Calle y número"></div>
+        <div class="fld"><label class="lbl">🧾 RFC</label><input class="inp" id="edr" value="${saved.rfc||''}" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div>
+      </div>
+      <div style="font-size:8px;color:var(--t4);margin:4px 0">💡 Estos datos se usan para cotizaciones y facturación</div>
+      <button onclick="saveEditBiz('${neg.replace(/'/g,"\\'")}')" class="btn btn-p" style="font-size:11px;padding:9px;margin-top:4px">💾 Guardar datos</button>
+      <button onclick="document.getElementById('seg-edit').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:4px;font-size:9px;padding:7px">← Volver</button>`;
+  } else {el.style.display='none';ct.style.display='block';}
+}
+
+async function saveEditBiz(neg){
+  const data={
+    encargado:document.getElementById('edn')?.value||'',
+    telefono:document.getElementById('edt')?.value||'',
+    email:document.getElementById('ede')?.value||'',
+    colonia:document.getElementById('edc')?.value||'',
+    direccion:document.getElementById('edd')?.value||'',
+    rfc:document.getElementById('edr')?.value?.toUpperCase()||''
+  };
+  // Save locally
+  localStorage.setItem('biz_'+S.u?.id+'_'+neg,JSON.stringify(data));
+  // Send to backend to update sheet
+  await pf({action:'update_biz',agente:S.u.id,negocio:neg,...data});
+  toast('✅ Datos actualizados');
+  document.getElementById('seg-edit').style.display='none';
+  document.getElementById('seg-content').style.display='block';
+}
+
+// === REGISTRAR VENTA ===
 function showVenta(neg,giro,maps){
   const el=document.getElementById('seg-venta');
   const ct=document.getElementById('seg-content');
