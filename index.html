@@ -53,7 +53,7 @@ function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr',
 
 // Get unique businesses from registros
 function getBizInfo(neg){const r=S.reg.filter(x=>x.negocio===neg);const last=r[r.length-1]||{};return{contacto:last.encargado||'',telefono:last.telefono||'',giro:last.giro||'',maps:last.maps||''};}
-function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.negocio;if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',interes:'',resultado:'',maps:r.maps||'',encargado:'',telefono:'',colonia:'',email:'',rfc:''};biz[k].visitas++;biz[k].ultimo=r.fecha||'';biz[k].interes=r.interes||biz[k].interes;biz[k].resultado=r.resultado||biz[k].resultado;if(r.maps)biz[k].maps=r.maps;if(r.encargado)biz[k].encargado=r.encargado;if(r.telefono)biz[k].telefono=r.telefono;if(r.colonia)biz[k].colonia=r.colonia;if(r.email)biz[k].email=r.email;const nm=r.notas||'';const rm=nm.match(/RFC:\s*([A-Z0-9]+)/i);if(rm)biz[k].rfc=rm[1];});return Object.values(biz);}
+function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.negocio;if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',interes:'',resultado:'',maps:r.maps||'',encargado:'',telefono:'',colonia:'',email:'',rfc:''};biz[k].visitas++;biz[k].ultimo=r.fecha||'';biz[k].interes=r.interes||biz[k].interes;biz[k].resultado=r.resultado||biz[k].resultado;if(r.maps)biz[k].maps=r.maps;if(r.encargado)biz[k].encargado=r.encargado;if(r.telefono)biz[k].telefono=r.telefono;if(r.colonia)biz[k].colonia=r.colonia;if(r.email)biz[k].email=r.email;if(r.rfc)biz[k].rfc=r.rfc;});return Object.values(biz);}
 
 async function load(){S.ld=true;R();
   if(S.u?.r==='admin'){const r=await gf('all_agents');if(r?.agents)S.ad=r.agents;}
