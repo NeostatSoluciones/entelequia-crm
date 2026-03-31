@@ -66,9 +66,9 @@ async function load(){S.ld=true;R();
 
 function R(){if(S.v==='registrar')saveForm();const a=document.getElementById('app');if(!S.u){a.innerHTML=loginH();return;}const isA=S.u.r==='admin';
   const tabs=isA?[{k:'dashboard',i:'📊',l:'Dashboard'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'config',i:'⚙️',l:'Admin'}]
-    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seguim.'},{k:'agendados',i:'📅',l:'Agenda'},{k:'sugeridos',i:'🗺️',l:'Zona'},{k:'config',i:'⚙️',l:'Config'}];
+    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seguim.'},{k:'agenda',i:'📅',l:'Agenda'},{k:'sugeridos',i:'🗺️',l:'Zona'},{k:'config',i:'⚙️',l:'Config'}];
   a.innerHTML=`<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat</h1><p>${S.u.nm} · ${S.u.z}</p></div></div><div style="padding:5px 7px 70px">${
-    S.v==='registrar'?registrarH():S.v==='seguimiento'?seguimientoH():S.v==='agendados'?agendadosH():S.v==='sugeridos'?sugeridosH():S.v==='cotizar'?cotizarH():S.v==='dashboard'?dashboardH():configH()
+    S.v==='registrar'?registrarH():S.v==='seguimiento'?seguimientoH():S.v==='agenda'?agendaH():S.v==='sugeridos'?sugeridosH():S.v==='cotizar'?cotizarH():S.v==='dashboard'?dashboardH():configH()
   }</div><div class="bn">${tabs.map(t=>`<button class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
   if(S.v==='registrar'){restoreForm();registrarReady();}}
 function nav(v){if(S.v==='registrar')saveForm();S.v=v;R();if(v!=='registrar')load();}
@@ -479,7 +479,7 @@ async function saveSegCot(neg){const b=document.getElementById('scb');if(b){b.di
 var segLat='',segLng='';
 function ggSeg(){segLat='';segLng='';const g=document.getElementById('sgb');if(g)g.innerHTML='<span>⏳</span><div>Obteniendo...</div>';navigator.geolocation?.getCurrentPosition(p=>{segLat=p.coords.latitude.toFixed(6);segLng=p.coords.longitude.toFixed(6);const b=document.getElementById('sgb');if(b)b.innerHTML='<span>✅</span><div><div style="font-weight:700">'+segLat+', '+segLng+'</div></div>';const l=document.getElementById('sgl');if(l)l.innerHTML='<a href="https://www.google.com/maps?q='+segLat+','+segLng+'" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>';},e=>{const b=document.getElementById('sgb');if(b)b.innerHTML='<span>❌</span><div>'+e.message+'</div>';},{enableHighAccuracy:true,timeout:10000});}
 
-async function doSeg(neg,giro,vn){const b=document.getElementById('sb');b.disabled=true;b.textContent='⏳...';
+async function doSeg(neg,giro,vn){const si=document.getElementById('si')?.value||'';const sr=document.getElementById('sr')?.value||'';if(!si){toast('⚠️ Selecciona Interés','err');return;}if(!sr){toast('⚠️ Selecciona Resultado','err');return;}const b=document.getElementById('sb');b.disabled=true;b.textContent='⏳...';
   if(photoData.seg){b.textContent='📷 Subiendo foto...';await pf({action:'upload_photo',agente:S.u.id,negocio:neg,photo:photoData.seg});photoData.seg=null;}
   const enc=document.getElementById('seg_enc')?.value||'',tel=document.getElementById('seg_tel')?.value||'',rfc=document.getElementById('seg_rfc')?.value||'',eml=document.getElementById('seg_email')?.value||'';
   if(enc||tel||rfc||eml){await pf({action:'update_negocio',agente:S.u.id,negocio:neg,encargado:enc,telefono:tel,rfc:rfc,email:eml});}
@@ -492,7 +492,7 @@ async function doSeg(neg,giro,vn){const b=document.getElementById('sb');b.disabl
   av(neg);document.getElementById('sm')?.remove();const vc2=incDay();showVisitPop(vc2);segLat='';segLng='';load();}
 
 // === AGENDADOS ===
-function agendadosH(){
+function agendaOld(){
   if(S.ld)return '<div class="empty"><div class="spin"></div>Cargando...</div>';
   const hoy=new Date().toISOString().split('T')[0];
   const all=S.reg.filter(r=>r.proxima_visita&&r.proxima_visita.length>=10);
@@ -509,7 +509,7 @@ function agendadosH(){
 function agCard(r,c){return `<div class="cd" style="border-left:3px solid ${c}"><div style="display:flex;justify-content:space-between"><div><div style="font-size:11px;font-weight:700;color:var(--t2)">${r.negocio}</div><div style="font-size:8px;color:var(--t4)">${r.giro||''} ${r.encargado?'· '+r.encargado:''} ${r.telefono?'· 📞 '+r.telefono:''}</div></div><div style="text-align:right"><div style="font-size:10px;font-weight:700;color:${c}">${(r.proxima_visita||'').substring(0,10)}</div><div style="font-size:7px;color:var(--t4)">${(r.interes||'').split('—')[0]||''}</div></div></div>${r.maps?`<a href="${r.maps}" target="_blank" style="font-size:8px;color:var(--ac);text-decoration:none">📍</a>`:''}</div>`;}
 
 // === PROGRAMADOS / AGENDA ===
-function programadosH(){
+function agendaH(){
   if(S.ld)return '<div class="empty"><div class="spin"></div>Cargando...</div>';
   const hoy=new Date().toISOString().split('T')[0];
   const todos=S.reg.filter(r=>(r.proxima_visita||'').length>=10);
