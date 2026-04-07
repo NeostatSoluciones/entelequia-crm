@@ -545,9 +545,10 @@ function catalogoH(){
     </div>
 
     <div class="sec">
-      <div class="sec-t" style="font-size:13px">📤 Compartir catálogo</div>
-      <button class="btn btn-p" onclick="compartirCat('${catUrl}')" style="font-size:14px;padding:13px;margin-bottom:6px">📲 Compartir por WhatsApp / Email</button>
-      <a href="${catUrl}" target="_blank" class="btn btn-s" style="display:block;text-decoration:none;text-align:center;font-size:13px;padding:11px;color:var(--ac2);border-color:var(--ac)">👁️ Ver catálogo PDF</a>
+      <div class="sec-t" style="font-size:13px">📤 Abrir y compartir</div>
+      <button onclick="window.open('${catUrl}','_blank')" style="width:100%;padding:13px;border-radius:9px;border:none;background:linear-gradient(135deg,#1D7BA3,#2da0d1);color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:6px;font-family:inherit">👁️ ABRIR CATÁLOGO PDF</button>
+      <button onclick="compartirCat('${catUrl}')" style="width:100%;padding:13px;border-radius:9px;border:none;background:#25D366;color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:6px;font-family:inherit">📲 COMPARTIR POR WHATSAPP</button>
+      <button onclick="copiarLinkCat('${catUrl}')" style="width:100%;padding:11px;border-radius:9px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔗 Copiar link del catálogo</button>
     </div>
 
     <div class="sec" style="border-color:#27ae60;border-width:2px;background:#f0fdf4">
@@ -573,12 +574,21 @@ function catalogoH(){
 }
 
 function compartirCat(url){
-  const txt='🌿 Catálogo Entelequia® — Desechables Compostables\n\n'+url+'\n\nProductos: Paja de trigo, PLA, Papel+PLA, Fécula de maíz\nCertificados: BPI, TÜV, FDA, USDA';
+  const txt='🌿 *Catálogo Entelequia®* — Desechables Compostables\n\n📄 '+url+'\n\n♻️ Productos: Paja de trigo · PLA · Papel+PLA · Fécula de maíz\n✅ Certificados: BPI · TÜV · FDA · USDA\n\n🏦 *Datos para transferencia:*\nBeneficiario: SOMOS ENTELEQUIA, SA DE CV\nBanco: Scotiabank\nCuenta: 03801663038\nCLABE: 044220038016630386\nRFC: SEN150416UA2';
   if(navigator.share){
-    navigator.share({title:'Catálogo Entelequia',text:txt,url:url}).catch(()=>{});
+    navigator.share({title:'Catálogo Entelequia',text:txt}).catch(()=>{
+      window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+    });
   }else{
-    const wa='https://wa.me/?text='+encodeURIComponent(txt);
-    window.open(wa,'_blank');
+    window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  }
+}
+
+function copiarLinkCat(url){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>toast('✅ Link copiado'));
+  }else{
+    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('✅ Link copiado');}catch(e){toast('⚠️','err');}document.body.removeChild(ta);
   }
 }
 
@@ -789,8 +799,8 @@ function idH(){
 
     <div class="sec">
       <div class="sec-t">📷 ${isSup&&targetId!==S.u.id?'Foto del agente':'Mi foto'}</div>
-      <input type="file" id="idphoto" accept="image/*" capture="user" onchange="uIdPh(this,'${u.id}')" style="font-size:11px;width:100%;padding:8px">
-      <div style="font-size:9px;color:var(--t4);margin-top:3px">${photo?'✅ Foto cargada · Toca para cambiar':'Toma o sube una foto de perfil'}</div>
+      <input type="file" id="idphoto" accept="image/*" onchange="uIdPh(this,'${u.id}')" style="font-size:11px;width:100%;padding:8px">
+      <div style="font-size:9px;color:var(--t4);margin-top:3px">${photo?'✅ Foto cargada · Toca para cambiar':'📷 Cámara o 🖼️ galería'}</div>
     </div>
 
     <button onclick="if(confirm('¿Cerrar sesión?')){['ecrm','ecrm2','ecrm3','ecrm4'].forEach(k=>localStorage.removeItem(k));S.u=null;S.v='registrar';R();}" style="width:100%;padding:14px;border-radius:10px;border:2px solid #e74c3c;background:#fef2f2;color:#dc2626;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;font-family:inherit">🚪 CERRAR SESIÓN</button>
