@@ -29,7 +29,7 @@ const RES_O=['Catálogo dejado','Muestra entregada','Cotización en sitio','Coti
 async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
 async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',
+let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',idAgent:'',
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
 
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
@@ -65,10 +65,10 @@ async function load(){S.ld=true;R();
   const c=await gf('costos');if(c?.productos)S.cos=c.productos;S.ld=false;R();if(S.v==='registrar'){restoreForm();registrarReady();}}
 
 function R(){if(S.v==='registrar')saveForm();const a=document.getElementById('app');if(!S.u){a.innerHTML=loginH();return;}const isA=S.u.r==='admin';
-  const tabs=isA?[{k:'dashboard',i:'📊',l:'Dashboard'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'config',i:'⚙️',l:'Admin'}]
-    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seguim.'},{k:'agenda',i:'📅',l:'Agenda'},{k:'sugeridos',i:'🗺️',l:'Zona'},{k:'config',i:'⚙️',l:'Config'},{k:'id',i:'🪪',l:'ID'}];
+  const tabs=isA?[{k:'dashboard',i:'📊',l:'Dashboard'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'catalogo',i:'📚',l:'Catálogo'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
+    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seguim.'},{k:'cotizar',i:'💰',l:'Cotizar'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catálogo'},{k:'id',i:'🪪',l:'ID'}];
   a.innerHTML=`<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat</h1><p>${S.u.nm} · ${S.u.z}</p></div></div><div style="padding:5px 7px 70px">${
-    S.v==='registrar'?registrarH():S.v==='seguimiento'?seguimientoH():S.v==='agenda'?agendaH():S.v==='sugeridos'?sugeridosH():S.v==='cotizar'?cotizarH():S.v==='dashboard'?dashboardH():S.v==='id'?idH():configH()
+    S.v==='registrar'?registrarH():S.v==='seguimiento'?seguimientoH():S.v==='agenda'?agendaH():S.v==='catalogo'?catalogoH():S.v==='cotizar'?cotizarH():S.v==='dashboard'?dashboardH():S.v==='id'?idH():configH()
   }</div><div class="bn">${tabs.map(t=>`<button class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
   if(S.v==='registrar'){restoreForm();registrarReady();}}
 function nav(v){if(S.v==='registrar')saveForm();S.v=v;R();if(v!=='registrar')load();}
@@ -526,17 +526,71 @@ function agendaH(){
 function navToSeg(neg){S.v='seguimiento';R();load();setTimeout(()=>{const biz=getBiz();const idx=biz.findIndex(b=>b.negocio===neg);if(idx>=0)openSeg(idx);},800);}
 
 // === SUGERIDOS ===
-function sugeridosH(){const all=ms(),vis=mv(),h=ch();let list=all;if(S.ss){const q=S.ss.toLowerCase();list=list.filter(s=>(s.n||'').toLowerCase().includes(q)||(s.d||'').toLowerCase().includes(q));}const pend=list.filter(s=>!vis.includes(s.n||'')),done=list.filter(s=>vis.includes(s.n||''));
-  const mapQ=encodeURIComponent((ZC[S.u.z]||[]).join(', ')+', CDMX, México');
-  const calles={'CONDESA':{cols:{'Condesa':['Fernando Montes de Oca','Zamora','Amsterdam','Tamaulipas','Campeche','Nuevo León','Veracruz','Pachuca','Mazatlán'],'Hipódromo':['Alfonso Reyes','Atlixco','Cuernavaca','Ozuluama','Iztaccíhuatl','Popocatépetl']}},'COL. JUÁREZ':{cols:{'Juárez':['Niza','Génova','Havre','Londres','Liverpool','Hamburgo','Amberes','Florencia'],'Cuauhtémoc':['Morelos','Artículo 123','Balderas','Bucareli'],'Zona Rosa':['Praga','Varsovia','Copenhague','Marsella','Nápoles']}},'ROMA':{cols:{'Roma Norte':['Álvaro Obregón','Orizaba','Colima','Durango','Monterrey','Mérida','Córdoba','Zacatecas','Guanajuato','Jalapa','Chiapas','Tabasco','Frontera','Tonalá','Querétaro'],'Roma Sur':['Medellín','Bajío','Coahuila','Yucatán','Baja California','Tepic','Tlacotalpan'],'Doctores':['Dr. Vértiz','Dr. Río de la Loza','Dr. Márquez','Dr. Lavista','Dr. Lucio'],'Narvarte':['Romero de Terreros','Amatlán','Xola','Obrero Mundial']}},'SANTA MARÍA LA RIBERA':{cols:{'Santa María la Ribera':['Dr. Atl','Salvador Díaz Mirón','Jaime Torres Bodet','Sor Juana Inés de la Cruz','Ribera de San Cosme','Amado Nervo','Naranjo','Fresno','Pino','Cedro','Eligio Ancona'],'Atlampa':['Crisantema','Begonia','Camelia']}},'POLANCO':{cols:{'Polanco I-V':['Presidente Masaryk','Schiller','Horacio','Newton','Homero','Anatole France','Emilio Castelar','Campos Elíseos'],'Chapultepec Morales':['Ferrocarril de Cuernavaca','Lago Alberto','Lago Zurich'],'Granada':['Av. Ejército Nacional','Av. Mariano Escobedo'],'Anzures':['Temístocles','Virgilio','Sócrates','Aristóteles','Platón']}},'ZONA ESMERALDA':{cols:{'Hacienda de Valle Escondido':['Av. Jesús del Monte','Paseo del Otoño','Paseo del Invierno','Paseo de la Primavera'],'Club de Golf Hacienda':['Av. Club de Golf','Fuente de Quijote','Fuente de Diana'],'Condado de Sayavedra':['Av. Sayavedra','Blvd. Condado de Sayavedra'],'Lomas de la Hacienda':['Av. de la Hacienda','Prol. Ruiz Cortines'],'Bosque Esmeralda':['Av. Bosques del Valle','Blvd. Popocatépetl']}}};
-  const zCal=calles[S.u.z]?.cols||{};
-  return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;font-weight:700;color:var(--ac2)">🗺️ ${S.u.z}</div><div style="font-size:8px;color:var(--t4)">${(ZC[S.u.z]||[]).join(', ')}</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div>
-  <div style="border-radius:10px;overflow:hidden;border:1px solid var(--bd);margin-bottom:7px"><iframe src="https://www.google.com/maps/embed/v1/search?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${mapQ}&zoom=15" width="100%" height="220" style="border:0;display:block" allowfullscreen loading="lazy"></iframe></div>
-  <div class="sec"><div class="sec-t">🛣️ Calles por Colonia</div>${Object.entries(zCal).map(([col,cals])=>`<div style="margin-bottom:6px"><div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:2px">📍 ${col}</div><div style="font-size:8px;color:var(--t3);line-height:1.6">${cals.join(' · ')}</div></div>`).join('')}</div>
-  <div class="sec"><div class="sec-t">🏪 Sugeridos (${all.length}) · ✅ ${vis.length} visitados</div>
-  ${all.length===0?'<div class="empty">🗺️ Zona nueva</div>':''}<input class="inp" placeholder="🔍 Buscar..." value="${S.ss}" oninput="S.ss=this.value;R()" style="margin-bottom:4px;font-size:11px">${pend.slice(0,50).map(s=>{const i=all.indexOf(s),mu='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.n||'')+' '+(s.d||'')+' '+(s.c||'')+' CDMX');return `<div class="cd" style="border-left:3px solid var(--ac)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1;min-width:0" onclick="uS(${i})"><div style="font-size:11px;font-weight:700;color:var(--t2)">${s.n||''}</div><div style="font-size:8px;color:var(--t4)">📍 ${s.d||''} · ${s.c||''}</div></div><div style="display:flex;gap:3px"><a href="${mu}" target="_blank" onclick="event.stopPropagation()" style="padding:3px 5px;border-radius:4px;background:#4285f412;color:#4285f4;font-size:8px;font-weight:600;text-decoration:none">📍</a><button onclick="event.stopPropagation();qV(${i})" style="padding:3px 5px;border-radius:4px;border:none;background:#27ae6015;color:var(--gn);cursor:pointer;font-size:8px;font-weight:600">✓</button></div></div></div>`;}).join('')}${done.length>0?`<div style="margin-top:6px;font-size:9px;font-weight:700;color:var(--gn);margin-bottom:3px">✅ Visitados (${done.length})</div>${done.slice(0,15).map(s=>`<div class="cd" style="border-left:3px solid var(--gn);opacity:.5"><div style="font-size:10px;color:var(--t3)">✅ ${s.n||''}</div></div>`).join('')}`:''}</div></div>`;}
-function uS(i){const s=ms()[i];if(!s)return;S.form={rn:s.n||'',rg:'',re:'',rt:s.t||'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''};S.lat='';S.lng='';S.gs='';S.v='registrar';R();toast('📋 '+(s.n||''));}
-function qV(i){const s=ms()[i];if(!s)return;av(s.n||'');toast('✅ '+(s.n||''));R();}
+// === CATÁLOGO — QR + compartir PDF + datos bancarios ===
+function catalogoH(){
+  const catUrl='https://neostatsoluciones.github.io/Catalogo%20Entelequia%20CL.pdf';
+  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=260x260&data='+encodeURIComponent(catUrl)+'&color=1D7BA3&bgcolor=ffffff&margin=10';
+  return `<div class="fi">
+    <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#2da0d1);border:none;color:#fff;padding:14px 12px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:3px">📚 Catálogo Entelequia®</div>
+      <div style="font-size:11px;opacity:.95">Comparte el catálogo con tus clientes</div>
+    </div>
+
+    <div class="sec" style="text-align:center">
+      <div class="sec-t" style="font-size:13px">📱 Código QR del catálogo</div>
+      <div style="background:#fff;padding:10px;border-radius:10px;display:inline-block;border:2px solid var(--ac3);margin:6px 0">
+        <img src="${qrUrl}" alt="QR Catálogo" style="display:block;width:240px;height:240px;max-width:100%">
+      </div>
+      <div style="font-size:10px;color:var(--t4);margin-top:5px">El cliente escanea con la cámara de su teléfono</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t" style="font-size:13px">📤 Compartir catálogo</div>
+      <button class="btn btn-p" onclick="compartirCat('${catUrl}')" style="font-size:14px;padding:13px;margin-bottom:6px">📲 Compartir por WhatsApp / Email</button>
+      <a href="${catUrl}" target="_blank" class="btn btn-s" style="display:block;text-decoration:none;text-align:center;font-size:13px;padding:11px;color:var(--ac2);border-color:var(--ac)">👁️ Ver catálogo PDF</a>
+    </div>
+
+    <div class="sec" style="border-color:#27ae60;border-width:2px;background:#f0fdf4">
+      <div class="sec-t" style="font-size:13px;color:#27ae60">🏦 Datos bancarios</div>
+      <div style="font-size:12px;line-height:1.9;color:var(--t2)">
+        <div><b style="color:#27ae60">Banco:</b> Scotiabank</div>
+        <div><b style="color:#27ae60">Beneficiario:</b><br>SOMOS ENTELEQUIA SA DE CV</div>
+        <div><b style="color:#27ae60">RFC:</b> SEN150416UA2</div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #27ae60;font-size:10px;color:var(--t4)">
+          ⚠️ Solicita CLABE/cuenta al supervisor para envío al cliente
+        </div>
+      </div>
+      <button class="btn btn-s" onclick="copiarDatosBanco()" style="font-size:11px;padding:9px;margin-top:8px;border-color:#27ae60;color:#27ae60">📋 Copiar datos bancarios</button>
+    </div>
+
+    <div class="sec" style="background:#fff9e6;border-color:#f39c1233">
+      <div style="font-size:11px;color:#92600a;text-align:center;line-height:1.5">
+        🌿 <b>Productos compostables</b><br>
+        <span style="font-size:9px">Paja de Trigo · PLA · Papel+PLA · Fécula de Maíz</span><br>
+        <span style="font-size:9px">Certificados BPI · TÜV · FDA · USDA</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function compartirCat(url){
+  const txt='🌿 Catálogo Entelequia® — Desechables Compostables\n\n'+url+'\n\nProductos: Paja de trigo, PLA, Papel+PLA, Fécula de maíz\nCertificados: BPI, TÜV, FDA, USDA';
+  if(navigator.share){
+    navigator.share({title:'Catálogo Entelequia',text:txt,url:url}).catch(()=>{});
+  }else{
+    const wa='https://wa.me/?text='+encodeURIComponent(txt);
+    window.open(wa,'_blank');
+  }
+}
+
+function copiarDatosBanco(){
+  const txt='Banco: Scotiabank\nBeneficiario: SOMOS ENTELEQUIA SA DE CV\nRFC: SEN150416UA2';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(txt).then(()=>toast('✅ Datos copiados'));
+  }else{
+    toast('⚠️ Copia manual','err');
+  }
+}
 
 // === DASHBOARD SUPERVISOR ===
 function dashboardH(){if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;if(!S.ad)return `<div class="empty">Sin datos <button onclick="load()" class="btn btn-s" style="width:auto;padding:5px 10px;font-size:9px;margin-top:5px">🔄</button></div>`;
@@ -565,23 +619,105 @@ function dashboardH(){if(S.ld)return `<div class="empty"><div class="spin"></div
 function stc(l,v,c){return `<div class="st"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${c};opacity:.5"></div><div class="st-l">${l}</div><div class="st-n" style="color:${c}">${v}</div></div>`;}
 
 // === COTIZAR ===
-function cotizarH(){const items=S.qi,total=items.reduce((s,i)=>s+i.total,0),pzT=items.reduce((s,i)=>s+i.pz,0);
-  const negocios=S.reg.map(r=>r.negocio).filter((v,i,a)=>v&&a.indexOf(v)===i);
+// === COTIZAR — menú independiente con email obligatorio ===
+function cotizarH(){
+  const items=S.qi,total=items.reduce((s,i)=>s+i.total,0),pzT=items.reduce((s,i)=>s+i.pz,0);
+  const negocios=[...new Set(S.reg.map(r=>r.negocio).filter(v=>v))];
   let prods=S.cos;if(S.qs){const q=S.qs.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
+  // Auto-fill email del negocio si existe
+  let autoEmail='';if(S.cotNeg){const reg=S.reg.find(r=>r.negocio===S.cotNeg&&r.email);if(reg)autoEmail=reg.email;}
   return `<div class="fi">
-  <div class="sec" style="border-color:var(--ac)"><div class="sec-t">💰 Cotización</div>
-    <div class="fld"><label class="lbl">Negocio visitado *</label><select class="inp" id="qn"><option value="">Seleccionar negocio...</option>${negocios.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>
-    ${negocios.length===0?'<div style="font-size:9px;color:var(--yw);margin-top:2px">⚠️ Primero registra visitas</div>':''}
-  </div>
-  ${items.length>0?`<div class="sec"><div class="sec-t">🧾 Productos (${items.length})</div>
-    ${items.map((it,i)=>`<div class="ql"><div style="flex:1"><div style="font-size:10px;font-weight:700;color:var(--ac2)">${it.sku}</div><div style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</div></div><div style="font-size:11px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="S.qi.splice(${i},1);R()" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:11px;margin-left:2px">✕</button></div>`).join('')}
-    <div style="border-top:2px solid var(--bd);padding-top:5px;margin-top:3px;display:flex;justify-content:space-between"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz</div><div style="font-size:16px;font-weight:800;color:var(--ac2)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
-    <div style="margin-top:4px;padding:5px;background:#fff9e6;border:1px solid #f39c1233;border-radius:5px;font-size:8px;color:#92600a">💡 <b>IVA incluido</b> · Envío <b>GRATIS</b> > $2,500</div></div>
-    <button class="btn btn-p" onclick="sQ()" id="qb" style="margin-bottom:8px">📋 Guardar Cotización</button>`:''}
-  <div class="sec"><div class="sec-t">📦 Catálogo (${S.cos.length})</div>
-    ${S.cos.length===0?'<div class="empty">Catálogo vacío</div>':''}
-    <input class="inp" placeholder="🔍 SKU o nombre..." value="${S.qs}" oninput="S.qs=this.value;R()" style="margin-bottom:4px;font-size:11px">
-    <div style="max-height:280px;overflow-y:auto">${prods.slice(0,40).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="oC(${ri})"><div style="font-size:8px;font-weight:700;color:var(--ac2);min-width:50px">${p.sku}</div><div style="font-size:9px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:9px;font-weight:700;white-space:nowrap">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}${prods.length>40?`<div style="font-size:8px;color:var(--t4);text-align:center;padding:5px">40/${prods.length}</div>`:''}</div></div></div>`;}
+    <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#2da0d1);border:none;color:#fff;padding:14px 12px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:3px">💰 Nueva Cotización</div>
+      <div style="font-size:11px;opacity:.95">Se enviará por email al cliente y supervisor</div>
+    </div>
+
+    <div class="sec" style="border-color:var(--ac)">
+      <div class="sec-t" style="font-size:13px">🏪 Cliente</div>
+      <div class="fld">
+        <label class="lbl" style="font-size:10px">Negocio *</label>
+        <select class="inp" id="qn" onchange="S.cotNeg=this.value;R()" style="font-size:14px;padding:11px">
+          <option value="">— Seleccionar negocio —</option>
+          ${negocios.map(n=>`<option value="${n}" ${S.cotNeg===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fld">
+        <label class="lbl" style="font-size:10px">📧 Email del cliente *</label>
+        <input class="inp" id="qem" type="email" placeholder="cliente@correo.com" value="${autoEmail}" style="font-size:14px;padding:11px">
+        <div style="font-size:9px;color:var(--t4);margin-top:2px">Recibirá copia automática de esta cotización</div>
+      </div>
+      ${negocios.length===0?'<div style="font-size:10px;color:var(--yw);margin-top:4px">⚠️ Primero registra una visita en 📝 Nuevo</div>':''}
+    </div>
+
+    ${items.length>0?`
+    <div class="sec" style="border-color:var(--gn);border-width:2px">
+      <div class="sec-t" style="font-size:13px;color:var(--gn)">🛒 Carrito (${items.length} ${items.length===1?'producto':'productos'})</div>
+      ${items.map((it,i)=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:5px;background:#fafbfc">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:800;color:var(--ac2);margin-bottom:2px">${it.sku}</div>
+            <div style="font-size:11px;color:var(--t3);margin-bottom:2px">${it.qty} ${it.tipo}${it.qty>1?'s':''} · ${it.pz.toLocaleString()} pz</div>
+            <div style="font-size:15px;font-weight:800;color:var(--gn)">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+          </div>
+          <button onclick="S.qi.splice(${i},1);R()" style="background:#fef2f2;border:1px solid #fca5a5;color:var(--rd);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:bold">✕</button>
+        </div>`).join('')}
+      <div style="background:linear-gradient(135deg,#27ae60,#1abc9c);border-radius:10px;padding:14px;margin-top:8px;color:#fff">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-size:11px;opacity:.9">${pzT.toLocaleString()} piezas</div>
+          <div style="font-size:9px;opacity:.85">IVA incluido</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div style="font-size:11px;font-weight:600;opacity:.9">TOTAL</div>
+          <div style="font-size:24px;font-weight:800">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+        </div>
+        ${total>=2500?'<div style="font-size:10px;margin-top:4px;background:rgba(255,255,255,.18);padding:3px 8px;border-radius:5px;text-align:center">🚚 Envío GRATIS</div>':`<div style="font-size:10px;margin-top:4px;opacity:.9">+$${(2500-total).toLocaleString('es-MX',{minimumFractionDigits:2})} para envío gratis</div>`}
+      </div>
+      <button class="btn btn-p" onclick="enviarCot()" id="qb" style="font-size:15px;padding:14px;margin-top:10px;background:linear-gradient(135deg,#27ae60,#1abc9c)">💌 ENVIAR COTIZACIÓN POR EMAIL</button>
+    </div>`:''}
+
+    <div class="sec">
+      <div class="sec-t" style="font-size:13px">📦 Catálogo (${S.cos.length} productos)</div>
+      <input class="inp" placeholder="🔍 Buscar SKU o nombre..." value="${S.qs}" oninput="S.qs=this.value;R()" style="font-size:13px;padding:10px;margin-bottom:6px">
+      <div style="max-height:340px;overflow-y:auto">
+        ${prods.slice(0,50).map((p)=>{const ri=S.cos.indexOf(p);return `
+          <div onclick="oC(${ri})" style="display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:4px;cursor:pointer;background:#fff">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:800;color:var(--ac2);margin-bottom:1px">${p.sku}</div>
+              <div style="font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:13px;font-weight:800;color:var(--gn)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+              <div style="font-size:8px;color:var(--t4)">por caja</div>
+            </div>
+          </div>`;}).join('')}
+        ${prods.length>50?`<div style="font-size:9px;color:var(--t4);text-align:center;padding:6px">Mostrando 50 de ${prods.length} · busca para filtrar</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+async function enviarCot(){
+  const neg=document.getElementById('qn')?.value;
+  const em=document.getElementById('qem')?.value?.trim();
+  if(!neg){toast('⚠️ Selecciona negocio','err');return;}
+  if(!em||em.indexOf('@')<0){toast('⚠️ Email del cliente requerido','err');return;}
+  if(S.qi.length===0){toast('⚠️ Carrito vacío','err');return;}
+  if(!confirm('¿Enviar cotización a:\n\n• '+em+'\n• supervisor@entelequia.com.mx\n• neostatsoluciones@gmail.com\n\nTotal: $'+S.qi.reduce((s,i)=>s+i.total,0).toLocaleString('es-MX',{minimumFractionDigits:2})+'?'))return;
+  const b=document.getElementById('qb');b.disabled=true;b.textContent='⏳ Enviando email...';
+  // Buscar datos del negocio
+  const reg=S.reg.find(r=>r.negocio===neg)||{};
+  await pf({
+    action:'save_quote',agente:S.u.id,negocio:neg,
+    email_cliente:em,
+    contacto:reg.encargado||'',telefono:reg.telefono||'',colonia:reg.colonia||'',
+    productos_detalle:S.qi.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),
+    cantidad_piezas:S.qi.reduce((s,i)=>s+i.pz,0),
+    total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2)
+  });
+  toast('✅ Cotización enviada por email');
+  S.qi=[];S.cotNeg='';R();
+  setTimeout(()=>{const b2=document.getElementById('qb');if(b2){b2.disabled=false;b2.textContent='💌 ENVIAR COTIZACIÓN POR EMAIL';}},500);
+}
 function oC(i){const p=S.cos[i];if(!p)return;const m=document.createElement('div');m.id='cm';m.className='mbg';m.onclick=e=>{if(e.target===m)m.remove();};m.innerHTML=`<div class="mdl"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div style="font-size:11px;font-weight:800;color:var(--ac2)">${p.sku}</div><div style="font-size:9px;color:var(--t3)">${p.producto}</div></div><button onclick="document.getElementById('cm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:14px">✕</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px"><div style="background:var(--s2);border-radius:6px;padding:7px;text-align:center"><div style="font-size:7px;color:var(--t4);font-weight:700">PZ/EMP</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">${p.pz_emp||'—'}</div></div><div style="background:var(--s2);border-radius:6px;padding:7px;text-align:center"><div style="font-size:7px;color:var(--t4);font-weight:700">PZ/CAJA</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">${p.pz_caja||'—'}</div></div><div style="background:var(--ac3);border-radius:6px;padding:7px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/CAJA</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="background:var(--ac3);border-radius:6px;padding:7px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/PZ</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div><div class="g2"><div class="fld"><label class="lbl">Compra por</label><select class="inp" id="ct" onchange="cc(${i})">${p.pz_emp>0?`<option value="empaque">Empaque (${p.pz_emp} pz)</option>`:''}${p.pz_caja>0?`<option value="caja">Caja (${p.pz_caja} pz)</option>`:''}</select></div><div class="fld"><label class="lbl">Cantidad</label><input class="inp" type="number" id="cq" value="1" min="1" oninput="cc(${i})" inputmode="numeric"></div></div><div style="background:var(--s2);border-radius:7px;padding:9px;margin:5px 0;display:flex;justify-content:space-between"><div><div style="font-size:7px;color:var(--t4);font-weight:700">PIEZAS</div><div style="font-size:14px;font-weight:800" id="cpz">0</div></div><div style="text-align:right"><div style="font-size:7px;color:var(--t4);font-weight:700">TOTAL (IVA INCL.)</div><div style="font-size:18px;font-weight:800;color:var(--ac2)" id="ctt">$0</div></div></div><div style="font-size:8px;color:#92600a;background:#fff9e6;border:1px solid #f39c1233;border-radius:4px;padding:4px 6px;margin-bottom:5px">💡 IVA incluido · Envío GRATIS > $2,500</div><button class="btn btn-p" onclick="aQ(${i})">➕ Agregar</button></div>`;document.body.appendChild(m);cc(i);}
 
 function cc(i){const p=S.cos[i],t=document.getElementById('ct')?.value||'caja',q=parseInt(document.getElementById('cq')?.value)||1;const pz=t==='caja'?p.pz_caja:p.pz_emp,pr=t==='caja'?p.precio_caja:(p.pz_emp>0&&p.pz_caja>0?p.precio_caja*(p.pz_emp/p.pz_caja):p.precio_pz*p.pz_emp);document.getElementById('cpz').textContent=(pz*q).toLocaleString();document.getElementById('ctt').textContent='$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});}
@@ -593,10 +729,32 @@ async function sQ(){const neg=document.getElementById('qn')?.value;if(!neg){toas
 
 // === CONFIG ===
 // === ID / TARJETA DIGITAL ===
+function getAgentData(id){
+  const def=AG.find(a=>a.id===id);
+  if(!def)return null;
+  const ov=JSON.parse(localStorage.getItem('agent_ov_'+id)||'{}');
+  return {id:def.id,z:def.z,r:def.r,nm:ov.nm||def.nm,e:ov.e!==undefined?ov.e:def.e,tel:ov.tel||def.tel};
+}
+
 function idH(){
-  const u=S.u;const colonias=ZC[u.z]||[];const photo=localStorage.getItem('photo_'+u.id)||'';
+  const isSup=S.u.r==='admin';
+  // Si supervisor, puede elegir qué agente ver/editar; default a sí mismo
+  const targetId=isSup?(S.idAgent||S.u.id):S.u.id;
+  const u=getAgentData(targetId);
+  if(!u)return '<div class="empty">Agente no encontrado</div>';
+  const colonias=ZC[u.z]||[];
+  const photo=localStorage.getItem('photo_'+u.id)||'';
   const initials=u.nm.split(' ').map(w=>w[0]).slice(0,2).join('');
+  const editable=isSup;
   return `<div class="fi">
+    ${isSup?`<div class="sec" style="background:#fff9e6;border-color:#f39c12">
+      <div class="sec-t" style="font-size:11px;color:#92600a">⚙️ Modo Supervisor — Editar perfil</div>
+      <select class="inp" onchange="S.idAgent=this.value;R()" style="font-size:13px;padding:10px">
+        ${AG.map(a=>`<option value="${a.id}" ${targetId===a.id?'selected':''}>${a.nm} — ${a.z}</option>`).join('')}
+      </select>
+      <div style="font-size:9px;color:var(--t4);margin-top:4px">Selecciona un agente para ver o editar su tarjeta</div>
+    </div>`:''}
+
     <div class="sec" style="text-align:center;background:linear-gradient(135deg,#1D7BA3,#2da0d1);color:#fff;padding:18px 12px;border:none">
       <div style="margin-bottom:10px">
         ${photo?`<img src="${photo}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.25)">`:`<div style="width:90px;height:90px;border-radius:50%;background:#fff;color:#1D7BA3;display:inline-flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.25)">${initials}</div>`}
@@ -605,27 +763,52 @@ function idH(){
       <div style="font-size:9px;opacity:.9;letter-spacing:1.8px;font-weight:700;text-transform:uppercase">🌿 Embajador Entelequia®</div>
       <div style="font-size:10px;opacity:.95;margin-top:8px;background:rgba(255,255,255,.18);padding:3px 10px;border-radius:12px;display:inline-block;font-weight:600">📍 ${u.z}</div>
     </div>
+
     <div class="sec">
-      <div class="sec-t">📷 Mi foto</div>
-      <input type="file" id="idphoto" accept="image/*" capture="user" onchange="uIdPh(this)" style="font-size:10px;width:100%;padding:6px">
-      <div style="font-size:8px;color:var(--t4);margin-top:3px">${photo?'Foto cargada · Toca para cambiar':'Toma o sube una foto'}</div>
+      <div class="sec-t">📇 Datos de contacto ${editable?'<span style="font-size:9px;color:#92600a;font-weight:600">· editable</span>':''}</div>
+      ${editable?`
+        <div class="fld"><label class="lbl">Nombre completo</label><input class="inp" id="ed_nm" value="${u.nm}" style="font-size:13px;padding:10px"></div>
+        <div class="fld"><label class="lbl">Correo</label><input class="inp" id="ed_em" type="email" value="${u.e||''}" placeholder="campo@entelequia.com.mx" style="font-size:13px;padding:10px"></div>
+        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" id="ed_tel" value="${u.tel||''}" placeholder="55-XXXX-XXXX" style="font-size:13px;padding:10px"></div>
+        <button class="btn btn-p" onclick="guardarPerfil('${u.id}')" style="font-size:13px;padding:11px;margin-top:5px">💾 Guardar cambios</button>
+        <div style="font-size:9px;color:var(--t4);margin-top:5px;text-align:center">⚠️ Los cambios se guardan en este dispositivo</div>
+      `:`
+        <div style="font-size:13px;line-height:2;color:var(--t2)">
+          <div><b style="color:var(--ac2)">Nombre:</b> ${u.nm}</div>
+          <div><b style="color:var(--ac2)">Correo:</b> ${u.e?`<a href="mailto:${u.e}" style="color:var(--ac);text-decoration:none">${u.e}</a>`:'—'}</div>
+          <div><b style="color:var(--ac2)">Teléfono:</b> ${u.tel||'—'}</div>
+          <div><b style="color:var(--ac2)">Zona:</b> ${u.z}</div>
+        </div>
+      `}
     </div>
-    <div class="sec">
-      <div class="sec-t">📇 Datos de contacto</div>
-      <div style="font-size:11px;line-height:2;color:var(--t2)">
-        <div><b style="color:var(--ac2)">Nombre:</b> ${u.nm}</div>
-        <div><b style="color:var(--ac2)">Correo:</b> ${u.e?`<a href="mailto:${u.e}" style="color:var(--ac);text-decoration:none">${u.e}</a>`:'—'}</div>
-        <div><b style="color:var(--ac2)">Teléfono:</b> ${u.tel||'—'}</div>
-        <div><b style="color:var(--ac2)">Zona:</b> ${u.z}</div>
-      </div>
-    </div>
+
     ${colonias.length>0?`<div class="sec"><div class="sec-t">🗺️ Colonias asignadas</div>${colonias.map(c=>`<div style="padding:6px 10px;background:var(--ac3);border-radius:6px;margin-bottom:3px;font-size:11px;color:var(--ac2);font-weight:600">📍 ${c}</div>`).join('')}</div>`:''}
+
     <div class="sec" style="background:#fff9e6;border-color:#f39c1233">
       <div style="font-size:10px;color:#92600a;font-weight:700;text-align:center;line-height:1.5">🌿 Embajador Oficial<br><b>Entelequia® Desechables Compostables</b><br><span style="font-size:8px;font-weight:500;opacity:.85">CDMX · CRM × Neostat</span></div>
     </div>
+
+    <div class="sec">
+      <div class="sec-t">📷 ${isSup&&targetId!==S.u.id?'Foto del agente':'Mi foto'}</div>
+      <input type="file" id="idphoto" accept="image/*" capture="user" onchange="uIdPh(this,'${u.id}')" style="font-size:11px;width:100%;padding:8px">
+      <div style="font-size:9px;color:var(--t4);margin-top:3px">${photo?'✅ Foto cargada · Toca para cambiar':'Toma o sube una foto de perfil'}</div>
+    </div>
+
+    <button class="btn btn-s" onclick="if(confirm('¿Cerrar sesión?')){localStorage.removeItem('ecrm4');S.u=null;R();}" style="color:var(--rd);border-color:#e74c3c25;margin-top:8px">🚪 Cerrar Sesión</button>
   </div>`;
 }
-function uIdPh(input){
+
+function guardarPerfil(id){
+  const nm=document.getElementById('ed_nm').value.trim();
+  const em=document.getElementById('ed_em').value.trim();
+  const tel=document.getElementById('ed_tel').value.trim();
+  if(!nm){toast('⚠️ Nombre requerido','err');return;}
+  localStorage.setItem('agent_ov_'+id,JSON.stringify({nm:nm,e:em,tel:tel}));
+  toast('✅ Perfil actualizado');
+  R();
+}
+
+function uIdPh(input,id){
   const f=input.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=e=>{
@@ -637,7 +820,7 @@ function uIdPh(input){
       c.width=img.width*sc;c.height=img.height*sc;
       c.getContext('2d').drawImage(img,0,0,c.width,c.height);
       try{
-        localStorage.setItem('photo_'+S.u.id,c.toDataURL('image/jpeg',0.7));
+        localStorage.setItem('photo_'+id,c.toDataURL('image/jpeg',0.7));
         toast('✅ Foto guardada');
         R();
       }catch(err){toast('❌ Foto muy grande','err');}
