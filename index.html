@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#ffffff"><title>Entelequia® CRM</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Entelequia® CRM v8.3</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet"><style>
 :root{--bg:#ffffff;--s2:#f1f5f9;--bd:#94a3b8;--bd2:#cbd5e1;--ac:#0F4C5C;--ac2:#1D7BA3;--ac3:#d6ecf5;--tx:#0a0a0a;--t2:#1a1a1a;--t3:#374151;--t4:#475569;--rd:#dc2626;--yw:#d97706;--gn:#16a34a;--tl:#0891b2;--sage:#7FB069}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html,body{height:100%;overflow-x:hidden}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;font-size:16px;font-weight:500}input,select,textarea,button{font-family:inherit}@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fi{}
 .hdr{background:#fff;padding:12px 14px;border-bottom:2px solid var(--ac);display:flex;align-items:center;justify-content:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(15,76,92,.1)}.hdr img{height:38px}.hdr-t h1{font-size:14px;color:var(--ac);letter-spacing:3px;font-weight:900}.hdr-t p{font-size:11px;color:var(--t4);letter-spacing:1px;font-weight:600;margin-top:2px}
 .bn{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;padding:5px 2px 7px;display:flex;justify-content:center;gap:1px;border-top:2px solid var(--bd2);box-shadow:0 -3px 12px rgba(0,0,0,.08)}.bn button{flex:1;max-width:64px;padding:7px 1px 5px;border-radius:9px;border:none;cursor:pointer;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--t3);min-height:54px;overflow:hidden}.bn button.on{background:var(--ac3);color:var(--ac);border:2px solid var(--ac2)}.bn button span{font-size:22px;line-height:1}
@@ -144,7 +144,7 @@ function mountApp(){
   const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'precios',i:'🏷️',l:'Precios'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
     :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'precios',i:'🏷️',l:'Precios'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
   a.innerHTML=
-    `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat</h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
+    `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v8.3</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
     +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
     +`<div class="bn">${tabs.map(t=>`<button data-tab="${t.k}" class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
 }
@@ -970,31 +970,41 @@ function cotizarH(){
 
     <div class="sec">
       <div class="sec-t">📦 Catálogo (${S.cos.length} productos)</div>
-      <input class="inp" placeholder="🔍 Buscar SKU o nombre…" value="${S.qs}" oninput="S.qs=this.value;R()" style="margin-bottom:10px">
-      <div style="max-height:420px;overflow-y:auto">
-        ${prods.slice(0,50).map((p)=>{const ri=S.cos.indexOf(p);return `
-          <div onclick="oC(${ri})" style="padding:13px;border:2px solid var(--bd2);border-radius:10px;margin-bottom:7px;cursor:pointer;background:#fff">
-            <div style="font-size:13px;font-weight:900;color:var(--ac);margin-bottom:3px">${p.sku}</div>
-            <div style="font-size:13px;color:var(--t2);margin-bottom:8px;font-weight:600;line-height:1.3">${p.producto}</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
-              <div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center">
-                <div style="font-size:9px;color:var(--ac);font-weight:800">CAJA</div>
-                <div style="font-size:13px;font-weight:900;color:var(--ac)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
-              </div>
-              <div style="background:#fef9e7;border-radius:6px;padding:6px;text-align:center">
-                <div style="font-size:9px;color:#92400e;font-weight:800">PAQUETE</div>
-                <div style="font-size:13px;font-weight:900;color:#92400e">$${(p.precio_paq||0).toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
-              </div>
-              <div style="background:#f0fdf4;border-radius:6px;padding:6px;text-align:center">
-                <div style="font-size:9px;color:var(--gn);font-weight:800">PIEZA</div>
-                <div style="font-size:13px;font-weight:900;color:var(--gn)">$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
-              </div>
-            </div>
-          </div>`;}).join('')}
-        ${prods.length>50?`<div style="font-size:11px;color:var(--t4);text-align:center;padding:10px;font-weight:600">Mostrando 50 de ${prods.length} · busca para filtrar</div>`:''}
-      </div>
+      <input class="inp" placeholder="🔍 Buscar SKU o nombre…" value="${S.qs}" oninput="S.qs=this.value;updateCotizList()" style="margin-bottom:10px">
+      <div id="cotiz-list" style="max-height:420px;overflow-y:auto">${cotizListHTML(prods)}</div>
     </div>
   </div>`;
+}
+
+function cotizListHTML(prods){
+  return prods.slice(0,50).map((p)=>{const ri=S.cos.indexOf(p);return `
+    <div onclick="oC(${ri})" style="padding:13px;border:2px solid var(--bd2);border-radius:10px;margin-bottom:7px;cursor:pointer;background:#fff">
+      <div style="font-size:13px;font-weight:900;color:var(--ac);margin-bottom:3px">${p.sku}</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:8px;font-weight:600;line-height:1.3">${p.producto}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+        <div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:9px;color:var(--ac);font-weight:800">CAJA</div>
+          <div style="font-size:13px;font-weight:900;color:var(--ac)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
+        </div>
+        <div style="background:#fef9e7;border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:9px;color:#92400e;font-weight:800">PAQUETE</div>
+          <div style="font-size:13px;font-weight:900;color:#92400e">$${(p.precio_paq||0).toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:9px;color:var(--gn);font-weight:800">PIEZA</div>
+          <div style="font-size:13px;font-weight:900;color:var(--gn)">$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+        </div>
+      </div>
+    </div>`;}).join('')
+    + (prods.length>50?`<div style="font-size:11px;color:var(--t4);text-align:center;padding:10px;font-weight:600">Mostrando 50 de ${prods.length} · busca para filtrar</div>`:'');
+}
+
+function updateCotizList(){
+  const el=document.getElementById('cotiz-list');
+  if(!el)return;
+  let prods=S.cos;
+  if(S.qs){const q=S.qs.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
+  el.innerHTML=cotizListHTML(prods);
 }
 
 async function enviarCot(){
@@ -1133,8 +1143,8 @@ function preciosH(){
     </div>
 
     <div class="sec" style="margin-bottom:6px">
-      <input class="inp" placeholder="🔍 Buscar SKU o nombre…" value="${sq}" oninput="S.precSearch=this.value;R()">
-      <div style="font-size:12px;color:var(--t4);margin-top:6px;font-weight:600">${prods.length===S.cos.length?'Mostrando todos':'Coincidencias: '+prods.length}</div>
+      <input class="inp" placeholder="🔍 Buscar SKU o nombre…" value="${sq}" oninput="S.precSearch=this.value;updatePreciosList()">
+      <div id="precios-count" style="font-size:12px;color:var(--t4);margin-top:6px;font-weight:600">${prods.length===S.cos.length?'Mostrando todos':'Coincidencias: '+prods.length}</div>
     </div>
 
     ${S.cos.length===0 ? '<div class="empty">No hay productos cargados aún</div>' : ''}
@@ -1146,30 +1156,43 @@ function preciosH(){
       <div style="text-align:right">$/PIEZA</div>
     </div>
 
-    <div style="background:#fff;border:2px solid var(--bd2);border-top:none;border-radius:0 0 8px 8px;margin-bottom:80px">
-    ${prods.slice(0,200).map((p,idx)=>`
-      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:6px;padding:11px 12px;border-bottom:1px solid var(--bd2);background:${idx%2===0?'#fff':'#f8fafc'};align-items:center">
-        <div style="min-width:0">
-          <div style="font-size:11px;font-weight:900;color:var(--ac);font-family:monospace;line-height:1.2">${p.sku}</div>
-          <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.producto}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:14px;font-weight:900;color:var(--ac);font-variant-numeric:tabular-nums">${p.precio_caja>0?'$'+p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'}</div>
-          <div style="font-size:9px;color:var(--t4);font-weight:600">${p.pz_caja||'—'} pz</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:14px;font-weight:900;color:#92400e;font-variant-numeric:tabular-nums">${p.precio_paq>0?'$'+p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'}</div>
-          <div style="font-size:9px;color:var(--t4);font-weight:600">${p.u_paq||'—'} pz</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:14px;font-weight:900;color:var(--gn);font-variant-numeric:tabular-nums">${p.precio_pz>0?'$'+p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2}):'—'}</div>
-          <div style="font-size:9px;color:var(--t4);font-weight:600">1 pz</div>
-        </div>
-      </div>`).join('')}
-    ${prods.length>200?`<div style="text-align:center;padding:14px;font-size:12px;color:var(--t4);font-weight:600">Mostrando 200 de ${prods.length} · busca para filtrar</div>`:''}
-    ${prods.length===0&&S.cos.length>0?`<div class="empty">No se encontraron productos con "${sq}"</div>`:''}
-    </div>
+    <div id="precios-list" style="background:#fff;border:2px solid var(--bd2);border-top:none;border-radius:0 0 8px 8px;margin-bottom:80px">${preciosListHTML(prods,sq)}</div>
   </div>`;
+}
+
+function preciosListHTML(prods,sq){
+  return prods.slice(0,200).map((p,idx)=>`
+    <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:6px;padding:11px 12px;border-bottom:1px solid var(--bd2);background:${idx%2===0?'#fff':'#f8fafc'};align-items:center">
+      <div style="min-width:0">
+        <div style="font-size:11px;font-weight:900;color:var(--ac);font-family:monospace;line-height:1.2">${p.sku}</div>
+        <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.producto}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:14px;font-weight:900;color:var(--ac);font-variant-numeric:tabular-nums">${p.precio_caja>0?'$'+p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'}</div>
+        <div style="font-size:9px;color:var(--t4);font-weight:600">${p.pz_caja||'—'} pz</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:14px;font-weight:900;color:#92400e;font-variant-numeric:tabular-nums">${p.precio_paq>0?'$'+p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'}</div>
+        <div style="font-size:9px;color:var(--t4);font-weight:600">${p.u_paq||'—'} pz</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:14px;font-weight:900;color:var(--gn);font-variant-numeric:tabular-nums">${p.precio_pz>0?'$'+p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2}):'—'}</div>
+        <div style="font-size:9px;color:var(--t4);font-weight:600">1 pz</div>
+      </div>
+    </div>`).join('')
+    + (prods.length>200?`<div style="text-align:center;padding:14px;font-size:12px;color:var(--t4);font-weight:600">Mostrando 200 de ${prods.length} · busca para filtrar</div>`:'')
+    + (prods.length===0&&S.cos.length>0?`<div class="empty">No se encontraron productos con "${sq||''}"</div>`:'');
+}
+
+function updatePreciosList(){
+  const el=document.getElementById('precios-list');
+  if(!el)return;
+  let prods=S.cos||[];
+  const sq=S.precSearch||'';
+  if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
+  el.innerHTML=preciosListHTML(prods,sq);
+  const cnt=document.getElementById('precios-count');
+  if(cnt)cnt.textContent=prods.length===S.cos.length?'Mostrando todos':'Coincidencias: '+prods.length;
 }
 
 async function sQ(){const neg=document.getElementById('qn')?.value;if(!neg){toast('⚠️ Selecciona negocio','err');return;}const b=document.getElementById('qb');b.disabled=true;b.textContent='⏳...';await pf({action:'save_quote',agente:S.u.id,negocio:neg,productos_detalle:S.qi.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),cantidad_piezas:S.qi.reduce((s,i)=>s+i.pz,0),total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2)});const cotC2=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
