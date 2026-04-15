@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Entelequia® CRM v8.3</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Entelequia® CRM v9.0</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet"><style>
 :root{--bg:#ffffff;--s2:#f1f5f9;--bd:#94a3b8;--bd2:#cbd5e1;--ac:#0F4C5C;--ac2:#1D7BA3;--ac3:#d6ecf5;--tx:#0a0a0a;--t2:#1a1a1a;--t3:#374151;--t4:#475569;--rd:#dc2626;--yw:#d97706;--gn:#16a34a;--tl:#0891b2;--sage:#7FB069}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html,body{height:100%;overflow-x:hidden}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;font-size:16px;font-weight:500}input,select,textarea,button{font-family:inherit}@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fi{}
 .hdr{background:#fff;padding:12px 14px;border-bottom:2px solid var(--ac);display:flex;align-items:center;justify-content:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(15,76,92,.1)}.hdr img{height:38px}.hdr-t h1{font-size:14px;color:var(--ac);letter-spacing:3px;font-weight:900}.hdr-t p{font-size:11px;color:var(--t4);letter-spacing:1px;font-weight:600;margin-top:2px}
 .bn{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;padding:5px 2px 7px;display:flex;justify-content:center;gap:1px;border-top:2px solid var(--bd2);box-shadow:0 -3px 12px rgba(0,0,0,.08)}.bn button{flex:1;max-width:64px;padding:7px 1px 5px;border-radius:9px;border:none;cursor:pointer;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--t3);min-height:54px;overflow:hidden}.bn button.on{background:var(--ac3);color:var(--ac);border:2px solid var(--ac2)}.bn button span{font-size:22px;line-height:1}
@@ -32,7 +32,7 @@ const RES_O=['Catálogo dejado','Muestra entregada','Cotización en sitio','Coti
 async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
 async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotUnit:'caja',precSearch:'',idAgent:'',alertas:null,welcomeShown:false,
+let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
 
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
@@ -104,7 +104,7 @@ async function load(){S.ld=true;R();
     const r=await gf('registros','&agente='+encodeURIComponent(S.u.id));if(r?.registros)S.reg=r.registros;
     const al=await gf('alertas','&agente='+encodeURIComponent(S.u.id));if(al?.alertas)S.alertas=al.alertas;
   }
-  const c=await gf('costos');if(c?.productos)S.cos=c.productos;S.ld=false;R();
+  const c=await gf('costos');if(c?.productos)S.cos=c.productos;const st=await gf('estrellas&agente='+S.u.id);if(st?.estrellas)S.estrellas=st.estrellas;S.ld=false;R();
   if(S.v==='registrar'){restoreForm();registrarReady();}
   // Welcome popup una vez por sesión
   if(!S.welcomeShown&&S.u?.r!=='admin'&&S.alertas){S.welcomeShown=true;setTimeout(()=>showWelcomePopup(),400);}
@@ -144,7 +144,7 @@ function mountApp(){
   const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'precios',i:'🏷️',l:'Precios'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
     :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'precios',i:'🏷️',l:'Precios'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
   a.innerHTML=
-    `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v8.3</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
+    `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v9.0</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
     +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
     +`<div class="bn">${tabs.map(t=>`<button data-tab="${t.k}" class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
 }
@@ -190,7 +190,7 @@ function renderInlineCatalog(){
     <div onclick="openInlineCalc(${ri})" style="padding:13px;border:2px solid var(--bd2);border-radius:10px;margin-bottom:7px;cursor:pointer;background:#fff">
       <div style="font-size:13px;font-weight:900;color:var(--ac);margin-bottom:3px">${p.sku}</div>
       <div style="font-size:13px;color:var(--t2);margin-bottom:8px;font-weight:600;line-height:1.3">${p.producto}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:5px">
         <div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center">
           <div style="font-size:9px;color:var(--ac);font-weight:800">CAJA</div>
           <div style="font-size:13px;font-weight:900;color:var(--ac)">$${p.precio_caja>0?p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0}):'—'}</div>
@@ -199,9 +199,8 @@ function renderInlineCatalog(){
           <div style="font-size:9px;color:#92400e;font-weight:800">PAQUETE</div>
           <div style="font-size:13px;font-weight:900;color:#92400e">$${p.precio_paq>0?p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:0}):'—'}</div>
         </div>
-        <div style="background:#f0fdf4;border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:9px;color:var(--gn);font-weight:800">PIEZA</div>
-          <div style="font-size:13px;font-weight:900;color:var(--gn)">$${p.precio_pz>0?p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2}):'—'}</div>
+        <div style="background:#fff9e6;border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:10px;color:#92400e;font-weight:800">+ IVA 16%</div>
         </div>
       </div>
     </div>`;}).join('')}${prods.length>40?`<div style="font-size:11px;color:var(--t4);text-align:center;padding:8px;font-weight:600">Mostrando 40 de ${prods.length} · busca para filtrar</div>`:''}</div>`;
@@ -874,7 +873,7 @@ function dashboardH(){
     <div class="sec" style="border:2px solid #1D7BA3;background:#fff">
       <div class="sec-t" style="font-size:13px">📧 Generar reporte ahora</div>
       <div style="font-size:10px;color:var(--t3);margin-bottom:8px">Visualiza el reporte ejecutivo en pantalla. Los reportes automáticos se envían por email diario 7pm, lunes 8am y día 1 del mes.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:5px">
         <button onclick="verReporte('hoy')" style="padding:11px 6px;border-radius:8px;border:1px solid #1D7BA3;background:#E8F4F9;color:#0F4C5C;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">📅 HOY</button>
         <button onclick="verReporte('semana')" style="padding:11px 6px;border-radius:8px;border:1px solid #1D7BA3;background:#E8F4F9;color:#0F4C5C;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">📆 SEMANA</button>
         <button onclick="verReporte('mes')" style="padding:11px 6px;border-radius:8px;border:1px solid #1D7BA3;background:#E8F4F9;color:#0F4C5C;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">📊 MES</button>
@@ -915,7 +914,7 @@ function stc(l,v,c){return `<div class="st"><div style="position:absolute;top:0;
 // === COTIZAR ===
 // === COTIZAR — menú independiente con email obligatorio ===
 function cotizarH(){
-  const items=S.qi,total=items.reduce((s,i)=>s+i.total,0),pzT=items.reduce((s,i)=>s+i.pz,0);
+  const items=S.qi,subT=items.reduce((s,i)=>s+(i.subtotal||i.total/1.16),0),ivaT=Math.round(subT*0.16*100)/100,total=Math.round((subT+ivaT)*100)/100,pzT=items.reduce((s,i)=>s+i.pz,0);
   const negocios=[...new Set(S.reg.map(r=>r.negocio).filter(v=>v))];
   let prods=S.cos;if(S.qs){const q=S.qs.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
   // Auto-fill email del negocio si existe
@@ -936,9 +935,24 @@ function cotizarH(){
         </datalist>
       </div>
       <div class="fld">
+        <div class="g2">
+        <div class="fld">
+          <label class="lbl">👤 Contacto *</label>
+          <input class="inp" id="qcon" value="${S.cotCon||''}" oninput="S.cotCon=this.value" placeholder="Nombre del encargado">
+        </div>
+        <div class="fld">
+          <label class="lbl">📞 Teléfono *</label>
+          <input class="inp" id="qtel" type="tel" value="${S.cotTel||''}" oninput="S.cotTel=this.value" placeholder="55-XXXX-XXXX">
+        </div>
+      </div>
+      <div class="fld">
         <label class="lbl">📧 Email del cliente *</label>
         <input class="inp" id="qem" type="email" inputmode="email" autocomplete="email" placeholder="cliente@correo.com" value="${S.cotEmail||autoEmail}" oninput="S.cotEmail=this.value">
         <div style="font-size:11px;color:var(--t4);margin-top:5px;font-weight:600">El cliente recibirá la cotización en este correo</div>
+      </div>
+      <div class="fld">
+        <label class="lbl">🧾 RFC (opcional)</label>
+        <input class="inp" id="qrfc" value="${S.cotRfc||''}" oninput="S.cotRfc=this.value" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase">
       </div>
     </div>
 
@@ -960,7 +974,7 @@ function cotizarH(){
           <div style="font-size:11px;color:#7FB069;font-weight:700">IVA INCLUIDO</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <div style="font-size:13px;font-weight:800;color:#CADCFC">TOTAL</div>
+          <div style="font-size:13px;font-weight:800;color:#CADCFC">Subtotal</div><div style="font-size:14px;font-weight:800;color:#CADCFC">$${subT.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div style="font-size:12px;color:#CADCFC;font-weight:600">IVA 16%</div><div style="font-size:14px;font-weight:800;color:#CADCFC">$${ivaT.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="border-top:2px solid #7FB069;padding-top:8px;display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:13px;font-weight:800;color:#7FB069">TOTAL</div>
           <div style="font-size:32px;font-weight:900">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
         </div>
         ${total>=2500?'<div style="font-size:12px;margin-top:8px;background:#7FB069;color:#0F4C5C;padding:6px 12px;border-radius:7px;text-align:center;font-weight:800">🚚 ENVÍO GRATIS</div>':`<div style="font-size:11px;margin-top:6px;color:#CADCFC;font-weight:600">+$${(2500-total).toLocaleString('es-MX',{minimumFractionDigits:2})} para envío gratis</div>`}
@@ -981,7 +995,7 @@ function cotizListHTML(prods){
     <div onclick="oC(${ri})" style="padding:13px;border:2px solid var(--bd2);border-radius:10px;margin-bottom:7px;cursor:pointer;background:#fff">
       <div style="font-size:13px;font-weight:900;color:var(--ac);margin-bottom:3px">${p.sku}</div>
       <div style="font-size:13px;color:var(--t2);margin-bottom:8px;font-weight:600;line-height:1.3">${p.producto}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:5px">
         <div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center">
           <div style="font-size:9px;color:var(--ac);font-weight:800">CAJA</div>
           <div style="font-size:13px;font-weight:900;color:var(--ac)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
@@ -990,9 +1004,8 @@ function cotizListHTML(prods){
           <div style="font-size:9px;color:#92400e;font-weight:800">PAQUETE</div>
           <div style="font-size:13px;font-weight:900;color:#92400e">$${(p.precio_paq||0).toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
         </div>
-        <div style="background:#f0fdf4;border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:9px;color:var(--gn);font-weight:800">PIEZA</div>
-          <div style="font-size:13px;font-weight:900;color:var(--gn)">$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+        <div style="background:#fff9e6;border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:10px;color:#92400e;font-weight:800">+ IVA 16%</div>
         </div>
       </div>
     </div>`;}).join('')
@@ -1010,7 +1023,12 @@ function updateCotizList(){
 async function enviarCot(){
   const neg=document.getElementById('qn')?.value;
   const em=document.getElementById('qem')?.value?.trim();
+  const con=document.getElementById('qcon')?.value?.trim()||S.cotCon||'';
+  const tel=document.getElementById('qtel')?.value?.trim()||S.cotTel||'';
+  const rfc=document.getElementById('qrfc')?.value?.trim()||S.cotRfc||'';
   if(!neg){toast('⚠️ Falta el negocio','err');return;}
+  if(!con){toast('⚠️ Falta nombre del contacto','err');return;}
+  if(!tel){toast('⚠️ Falta teléfono','err');return;}
   if(!em||em.indexOf('@')<0||em.indexOf('.')<0){toast('⚠️ Email del cliente inválido','err');return;}
   if(S.qi.length===0){toast('⚠️ Carrito vacío','err');return;}
   if(!confirm('¿Enviar cotización a:\n\n📧 '+em+'\n📧 neostatsoluciones@gmail.com\n\nTotal: $'+S.qi.reduce((s,i)=>s+i.total,0).toLocaleString('es-MX',{minimumFractionDigits:2})+'?'))return;
@@ -1020,20 +1038,20 @@ async function enviarCot(){
   await pf({
     action:'save_quote',agente:S.u.id,negocio:neg,
     email_cliente:em,
-    contacto:reg.encargado||'',telefono:reg.telefono||'',colonia:reg.colonia||'',
+    contacto:con,telefono:tel,rfc:rfc,colonia:reg.colonia||'',
     productos_detalle:S.qi.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),
     cantidad_piezas:S.qi.reduce((s,i)=>s+i.pz,0),
-    total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2)
+    subtotal:S.qi.reduce((s,i)=>s+(i.subtotal||i.total),0).toFixed(2),total:S.qi.reduce((s,i)=>s+i.total,0).toFixed(2)
   });
   toast('✅ Cotización enviada por email');
-  S.qi=[];S.cotNeg='';S.cotEmail='';R();
+  S.qi=[];S.cotNeg='';S.cotEmail='';S.cotCon='';S.cotTel='';S.cotRfc='';R();
   setTimeout(()=>{const b2=document.getElementById('qb');if(b2){b2.disabled=false;b2.textContent='💌 ENVIAR COTIZACIÓN';}},500);
 }
 function oC(i){
   const p=S.cos[i];if(!p)return;
   // Determinar unidades disponibles (algunos productos solo tienen ciertos tipos)
-  const hasCaja=p.precio_caja>0, hasPaq=p.precio_paq>0&&p.u_paq>0, hasPz=p.precio_pz>0;
-  const defUnit=hasCaja?'caja':(hasPaq?'paquete':'pieza');
+  const hasCaja=p.precio_caja>0, hasPaq=p.precio_paq>0;
+  const defUnit=hasCaja?'caja':'paquete';
   S.cotUnit=defUnit;
   const m=document.createElement('div');m.id='cm';m.className='mbg';
   m.onclick=e=>{if(e.target===m)m.remove();};
@@ -1061,7 +1079,6 @@ function oC(i){
     <div class="unit-sel">
       ${hasCaja?`<div class="unit-opt ${defUnit==='caja'?'on':''}" id="uoC" onclick="selUnit('caja',${i})">📦 CAJA<small>$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0})}</small></div>`:'<div class="unit-opt" style="opacity:.3">📦 CAJA<small>—</small></div>'}
       ${hasPaq?`<div class="unit-opt ${defUnit==='paquete'?'on':''}" id="uoQ" onclick="selUnit('paquete',${i})">📦 PAQUETE<small>$${p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:0})}</small></div>`:'<div class="unit-opt" style="opacity:.3">📦 PAQUETE<small>—</small></div>'}
-      ${hasPz?`<div class="unit-opt ${defUnit==='pieza'?'on':''}" id="uoP" onclick="selUnit('pieza',${i})">▫️ PIEZA<small>$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</small></div>`:'<div class="unit-opt" style="opacity:.3">▫️ PIEZA<small>—</small></div>'}
     </div>
 
     <label class="lbl">Cantidad</label>
@@ -1080,6 +1097,7 @@ function oC(i){
         <div style="font-size:22px;font-weight:900" id="cpz">0</div>
         <div style="font-size:28px;font-weight:900;color:#7FB069" id="ctt">$0</div>
       </div>
+      <div style="font-size:12px;color:#CADCFC;margin-top:4px;text-align:center" id="csub"></div>
     </div>
 
     <div style="font-size:12px;color:#92400e;background:#fff9e6;border:2px solid #f59e0b;border-radius:8px;padding:10px;margin-bottom:12px;font-weight:600">💡 IVA incluido · Envío GRATIS en pedidos &gt; $2,500</div>
@@ -1104,10 +1122,11 @@ function ajCq(i,delta){
 }
 
 function calcUnit(p,t){
-  // Devuelve {pz, precio} para un producto y tipo de unidad
-  if(t==='caja')return{pz:p.pz_caja||0,precio:p.precio_caja||0};
-  if(t==='paquete')return{pz:p.u_paq||0,precio:p.precio_paq||0};
-  return{pz:1,precio:p.precio_pz||0};
+  // Precios SIN IVA. Frontend suma +16% al mostrar totales.
+  // pz = paquetes equivalentes (para tracking)
+  if(t==='caja')return{pz:p.paq_caja||1,precio:p.precio_caja||0};
+  if(t==='paquete')return{pz:1,precio:p.precio_paq||0};
+  return{pz:0,precio:0};
 }
 
 function cc(i){
@@ -1116,7 +1135,7 @@ function cc(i){
   const q=parseInt(document.getElementById('cq')?.value)||1;
   const u=calcUnit(p,t);
   const elPz=document.getElementById('cpz');if(elPz)elPz.textContent=(u.pz*q).toLocaleString();
-  const elTt=document.getElementById('ctt');if(elTt)elTt.textContent='$'+(u.precio*q).toLocaleString('es-MX',{minimumFractionDigits:2});
+  const sub=u.precio*q;const iva16=Math.round(sub*0.16*100)/100;const elTt=document.getElementById('ctt');if(elTt)elTt.textContent='$'+(sub+iva16).toLocaleString('es-MX',{minimumFractionDigits:2});const elSub=document.getElementById('csub');if(elSub)elSub.textContent='Sub: $'+sub.toLocaleString('es-MX',{minimumFractionDigits:2})+' + IVA $'+iva16.toLocaleString('es-MX',{minimumFractionDigits:2});
 }
 
 function aQ(i){
@@ -1125,7 +1144,7 @@ function aQ(i){
   const q=parseInt(document.getElementById('cq')?.value)||1;
   const u=calcUnit(p,t);
   if(u.precio<=0){toast('⚠️ Esta unidad no está disponible','err');return;}
-  S.qi.push({sku:p.sku,tipo:t,qty:q,pz:u.pz*q,total:u.precio*q});
+  const sub=u.precio*q;const iva16=Math.round(sub*0.16*100)/100;S.qi.push({sku:p.sku,tipo:t,qty:q,pz:u.pz*q,subtotal:sub,iva:iva16,total:sub+iva16});
   document.getElementById('cm')?.remove();
   toast('✅ '+p.sku+' agregado');
   R();
@@ -1149,11 +1168,11 @@ function preciosH(){
 
     ${S.cos.length===0 ? '<div class="empty">No hay productos cargados aún</div>' : ''}
 
-    <div style="background:var(--ac);color:#fff;padding:10px 12px;border-radius:8px 8px 0 0;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:6px;font-size:10px;font-weight:900;letter-spacing:.5px;position:sticky;top:0;z-index:5">
+    <div style="background:var(--ac);color:#fff;padding:10px 12px;border-radius:8px 8px 0 0;display:grid;grid-template-columns:1.5fr 1fr 1fr .6fr;gap:6px;font-size:10px;font-weight:900;letter-spacing:.5px;position:sticky;top:0;z-index:5">
       <div>SKU / DESCRIPCIÓN</div>
       <div style="text-align:right">$/CAJA</div>
       <div style="text-align:right">$/PAQ</div>
-      <div style="text-align:right">$/PIEZA</div>
+      <div style="text-align:right">+IVA</div>
     </div>
 
     <div id="precios-list" style="background:#fff;border:2px solid var(--bd2);border-top:none;border-radius:0 0 8px 8px;margin-bottom:80px">${preciosListHTML(prods,sq)}</div>
@@ -1162,7 +1181,7 @@ function preciosH(){
 
 function preciosListHTML(prods,sq){
   return prods.slice(0,200).map((p,idx)=>`
-    <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:6px;padding:11px 12px;border-bottom:1px solid var(--bd2);background:${idx%2===0?'#fff':'#f8fafc'};align-items:center">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr .6fr;gap:6px;padding:11px 12px;border-bottom:1px solid var(--bd2);background:${idx%2===0?'#fff':'#f8fafc'};align-items:center">
       <div style="min-width:0">
         <div style="font-size:11px;font-weight:900;color:var(--ac);font-family:monospace;line-height:1.2">${p.sku}</div>
         <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.producto}</div>
@@ -1415,8 +1434,8 @@ async function saveInlineCot(){
 }
 function openInlineCalc(idx){
   const p=S.cos[idx];if(!p)return;
-  const hasCaja=p.precio_caja>0, hasPaq=p.precio_paq>0&&p.u_paq>0, hasPz=p.precio_pz>0;
-  const defUnit=hasCaja?'caja':(hasPaq?'paquete':'pieza');
+  const hasCaja=p.precio_caja>0, hasPaq=p.precio_paq>0;
+  const defUnit=hasCaja?'caja':'paquete';
   S.cotUnit=defUnit;
   const c=document.createElement('div');c.id='icm';c.className='mbg';
   c.onclick=e=>{if(e.target===c)c.remove();};
@@ -1444,7 +1463,6 @@ function openInlineCalc(idx){
     <div class="unit-sel">
       ${hasCaja?`<div class="unit-opt ${defUnit==='caja'?'on':''}" id="iuoC" onclick="iSelUnit('caja',${idx})">📦 CAJA<small>$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0})}</small></div>`:'<div class="unit-opt" style="opacity:.3">📦 CAJA<small>—</small></div>'}
       ${hasPaq?`<div class="unit-opt ${defUnit==='paquete'?'on':''}" id="iuoQ" onclick="iSelUnit('paquete',${idx})">📦 PAQUETE<small>$${p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:0})}</small></div>`:'<div class="unit-opt" style="opacity:.3">📦 PAQUETE<small>—</small></div>'}
-      ${hasPz?`<div class="unit-opt ${defUnit==='pieza'?'on':''}" id="iuoP" onclick="iSelUnit('pieza',${idx})">▫️ PIEZA<small>$${p.precio_pz.toLocaleString('es-MX',{minimumFractionDigits:2})}</small></div>`:'<div class="unit-opt" style="opacity:.3">▫️ PIEZA<small>—</small></div>'}
     </div>
 
     <label class="lbl">Cantidad</label>
@@ -1463,6 +1481,7 @@ function openInlineCalc(idx){
         <div style="font-size:22px;font-weight:900" id="icpz">0</div>
         <div style="font-size:28px;font-weight:900;color:#7FB069" id="ictt">$0</div>
       </div>
+      <div style="font-size:12px;color:#CADCFC;margin-top:4px;text-align:center" id="icsub"></div>
     </div>
 
     <button class="btn btn-p" onclick="addInlineQ(${idx})" style="background:var(--gn);border-color:var(--gn);min-height:60px">➕ AGREGAR AL CARRITO</button>
@@ -1490,7 +1509,7 @@ function icc(i){
   const q=parseInt(document.getElementById('icq')?.value)||1;
   const u=calcUnit(p,t);
   const elPz=document.getElementById('icpz');if(elPz)elPz.textContent=(u.pz*q).toLocaleString();
-  const elTt=document.getElementById('ictt');if(elTt)elTt.textContent='$'+(u.precio*q).toLocaleString('es-MX',{minimumFractionDigits:2});
+  const isub=u.precio*q;const iiva=Math.round(isub*0.16*100)/100;const elTt=document.getElementById('ictt');if(elTt)elTt.textContent='$'+(isub+iiva).toLocaleString('es-MX',{minimumFractionDigits:2});const eiSub=document.getElementById('icsub');if(eiSub)eiSub.textContent='Sub: $'+isub.toLocaleString('es-MX',{minimumFractionDigits:2})+' + IVA $'+iiva.toLocaleString('es-MX',{minimumFractionDigits:2});
 }
 
 function addInlineQ(i){
@@ -1499,7 +1518,7 @@ function addInlineQ(i){
   const q=parseInt(document.getElementById('icq')?.value)||1;
   const u=calcUnit(p,t);
   if(u.precio<=0){toast('⚠️ Esta unidad no está disponible','err');return;}
-  inlineQItems.push({sku:p.sku,tipo:t,qty:q,pz:u.pz*q,total:u.precio*q});
+  const isub2=u.precio*q;const iiva2=Math.round(isub2*0.16*100)/100;inlineQItems.push({sku:p.sku,tipo:t,qty:q,pz:u.pz*q,subtotal:isub2,iva:iiva2,total:isub2+iiva2});
   document.getElementById('icm')?.remove();
   toast('✅ '+p.sku+' agregado');
   renderInlineCot(document.getElementById('cot-inline-content'));
