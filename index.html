@@ -229,7 +229,9 @@ async function doReg(){const n=document.getElementById('rn').value.trim(),g=docu
 function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
   const biz=getBiz();const h=ch();
   const a=S.alertas||{};
-  return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:800;color:var(--ac2)">🔄 Seguimiento</div><div style="font-size:8px;color:var(--t4)">${biz.length} negocio(s) registrado(s)</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div>
+  const starCount=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').length;
+  const isStar=(neg)=>(S.estrellas||[]).some(e=>e.negocio===neg&&e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido');
+  return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:900;color:var(--ac)">🔄 Seguimiento</div><div style="font-size:11px;color:var(--t4);font-weight:600">${biz.length} negocio(s) · ⭐ ${starCount} oportunidades</div></div><div style="text-align:center"><div style="font-size:22px;font-weight:900;color:var(--ac)">${h}</div><div style="font-size:9px;color:var(--t4);font-weight:700">HOY</div></div></div></div>
   ${(a.cotizSinAvance?.length>0||a.altoSinRevisita?.length>0)?`
     <div class="sec" style="background:#fef9e7;border:2px solid #f59e0b;padding:10px">
       <div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:6px">⚠️ Atención requerida</div>
@@ -237,16 +239,16 @@ function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></d
       ${a.altoSinRevisita?.length>0?`<div style="font-size:10px;color:#92400e">🔥 <b>${a.altoSinRevisita.length}</b> negocio${a.altoSinRevisita.length>1?'s':''} interés alto sin volver +7 días — vuelve a ${a.altoSinRevisita.map(c=>'<b>'+c.negocio+'</b>').join(', ')}</div>`:''}
     </div>`:''}
   ${biz.length===0?'<div class="empty">Aún no tienes negocios registrados.<br>Usa 📝 Nuevo para tu primera visita.</div>':''}
-  ${biz.map((b,i)=>{const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';
-    return `<div class="cd" onclick="openSeg(${i})" style="cursor:pointer;border-left:3px solid ${ic}">
+  ${biz.map((b,i)=>{const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';const starred=isStar(b.negocio);
+    return `<div class="cd" onclick="openSeg(${i})" style="cursor:pointer;border-left:3px solid ${ic};${starred?'border-right:3px solid #D4AF37':''}">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--t2)">${b.negocio}</div>
-        <div style="font-size:8px;color:var(--t4)">${b.giro} · ${b.visitas} visita(s) · Última: ${b.ultimo||'—'}</div></div>
-        <div style="display:flex;gap:3px;align-items:center">
-          <span class="pill" style="background:${ic}15;color:${ic}">${b.interes?.split('—')[0]||'—'}</span>
-          <span style="color:var(--t4);font-size:12px">›</span>
+        <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--t2)">${starred?'⭐ ':''}${b.negocio}</div>
+        <div style="font-size:11px;color:var(--t4);font-weight:600">${b.giro} · ${b.visitas} visita(s) · ${b.ultimo||'—'}</div></div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}')" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px">${starred?'⭐':'☆'}</button>
+          <span class="pill" style="background:${ic}15;color:${ic};font-size:11px">${b.interes?.split('—')[0]||'—'}</span>
         </div></div>
-      ${b.resultado?`<div style="font-size:8px;color:var(--t3);margin-top:2px">→ ${b.resultado}</div>`:''}
+      ${b.resultado?`<div style="font-size:11px;color:var(--t3);margin-top:3px;font-weight:600">→ ${b.resultado}</div>`:''}
     </div>`;}).join('')}</div>`;}
 
 function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
@@ -639,6 +641,14 @@ function agendaH(){
   </div>`;}
 
 function navToSeg(neg){S.v='seguimiento';R();load();setTimeout(()=>{const biz=getBiz();const idx=biz.findIndex(b=>b.negocio===neg);if(idx>=0)openSeg(idx);},800);}
+
+async function toggleStar(neg){
+  await pf({action:'toggle_estrella',agente:S.u.id,negocio:neg});
+  // Refresh stars
+  const st=await gf('estrellas&agente='+S.u.id);
+  if(st?.estrellas)S.estrellas=st.estrellas;
+  toast('⭐ Actualizado');R();
+}
 
 // === SUGERIDOS ===
 // === CATÁLOGO — QR + compartir PDF + datos bancarios ===
