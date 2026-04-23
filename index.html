@@ -41,7 +41,9 @@ function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='ts
 function showWelcomePopup(){
   if(!S.alertas)return;
   const a=S.alertas;
-  const total=(a.hoyAgenda?.length||0)+(a.cotizSinAvance?.length||0)+(a.altoSinRevisita?.length||0);
+  const starCount=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').length;
+  const starNames=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').map(e=>e.negocio).slice(0,5);
+  const total=(a.hoyAgenda?.length||0)+(a.cotizSinAvance?.length||0)+(a.altoSinRevisita?.length||0)+starCount;
   if(total===0)return;
   const m=document.createElement('div');m.className='mbg';m.id='welcomePop';
   m.onclick=e=>{if(e.target===m)cerrarWelcome();};
@@ -50,21 +52,28 @@ function showWelcomePopup(){
       <div style="font-size:18px;font-weight:800">👋 ¡Buen día, ${S.u.nm.split(' ')[0]}!</div>
       <div style="font-size:11px;opacity:.9;margin-top:3px">Esto es lo que tienes pendiente hoy</div>
     </div>
+    ${starCount>0?`
+      <div style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:900;color:#B8860B;margin-bottom:6px">⭐ ${starCount} OPORTUNIDADES PRIORITARIAS</div>
+        ${starNames.map(n=>`<div style="padding:8px 10px;background:#FFFDE7;border-left:4px solid #D4AF37;border-radius:5px;margin-bottom:3px;font-size:13px;color:#5D4E37;font-weight:700">★ ${n}</div>`).join('')}
+        ${starCount>5?`<div style="font-size:10px;color:#B8860B;margin-top:3px">+${starCount-5} más en Seguimiento</div>`:''}
+        <button onclick="cerrarWelcome();S.v='seguimiento';R();load();" style="margin-top:6px;background:#D4AF37;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%">Ver oportunidades →</button>
+      </div>`:''}
     ${a.hoyAgenda?.length>0?`
       <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:800;color:#1D7BA3;margin-bottom:5px;letter-spacing:.5px">📅 SEGUIMIENTOS PROGRAMADOS HOY (${a.hoyAgenda.length})</div>
+        <div style="font-size:12px;font-weight:800;color:#1D7BA3;margin-bottom:5px;letter-spacing:.5px">📅 SEGUIMIENTOS HOY (${a.hoyAgenda.length})</div>
         ${a.hoyAgenda.slice(0,5).map(n=>`<div style="padding:8px 10px;background:#E8F4F9;border-left:3px solid #1D7BA3;border-radius:5px;margin-bottom:3px;font-size:12px;color:#0F4C5C;font-weight:600">📍 ${n}</div>`).join('')}
-        ${a.hoyAgenda.length>5?`<div style="font-size:9px;color:#7a8fa3;margin-top:3px">+${a.hoyAgenda.length-5} más en Agenda</div>`:''}
+        ${a.hoyAgenda.length>5?`<div style="font-size:9px;color:#7a8fa3;margin-top:3px">+${a.hoyAgenda.length-5} más</div>`:''}
       </div>`:''}
     ${a.cotizSinAvance?.length>0?`
       <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:800;color:#d97706;margin-bottom:5px;letter-spacing:.5px">⚠️ COTIZACIONES SIN AVANCE +5 DÍAS (${a.cotizSinAvance.length})</div>
-        ${a.cotizSinAvance.map(c=>`<div style="padding:8px 10px;background:#fef3c7;border-left:3px solid #d97706;border-radius:5px;margin-bottom:3px;font-size:12px;color:#92400e"><b>${c.negocio}</b><br><span style="font-size:9px">Última visita: ${c.ultimo}</span></div>`).join('')}
+        <div style="font-size:11px;font-weight:800;color:#d97706;margin-bottom:5px">⚠️ COTIZACIONES SIN AVANCE +5 DÍAS (${a.cotizSinAvance.length})</div>
+        ${a.cotizSinAvance.map(c=>`<div style="padding:8px 10px;background:#fef3c7;border-left:3px solid #d97706;border-radius:5px;margin-bottom:3px;font-size:12px;color:#92400e"><b>${c.negocio}</b> <span style="font-size:9px">· ${c.ultimo}</span></div>`).join('')}
       </div>`:''}
     ${a.altoSinRevisita?.length>0?`
       <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:800;color:#dc2626;margin-bottom:5px;letter-spacing:.5px">🔥 INTERÉS ALTO SIN VOLVER +7 DÍAS (${a.altoSinRevisita.length})</div>
-        ${a.altoSinRevisita.map(c=>`<div style="padding:8px 10px;background:#fef2f2;border-left:3px solid #dc2626;border-radius:5px;margin-bottom:3px;font-size:12px;color:#991b1b"><b>${c.negocio}</b><br><span style="font-size:9px">Última visita: ${c.ultimo}</span></div>`).join('')}
+        <div style="font-size:11px;font-weight:800;color:#dc2626;margin-bottom:5px">🔥 INTERÉS ALTO SIN VOLVER +7 DÍAS (${a.altoSinRevisita.length})</div>
+        ${a.altoSinRevisita.map(c=>`<div style="padding:8px 10px;background:#fef2f2;border-left:3px solid #dc2626;border-radius:5px;margin-bottom:3px;font-size:12px;color:#991b1b"><b>${c.negocio}</b> <span style="font-size:9px">· ${c.ultimo}</span></div>`).join('')}
       </div>`:''}
     <button onclick="cerrarWelcome()" class="btn btn-p" style="margin-top:6px;font-size:13px;padding:12px">✅ Empezar el día</button>
   </div>`;
@@ -141,8 +150,8 @@ function R(){
 function mountApp(){
   const a=document.getElementById('app');
   const isA=S.u.r==='admin';
-  const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'precios',i:'🏷️',l:'Precios'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
-    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'precios',i:'🏷️',l:'Precios'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
+  const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
+    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
   a.innerHTML=
     `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v9.0</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
     +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
@@ -231,21 +240,29 @@ function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></d
   const a=S.alertas||{};
   const starCount=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').length;
   const isStar=(neg)=>(S.estrellas||[]).some(e=>e.negocio===neg&&e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido');
+  // Starred first, then by date
+  const starred=biz.filter(b=>isStar(b.negocio));
+  const noStar=biz.filter(b=>!isStar(b.negocio));
+  const sorted=[...starred,...noStar];
   return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:900;color:var(--ac)">🔄 Seguimiento</div><div style="font-size:11px;color:var(--t4);font-weight:600">${biz.length} negocio(s) · ⭐ ${starCount} oportunidades</div></div><div style="text-align:center"><div style="font-size:22px;font-weight:900;color:var(--ac)">${h}</div><div style="font-size:9px;color:var(--t4);font-weight:700">HOY</div></div></div></div>
+  ${starCount>0?`<div class="sec" style="background:#FFF8E1;border:2px solid #D4AF37;padding:10px">
+    <div style="font-size:13px;font-weight:900;color:#B8860B;margin-bottom:4px">⭐ ${starCount} OPORTUNIDADES PRIORITARIAS</div>
+    <div style="font-size:10px;color:#92400e">Estos negocios tienen mayor probabilidad de cierre. Dalos seguimiento primero.</div>
+  </div>`:''}
   ${(a.cotizSinAvance?.length>0||a.altoSinRevisita?.length>0)?`
     <div class="sec" style="background:#fef9e7;border:2px solid #f59e0b;padding:10px">
       <div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:6px">⚠️ Atención requerida</div>
-      ${a.cotizSinAvance?.length>0?`<div style="font-size:10px;color:#92400e;margin-bottom:4px"><b>${a.cotizSinAvance.length}</b> cotización${a.cotizSinAvance.length>1?'es':''} sin avance +5 días — retoma ${a.cotizSinAvance.map(c=>'<b>'+c.negocio+'</b>').join(', ')}</div>`:''}
-      ${a.altoSinRevisita?.length>0?`<div style="font-size:10px;color:#92400e">🔥 <b>${a.altoSinRevisita.length}</b> negocio${a.altoSinRevisita.length>1?'s':''} interés alto sin volver +7 días — vuelve a ${a.altoSinRevisita.map(c=>'<b>'+c.negocio+'</b>').join(', ')}</div>`:''}
+      ${a.cotizSinAvance?.length>0?`<div style="font-size:10px;color:#92400e;margin-bottom:4px"><b>${a.cotizSinAvance.length}</b> cotización${a.cotizSinAvance.length>1?'es':''} sin avance +5 días</div>`:''}
+      ${a.altoSinRevisita?.length>0?`<div style="font-size:10px;color:#92400e">🔥 <b>${a.altoSinRevisita.length}</b> interés alto sin volver +7 días</div>`:''}
     </div>`:''}
   ${biz.length===0?'<div class="empty">Aún no tienes negocios registrados.<br>Usa 📝 Nuevo para tu primera visita.</div>':''}
-  ${biz.map((b,i)=>{const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';const starred=isStar(b.negocio);
-    return `<div class="cd" onclick="openSeg(${i})" style="cursor:pointer;border-left:3px solid ${ic};${starred?'border-right:3px solid #D4AF37':''}">
+  ${sorted.map((b,i)=>{const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';const st=isStar(b.negocio);const origIdx=biz.indexOf(b);
+    return `<div class="cd" onclick="openSeg(${origIdx})" style="cursor:pointer;border-left:4px solid ${st?'#D4AF37':ic};${st?'background:#FFFDE7;border-right:4px solid #D4AF37':''}">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--t2)">${starred?'⭐ ':''}${b.negocio}</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--t2)">${b.negocio}</div>
         <div style="font-size:11px;color:var(--t4);font-weight:600">${b.giro} · ${b.visitas} visita(s) · ${b.ultimo||'—'}</div></div>
-        <div style="display:flex;gap:5px;align-items:center">
-          <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}')" style="background:none;border:none;cursor:pointer;font-size:22px;padding:4px">${starred?'⭐':'☆'}</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}')" style="background:${st?'#D4AF37':'#e5e7eb'};border:none;cursor:pointer;font-size:20px;padding:6px 10px;border-radius:8px;color:${st?'#fff':'#9ca3af'}">${st?'★':'☆'}</button>
           <span class="pill" style="background:${ic}15;color:${ic};font-size:11px">${b.interes?.split('—')[0]||'—'}</span>
         </div></div>
       ${b.resultado?`<div style="font-size:11px;color:var(--t3);margin-top:3px;font-weight:600">→ ${b.resultado}</div>`:''}
