@@ -129,7 +129,9 @@ async function load(){S.ld=true;R();
   S.ld=false;R();
   if(S.v==='registrar'){restoreForm();registrarReady();}
   // Welcome popup una vez por sesión
-  if(!S.welcomeShown&&S.u?.r!=='admin'&&S.alertas){S.welcomeShown=true;setTimeout(()=>showWelcomePopup(),400);}
+  const hoyKey='wp_'+new Date().toISOString().split('T')[0];
+  if(!localStorage.getItem(hoyKey)&&S.u?.r!=='admin'&&S.alertas){localStorage.setItem(hoyKey,'1');setTimeout(()=>showWelcomePopup(),400);}
+  else if(S.u?.r!=='admin'&&!S.welcomeShown){S.welcomeShown=true;setTimeout(()=>toast('📋 No olvides tipificar tus visitas'),800);}
 }
 
 function R(){
