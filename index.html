@@ -32,7 +32,7 @@ const RES_O=['Precio elevado','Catálogo dejado','Muestra entregada','Cotizació
 async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
 async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
+let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,hosp:null,hospLoaded:false,
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
 
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
@@ -147,6 +147,7 @@ function R(){
       S.v==='registrar'?registrarH():
       S.v==='seguimiento'?seguimientoH():
       S.v==='agenda'?agendaH():
+      S.v==='hospitales'?hospitalesH():
       S.v==='catalogo'?catalogoH():
       S.v==='cotizar'?cotizarH():
       S.v==='precios'?preciosH():
@@ -164,7 +165,7 @@ function mountApp(){
   const a=document.getElementById('app');
   const isA=S.u.r==='admin';
   const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
-    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
+    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'hospitales',i:'🏥',l:'Hosp.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
   a.innerHTML=
     `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v9.0</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
     +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
@@ -177,7 +178,7 @@ function nav(v){
   R();
   // Solo refrescar datos del servidor para tabs que muestran info dinámica.
   // Precios, Catálogo, ID y Config usan S.cos cacheado → no necesitan load().
-  const tabsConDatos=['seguimiento','agenda','dashboard','cotizar'];
+  const tabsConDatos=['seguimiento','agenda','dashboard','cotizar','hospitales'];
   if(tabsConDatos.includes(v))load();
 }
 
@@ -1401,6 +1402,136 @@ function uIdPh(input,id){
     img.src=e.target.result;
   };
   r.readAsDataURL(f);
+}
+
+// ============================================================
+// HOSPITALES — Prospección vertical DENUE
+// ============================================================
+const HOSP_RES = ['Interesado — pide cotización','Interesado — pide muestras','Ya tiene proveedor','No interesado','No encontré encargado','Cerrado / No encontrado','Venta cerrada','Precio elevado'];
+
+async function loadHosp(){
+  if(S.hospLoaded)return;
+  const r=await gf('hospitales&agente='+S.u.id);
+  if(r?.hospitales)S.hosp=r.hospitales;
+  S.hospLoaded=true;
+}
+
+function hospitalesH(){
+  if(!S.hosp){
+    loadHosp().then(()=>R());
+    return `<div class="empty"><div class="spin"></div>Cargando hospitales...</div>`;
+  }
+  const all=S.hosp;
+  const pendientes=all.filter(h=>!h.visitado);
+  const visitados=all.filter(h=>h.visitado);
+  const zona=pendientes.filter(h=>h.asignacion==='Zona directa');
+  const expansion=pendientes.filter(h=>h.asignacion!=='Zona directa');
+
+  return `<div class="fi">
+    <div class="sec" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:15px;font-weight:800">🏥 Hospitales</div>
+          <div style="font-size:10px;opacity:.9">Prospección vertical · Fuente DENUE/INEGI</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:900">${pendientes.length}</div>
+          <div style="font-size:8px;opacity:.85">PENDIENTES</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:16px;font-weight:800">${zona.length}</div>
+          <div style="font-size:8px;opacity:.8">Tu zona</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:16px;font-weight:800">${expansion.length}</div>
+          <div style="font-size:8px;opacity:.8">Expansión</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:16px;font-weight:800">${visitados.length}</div>
+          <div style="font-size:8px;opacity:.8">Visitados</div>
+        </div>
+      </div>
+    </div>
+
+    ${zona.length>0?`<div class="sec" style="border-color:#dc2626;border-width:2px">
+      <div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:8px">📍 TU ZONA — Prioridad</div>
+      ${zona.map((h,i)=>hospCard(h,i,'zona')).join('')}
+    </div>`:''}
+
+    ${expansion.length>0?`<div class="sec">
+      <div style="font-size:12px;font-weight:800;color:var(--t3);margin-bottom:8px">🗺️ EXPANSIÓN (${expansion.length})</div>
+      ${expansion.slice(0,20).map((h,i)=>hospCard(h,i,'exp')).join('')}
+      ${expansion.length>20?`<div style="text-align:center;padding:8px"><button onclick="document.getElementById('hospMore').style.display='block';this.remove()" class="btn btn-s" style="font-size:11px;padding:8px 16px">Ver ${expansion.length-20} más</button></div><div id="hospMore" style="display:none">${expansion.slice(20).map((h,i)=>hospCard(h,i+20,'exp')).join('')}</div>`:''}
+    </div>`:''}
+
+    ${visitados.length>0?`<div class="sec" style="background:#f0fdf4">
+      <div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:8px">✅ VISITADOS (${visitados.length})</div>
+      ${visitados.map((h,i)=>`<div style="padding:6px 8px;border-bottom:1px solid #dcfce7;font-size:11px;color:#16a34a">
+        <b>${h.hospital}</b> · ${h.resultado||'—'} · ${h.fecha_visita||''}
+      </div>`).join('')}
+    </div>`:''}
+
+    <div style="text-align:center;font-size:9px;color:var(--t4);padding:8px;line-height:1.5">
+      📊 Datos: DENUE · INEGI · Censos Económicos 2024<br>
+      <a href="https://www.inegi.org.mx/app/mapa/denue/default.aspx" target="_blank" style="color:var(--ac);text-decoration:none">inegi.org.mx/app/mapa/denue</a>
+    </div>
+  </div>`;
+}
+
+function hospCard(h,i,prefix){
+  return `<div style="padding:10px 8px;border-bottom:1px solid var(--bd);display:flex;gap:8px;align-items:start" id="hc_${prefix}_${i}">
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:700;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.hospital}</div>
+      <div style="font-size:10px;color:var(--t4);margin-top:1px">${h.colonia} · ${h.alcaldia}</div>
+      <div style="font-size:10px;color:var(--t3)">${h.direccion||''}</div>
+      ${h.telefono?`<div style="font-size:10px;color:var(--ac);margin-top:2px">📞 ${h.telefono}</div>`:''}
+    </div>
+    <button onclick="openHospModal(${h.row})" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">✅ Visitar</button>
+  </div>`;
+}
+
+function openHospModal(row){
+  const h=S.hosp.find(x=>x.row===row);
+  if(!h)return;
+  const m=document.createElement('div');m.className='mbg';m.id='hospModal';
+  m.onclick=e=>{if(e.target===m)m.remove();};
+  m.innerHTML=`<div class="mdl">
+    <div style="background:linear-gradient(135deg,#dc2626,#991b1b);margin:-13px -11px 12px;padding:14px;border-radius:12px 12px 0 0;color:#fff">
+      <div style="font-size:15px;font-weight:800">🏥 ${h.hospital}</div>
+      <div style="font-size:11px;opacity:.9">${h.colonia} · ${h.alcaldia}</div>
+    </div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:10px;line-height:1.6">
+      ${h.direccion?'📍 '+h.direccion+'<br>':''}
+      ${h.telefono?'📞 '+h.telefono+'<br>':''}
+      ${h.tipo?'🏷️ '+h.tipo+'<br>':''}
+      ${h.personal?'👥 '+h.personal:''}
+    </div>
+    ${h.lat&&h.lng?`<a href="https://www.google.com/maps?q=${h.lat},${h.lng}" target="_blank" style="display:block;background:var(--ac);color:#fff;text-decoration:none;padding:10px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;margin-bottom:10px">🗺️ Ver en Google Maps</a>`:''}
+    <div class="fld"><label class="lbl">Resultado *</label>
+      <select class="inp" id="hres"><option value="">Seleccionar...</option>${HOSP_RES.map(r=>'<option>'+r+'</option>').join('')}</select>
+    </div>
+    <div class="fld"><label class="lbl">Notas</label>
+      <textarea class="inp" id="hnot" rows="2" placeholder="Observaciones..."></textarea>
+    </div>
+    <button onclick="saveHospVisit(${row})" class="btn btn-p" style="margin-top:8px;font-size:13px;padding:12px" id="hbtn">✅ Registrar Visita</button>
+    <button onclick="document.getElementById('hospModal').remove()" class="btn btn-s" style="margin-top:6px;font-size:11px">Cancelar</button>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function saveHospVisit(row){
+  const res=document.getElementById('hres')?.value;
+  const notas=document.getElementById('hnot')?.value||'';
+  if(!res){toast('Selecciona un resultado','err');return;}
+  const b=document.getElementById('hbtn');b.disabled=true;b.textContent='Guardando...';
+  await pf({action:'update_hospital',row:row,visitado:'Sí',resultado:res,notas:notas});
+  // Update local state
+  const h=S.hosp.find(x=>x.row===row);
+  if(h){h.visitado='Sí';h.resultado=res;h.notas=notas;h.fecha_visita=new Date().toISOString().split('T')[0];}
+  document.getElementById('hospModal')?.remove();
+  toast('✅ Hospital registrado');R();
 }
 
 function configH(){const isA=S.u.r==='admin';return `<div class="fi"><div class="sec"><div class="sec-t">⚙️ Sistema</div><div style="font-size:9px;color:var(--t3);line-height:1.6">👤 ${S.u.nm} · ${S.u.z}<br>📦 Productos: ${S.cos.length}${!isA?'<br>📋 Registros: '+S.reg.length+' · 🗺️ Sugeridos: '+ms().length:''}</div></div>${isA?`<div class="sec" style="border-color:var(--rd)"><div class="sec-t" style="color:var(--rd)">🗑️ Admin</div>${AG.filter(a=>!a.r).map(a=>`<button class="btn btn-s" onclick="rAg('${a.id}')" style="font-size:9px;padding:7px;border-color:var(--rd)20;color:var(--rd);margin-bottom:3px">🗑️ ${a.nm}</button>`).join('')}<button class="btn btn-s" onclick="rAll()" style="font-size:10px;padding:9px;border-color:var(--rd);color:var(--rd);font-weight:800;margin-top:6px">⚠️ BORRAR TODO</button></div>`:''}<div class="sec"><div class="sec-t">📱 Instalar</div><div style="font-size:9px;color:var(--t3)"><b>iPhone:</b> Safari → Compartir → Agregar a inicio<br><b>Android:</b> Chrome → ⋮ → Agregar a inicio</div></div><button class="btn btn-s" onclick="if(confirm('¿Cerrar sesión?')){localStorage.removeItem('ecrm4');S.u=null;R();}" style="color:var(--rd);border-color:#e74c3c25">🚪 Cerrar Sesión</button></div>`;}
