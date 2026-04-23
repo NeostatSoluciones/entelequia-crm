@@ -27,7 +27,7 @@ const AG=[{id:'CarlosG',z:'CONDESA',p:'8142',nm:'Carlos Garcia',tel:'55-0000-000
 const ZC={'CONDESA':['Condesa','Hipódromo'],'COL. JUÁREZ':['Juárez','Cuauhtémoc','Zona Rosa'],'ROMA':['Roma Norte','Roma Sur','Doctores','Narvarte'],'SANTA MARÍA LA RIBERA':['Santa María la Ribera','Santa María Insurgentes','Atlampa'],'POLANCO':['Polanco I-V','Chapultepec Morales','Granada','Anzures'],'ZONA ESMERALDA':['Hacienda de Valle Escondido','Club de Golf Hacienda','Condado de Sayavedra','Lomas de la Hacienda','Bosque Esmeralda','Rincón Esmeralda']};
 const GIROS=['Cafetería / Coffee Shop','Restaurante','Bar / Cantina','Café Gourmet','Bistrot / Wine Bar','Hotel','Nevería / Heladería','Panadería','Food Truck','Taquería','Comida Rápida','Pizzería','Sushi / Japonés','Juice Bar','Catering','Fonda','Coworking','Hospital / Clínica','Escuela','Otro'];
 const INT_O=['Alto — Quiere cotización','Medio — Pide más info','Bajo — Tal vez después','Sin interés'];
-const RES_O=['Catálogo dejado','Muestra entregada','Cotización en sitio','Cotización por enviar','Pidió que regrese','No estaba el encargado','Cerrado / No encontrado','No interesado','Venta cerrada'];
+const RES_O=['Precio elevado','Catálogo dejado','Muestra entregada','Cotización en sitio','Cotización por enviar','Pidió que regrese','No estaba el encargado','Cerrado / No encontrado','No interesado','Venta cerrada'];
 
 async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
 async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
@@ -100,8 +100,8 @@ function incDay(){
   localStorage.setItem(k,String(nv));
   return nv;
 }
-function saveForm(){['rn','rg','re','rt','rc','rv','ri','rr','rp','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el)S.form[id]=el.value;});}
-function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr','rp','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el&&S.form[id])el.value=S.form[id];});if(S.form.rx==='si'){const fp=document.getElementById('rf');if(fp)fp.style.display='block';}},50);}
+function saveForm(){['rn','rg','re','rt','rc','rv','ri','rr','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el)S.form[id]=el.value;});}
+function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el&&S.form[id])el.value=S.form[id];});if(S.form.rx==='si'){const fp=document.getElementById('rf');if(fp)fp.style.display='block';}},50);}
 
 // Get unique businesses from registros
 function getBizInfo(neg){const r=S.reg.filter(x=>x.negocio===neg);const last=r[r.length-1]||{};return{contacto:last.encargado||'',telefono:last.telefono||'',giro:last.giro||'',maps:last.maps||''};}
@@ -173,7 +173,7 @@ function loginH(){return `<div class="login-w"><div class="login-b fi"><img src=
 function doL(){const sel=document.getElementById('la');if(!sel)return;const ag=sel.value,pin=document.getElementById('lp').value,a=AG.find(x=>x.id===ag);if(!a||pin!==a.p){document.getElementById('le').style.display='block';document.getElementById('le').textContent=!a?'Selecciona usuario':'PIN incorrecto';return;}localStorage.setItem('ecrm4',JSON.stringify(a));localStorage.setItem('ecrm_lastag',a.id);S.u=a;S.v=a.r==='admin'?'dashboard':'registrar';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};load();}
 
 // === REGISTRAR (visita inicial) ===
-function registrarH(){const cols=ZC[S.u.z]||[];const h=ch();return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:800;color:var(--ac2)">📝 Nueva Visita</div><div style="font-size:8px;color:var(--t4)">${S.u.nm} · ${S.u.z}</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div><div class="sec"><div class="sec-t">🏪 Negocio</div><div class="fld"><label class="lbl">Nombre *</label><input class="inp" id="rn" placeholder="Nombre del negocio"></div><div class="fld"><label class="lbl">Giro *</label><select class="inp" id="rg"><option value="">Seleccionar...</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select></div><div class="g2"><div class="fld"><label class="lbl">Encargado</label><input class="inp" id="re" placeholder="Nombre"></div><div class="fld"><label class="lbl">Teléfono</label><input class="inp" type="tel" id="rt" placeholder="55-XXXX-XXXX"></div></div><div class="fld"><label class="lbl">RFC (si requiere factura)</label><input class="inp" id="rfc" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div><div class="fld"><label class="lbl">Colonia</label><select class="inp" id="rc"><option value="">—</option>${cols.map(c=>`<option>${c}</option>`).join('')}<option>Otra</option></select></div></div><div class="sec"><div class="sec-t">📍 Ubicación</div><div class="gps-btn" onclick="gg()" id="gb"><span style="font-size:18px">📍</span><div><div style="font-weight:700">${S.lat?'✅ Capturada':'Capturar ubicación'}</div><div style="font-size:9px;font-weight:400;color:var(--t3)">${S.gs||'Toca para GPS + Maps'}</div></div></div><div id="gl">${S.lat?`<a href="https://www.google.com/maps?q=${S.lat},${S.lng}" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>`:''}</div></div><div class="sec"><div class="sec-t">📊 Tipificación</div><div class="g2"><div class="fld"><label class="lbl"># Visita</label><select class="inp" id="rv"><option>1</option></select></div><div class="fld"><label class="lbl">Interés</label><select class="inp" id="ri"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div><div class="fld full"><label class="lbl">Resultado</label><select class="inp" id="rr"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div><div class="fld full"><label class="lbl">Productos</label><input class="inp" id="rp" placeholder="Vasos, Platos..."></div></div></div><div class="sec"><div class="sec-t">🔔 Seguimiento</div><div class="g2"><div class="fld"><label class="lbl">¿Próxima visita?</label><select class="inp" id="rx" onchange="document.getElementById('rf').style.display=this.value==='si'?'block':'none'"><option value="no">No</option><option value="si">Sí</option></select></div><div class="fld" id="rf" style="display:none"><label class="lbl">¿Cuándo?</label><input class="inp" type="date" id="rd"></div></div><div class="fld"><label class="lbl">Notas</label><textarea class="inp" id="ro" rows="2" placeholder="Observaciones..."></textarea></div></div><div class="sec"><div class="sec-t">📸 Evidencia Fotográfica</div>
+function registrarH(){const cols=ZC[S.u.z]||[];const h=ch();return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:800;color:var(--ac2)">📝 Nueva Visita</div><div style="font-size:8px;color:var(--t4)">${S.u.nm} · ${S.u.z}</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div><div class="sec"><div class="sec-t">🏪 Negocio</div><div class="fld"><label class="lbl">Nombre *</label><input class="inp" id="rn" placeholder="Nombre del negocio"></div><div class="fld"><label class="lbl">Giro *</label><select class="inp" id="rg"><option value="">Seleccionar...</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select></div><div class="g2"><div class="fld"><label class="lbl">Encargado</label><input class="inp" id="re" placeholder="Nombre"></div><div class="fld"><label class="lbl">Teléfono</label><input class="inp" type="tel" id="rt" placeholder="55-XXXX-XXXX"></div></div><div class="fld"><label class="lbl">RFC (si requiere factura)</label><input class="inp" id="rfc" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div><div class="fld"><label class="lbl">Colonia</label><select class="inp" id="rc"><option value="">—</option>${cols.map(c=>`<option>${c}</option>`).join('')}<option>Otra</option></select></div></div><div class="sec"><div class="sec-t">📍 Ubicación</div><div class="gps-btn" onclick="gg()" id="gb"><span style="font-size:18px">📍</span><div><div style="font-weight:700">${S.lat?'✅ Capturada':'Capturar ubicación'}</div><div style="font-size:9px;font-weight:400;color:var(--t3)">${S.gs||'Toca para GPS + Maps'}</div></div></div><div id="gl">${S.lat?`<a href="https://www.google.com/maps?q=${S.lat},${S.lng}" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>`:''}</div></div><div class="sec"><div class="sec-t">📊 Tipificación</div><div class="g2"><div class="fld"><label class="lbl"># Visita</label><select class="inp" id="rv"><option>1</option></select></div><div class="fld"><label class="lbl">Interés</label><select class="inp" id="ri"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div><div class="fld full"><label class="lbl">Resultado</label><select class="inp" id="rr"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div></div></div><div class="sec"><div class="sec-t">🔔 Seguimiento</div><div class="g2"><div class="fld"><label class="lbl">¿Próxima visita?</label><select class="inp" id="rx" onchange="document.getElementById('rf').style.display=this.value==='si'?'block':'none'"><option value="no">No</option><option value="si">Sí</option></select></div><div class="fld" id="rf" style="display:none"><label class="lbl">¿Cuándo?</label><input class="inp" type="date" id="rd"></div></div><div class="fld"><label class="lbl">Notas</label><textarea class="inp" id="ro" rows="2" placeholder="Observaciones..."></textarea></div></div><div class="sec"><div class="sec-t">📸 Evidencia Fotográfica</div>
       <input type="file" accept="image/*" capture="environment" id="rph" onchange="previewPhoto(this,'rpv')" style="display:none">
       <div onclick="document.getElementById('rph').click()" style="border:2px dashed var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;color:var(--t4);font-size:10px" id="rpv">📷 Toca para abrir la cámara<br><span style="font-size:8px">Foto del local, fachada o menú</span></div>
     </div>
@@ -228,11 +228,11 @@ async function doRegFull(){
   // 3. Registrar visita
   b.textContent='📝 Registrando visita...';
   const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';
-  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:enc,telefono:tel,colonia:col,rfc:rfc,latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:document.getElementById('rp').value,proxima_visita:pv,notas:document.getElementById('ro').value});
+  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:enc,telefono:tel,colonia:col,rfc:rfc,latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:'',proxima_visita:pv,notas:document.getElementById('ro').value});
   av(n);const vc=incDay();S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};S.v='registrar';R();showVisitPop(vc);b.disabled=false;b.textContent='✅ GUARDAR Y REGISTRAR';
 }
 async function doReg(){const n=document.getElementById('rn').value.trim(),g=document.getElementById('rg').value;if(!n){toast('⚠️ Nombre','err');return;}const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳...';const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';if(photoData.reg){b.textContent='📷 Subiendo foto...';await pf({action:'upload_photo',agente:S.u.id,negocio:n,photo:photoData.reg});photoData.reg=null;}
-  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',rfc:document.getElementById('rfc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:document.getElementById('rp').value,proxima_visita:pv,notas:document.getElementById('ro').value});av(n);inlineQItems=[];const vc=incDay();showVisitPop(vc);S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
+  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',rfc:document.getElementById('rfc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:'',proxima_visita:pv,notas:document.getElementById('ro').value});av(n);inlineQItems=[];const vc=incDay();showVisitPop(vc);S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
 
 // === SEGUIMIENTO (visitas subsecuentes) ===
 function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
@@ -305,7 +305,7 @@ function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
       <div class="g2">
         <div class="fld"><label class="lbl">Interés</label><select class="inp" id="si"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
         <div class="fld"><label class="lbl">Resultado</label><select class="inp" id="sr"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
-        <div class="fld full"><label class="lbl">Productos</label><input class="inp" id="sp" placeholder="Productos de interés..."></div>
+        
         <div class="fld"><label class="lbl">Próxima visita</label><input class="inp" type="date" id="sd"></div>
         <div class="fld"><label class="lbl">⏰ Recordatorio</label><select class="inp" id="srm"><option value="">—</option><option>Llamar mañana</option><option>Enviar cotización</option><option>Entregar muestra</option><option>Confirmar pedido</option><option>Cobrar factura</option><option>Revisar stock cliente</option><option>Agendar con dueño</option></select></div>
         <div class="fld full"><label class="lbl">📦 Stock actual del cliente</label><select class="inp" id="ssk"><option value="">—</option><option>Sin stock — necesita pronto</option><option>Poco stock — 1-2 semanas</option><option>Stock suficiente — 1 mes</option><option>Bien abastecido</option><option>No aplica</option></select></div>
@@ -697,8 +697,8 @@ function catalogoH(){
       <div class="sec-t" style="font-size:13px;color:#27ae60">🏦 Datos bancarios</div>
       <div style="font-size:12px;line-height:1.9;color:var(--t2)">
         <div><b style="color:#27ae60">Beneficiario:</b><br>SOMOS ENTELEQUIA, SA DE CV</div>
-        <div><b style="color:#27ae60">Banco:</b> Scotiabank</div>
-        <div><b style="color:#27ae60">Cuenta:</b> <span style="font-family:monospace">03801663038</span></div>
+        <div><b style="color:#27ae60">BBVA:</b> <span style="font-family:monospace">0110458066</span></div>
+        <div><b style="color:#27ae60">Scotiabank:</b> <span style="font-family:monospace">03801663038</span></div>
         <div><b style="color:#27ae60">CLABE:</b> <span style="font-family:monospace;font-size:11px">044220038016630386</span></div>
         <div><b style="color:#27ae60">RFC:</b> SEN150416UA2</div>
       </div>
@@ -716,7 +716,7 @@ function catalogoH(){
 }
 
 function compartirCat(url){
-  const txt='🌿 *Catálogo Entelequia®* — Desechables Compostables\n\n📄 '+url+'\n\n♻️ Productos: Paja de trigo · PLA · Papel+PLA · Fécula de maíz\n✅ Certificados: BPI · TÜV · FDA · USDA\n\n🏦 *Datos para transferencia:*\nBeneficiario: SOMOS ENTELEQUIA, SA DE CV\nBanco: Scotiabank\nCuenta: 03801663038\nCLABE: 044220038016630386\nRFC: SEN150416UA2';
+  const txt='🌿 *Catálogo Entelequia®* — Desechables Compostables\n\n📄 '+url+'\n\n♻️ Productos: Paja de trigo · PLA · Papel+PLA · Fécula de maíz\n✅ Certificados: BPI · TÜV · FDA · USDA\n\n🏦 *Datos para transferencia:*\nBeneficiario: SOMOS ENTELEQUIA, SA DE CV\nBanco: Scotiabank\nBBVA: 0110458066 · Scotiabank: 03801663038\nCLABE: 044220038016630386\nRFC: SEN150416UA2';
   if(navigator.share){
     navigator.share({title:'Catálogo Entelequia',text:txt}).catch(()=>{
       window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
@@ -735,7 +735,7 @@ function copiarLinkCat(url){
 }
 
 function copiarDatosBanco(){
-  const txt='Banco: Scotiabank\nBeneficiario: SOMOS ENTELEQUIA SA DE CV\nRFC: SEN150416UA2';
+  const txt='BBVA: 0110458066\nScotiabank: 03801663038\nCLABE: 044220038016630386\nBeneficiario: SOMOS ENTELEQUIA SA DE CV\nRFC: SEN150416UA2';
   if(navigator.clipboard){
     navigator.clipboard.writeText(txt).then(()=>toast('✅ Datos copiados'));
   }else{
@@ -1256,98 +1256,33 @@ function getAgentData(id){
 }
 
 function idH(){
-  const isSup=S.u.r==='admin';
-  // Si supervisor, puede elegir qué agente ver/editar; default a sí mismo
-  const targetId=isSup?(S.idAgent||S.u.id):S.u.id;
-  const u=getAgentData(targetId);
-  if(!u)return '<div class="empty">Agente no encontrado</div>';
-  const colonias=ZC[u.z]||[];
-  const photo=localStorage.getItem('photo_'+u.id)||'';
-  const initials=u.nm.split(' ').map(w=>w[0]).slice(0,2).join('');
-  const editable=isSup;
+  const u=S.u;
+  if(u.r==='admin') return `<div class="fi"><div class="sec"><div class="sec-t">⚙️ Admin</div><p>Panel de administración</p></div></div>`;
   return `<div class="fi">
-    ${isSup?`<div class="sec" style="background:#fff9e6;border-color:#f59e0b;border-width:2px">
-      <div class="sec-t" style="color:#92400e">⚙️ Modo Supervisor — Editar perfil</div>
-      <select class="inp" onchange="S.idAgent=this.value;R()">
-        ${AG.map(a=>`<option value="${a.id}" ${targetId===a.id?'selected':''}>${a.nm} — ${a.z}</option>`).join('')}
-      </select>
-      <div style="font-size:11px;color:var(--t4);margin-top:6px;font-weight:600">Selecciona un agente para ver o editar su credencial</div>
-    </div>`:''}
-
-    <!-- CREDENCIAL VIRTUAL -->
-    <div style="background:#fff;border:3px solid var(--ac);border-radius:16px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 24px rgba(15,76,92,.15)">
-
-      <!-- Header con marca -->
-      <div style="background:var(--ac);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-size:11px;color:#7FB069;font-weight:900;letter-spacing:2px">🌿 ENTELEQUIA®</div>
-          <div style="font-size:10px;color:#CADCFC;font-weight:700;margin-top:2px">desechables · biodegradables</div>
-        </div>
-        <div style="background:#7FB069;color:#0F4C5C;padding:4px 10px;border-radius:6px;font-size:9px;font-weight:900;letter-spacing:1px">EMBAJADOR</div>
-      </div>
-
-      <!-- Foto + datos principales -->
-      <div style="padding:22px 18px 18px;display:flex;gap:16px;align-items:center;background:linear-gradient(180deg,#fff,#f0f9fc)">
-        <div style="flex-shrink:0">
-          ${photo
-            ? `<img src="${photo}" style="width:104px;height:104px;border-radius:14px;object-fit:cover;border:3px solid var(--ac);box-shadow:0 4px 14px rgba(15,76,92,.2)">`
-            : `<div style="width:104px;height:104px;border-radius:14px;background:var(--ac3);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;border:3px solid var(--ac);box-shadow:0 4px 14px rgba(15,76,92,.2)">${initials}</div>`
-          }
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:9px;color:var(--t4);font-weight:800;letter-spacing:1px;margin-bottom:3px">NOMBRE</div>
-          <div style="font-size:18px;font-weight:900;color:var(--tx);line-height:1.15;margin-bottom:8px;word-break:break-word">${u.nm}</div>
-          <div style="font-size:9px;color:var(--t4);font-weight:800;letter-spacing:1px;margin-bottom:2px">ZONA ASIGNADA</div>
-          <div style="font-size:13px;font-weight:800;color:var(--ac);line-height:1.2">📍 ${u.z}</div>
-        </div>
-      </div>
-
-      <!-- Datos de contacto -->
-      <div style="padding:14px 18px;background:#fff;border-top:2px solid var(--bd2)">
-        <div style="font-size:10px;color:var(--t4);font-weight:800;letter-spacing:1px;margin-bottom:8px">📇 CONTACTO</div>
-        <div style="display:grid;gap:6px">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);font-weight:600">
-            <span style="font-size:14px">✉️</span>
-            ${u.e?`<a href="mailto:${u.e}" style="color:var(--ac);text-decoration:none;font-weight:700">${u.e}</a>`:'<span style="color:var(--t4)">— sin correo —</span>'}
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);font-weight:600">
-            <span style="font-size:14px">📞</span>
-            ${u.tel?`<a href="tel:${u.tel}" style="color:var(--ac);text-decoration:none;font-weight:700">${u.tel}</a>`:'<span style="color:var(--t4)">— sin teléfono —</span>'}
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer institucional -->
-      <div style="padding:11px 18px;background:#0F4C5C;color:#CADCFC;text-align:center;font-size:10px;font-weight:700;letter-spacing:.5px">
-        SEN150416UA2 · CDMX · CRM × Neostat
-      </div>
+    <div class="sec" style="text-align:center;border-color:var(--ac);border-width:2px">
+      <img src="${LOGO}" style="width:80px;height:80px;border-radius:50%;margin:0 auto 10px;display:block;object-fit:cover">
+      <div style="font-size:18px;font-weight:900;color:var(--ac)">${u.nm}</div>
+      <div style="font-size:13px;color:var(--t4);font-weight:600">${u.z}</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">Embajador Comercial · Entelequia®</div>
     </div>
-
-    ${colonias.length>0?`<div class="sec">
-      <div class="sec-t">🗺️ Colonias asignadas</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        ${colonias.map(c=>`<div style="padding:8px 12px;background:var(--ac3);border:1px solid var(--ac2);border-radius:8px;font-size:12px;color:var(--ac);font-weight:700">📍 ${c}</div>`).join('')}
-      </div>
-    </div>`:''}
-
-    ${editable?`<div class="sec" style="border-color:#f59e0b;border-width:2px">
-      <div class="sec-t" style="color:#92400e">✏️ Editar datos del agente <span style="font-size:11px;color:var(--t4);font-weight:600">(solo supervisor)</span></div>
-      <div class="fld"><label class="lbl">Nombre completo</label><input class="inp" id="ed_nm" value="${u.nm}"></div>
-      <div class="fld"><label class="lbl">Correo</label><input class="inp" id="ed_em" type="email" value="${u.e||''}" placeholder="campo@entelequia.com.mx"></div>
-      <div class="fld"><label class="lbl">Teléfono</label><input class="inp" id="ed_tel" value="${u.tel||''}" placeholder="55-XXXX-XXXX"></div>
-      <button class="btn btn-p" onclick="guardarPerfil('${u.id}')">💾 Guardar cambios</button>
-      <div style="font-size:11px;color:var(--t4);margin-top:8px;text-align:center;font-weight:600">⚠️ Los cambios se guardan en este dispositivo</div>
-    </div>`:''}
-
     <div class="sec">
-      <div class="sec-t">📷 ${isSup&&targetId!==S.u.id?'Foto del agente':'Mi foto'}</div>
-      <input type="file" id="idphoto" accept="image/*" onchange="uIdPh(this,'${u.id}')" class="inp" style="padding:11px">
-      <div style="font-size:11px;color:var(--t4);margin-top:6px;font-weight:600">${photo?'✅ Foto cargada · Toca para cambiar':'📷 Toma una foto o elige de la galería'}</div>
+      <div class="sec-t">📋 Mi Información</div>
+      <div style="display:grid;gap:8px;font-size:13px">
+        <div style="padding:10px;background:var(--s2);border-radius:8px"><b style="color:var(--t4);font-size:10px">ZONA ASIGNADA</b><div style="font-weight:700;margin-top:2px">${u.z}</div></div>
+        <div style="padding:10px;background:var(--s2);border-radius:8px"><b style="color:var(--t4);font-size:10px">ID AGENTE</b><div style="font-weight:700;margin-top:2px">${u.id}</div></div>
+        <div style="padding:10px;background:var(--s2);border-radius:8px"><b style="color:var(--t4);font-size:10px">EMAIL</b><div style="font-weight:700;margin-top:2px">${u.email||'supervisor@entelequia.com.mx'}</div></div>
+      </div>
     </div>
-
-    <button onclick="if(confirm('¿Cerrar sesión?')){['ecrm','ecrm2','ecrm3','ecrm4'].forEach(k=>localStorage.removeItem(k));S.u=null;S.v='registrar';R();}" style="width:100%;padding:18px;border-radius:12px;border:3px solid #dc2626;background:#fef2f2;color:#dc2626;font-size:17px;font-weight:900;cursor:pointer;margin-top:14px;font-family:inherit;min-height:60px">🚪 CERRAR SESIÓN</button>
-  </div>`;
-}
+    <div class="sec">
+      <div class="sec-t">📞 Contactar Supervisor</div>
+      <a href="https://wa.me/5215656672426?text=${encodeURIComponent('Hola, soy '+u.nm+' ('+u.z+'). Necesito apoyo con:')}" style="display:block;background:#25D366;color:#fff;text-decoration:none;padding:14px;border-radius:10px;text-align:center;font-size:15px;font-weight:bold;margin-bottom:8px">💬 WhatsApp Supervisor</a>
+      <div style="text-align:center;font-size:12px;color:var(--t4)">Christian López · 56 5567-2426</div>
+    </div>
+    <div class="sec">
+      <button onclick="if(confirm('¿Borrar caché y recargar?')){localStorage.clear();caches.keys().then(k=>k.forEach(c=>caches.delete(c)));location.reload();}" class="btn" style="width:100%;background:#f59e0b;color:#fff;font-size:13px;padding:12px;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:8px">🔄 Actualizar CRM (borrar caché)</button>
+      <button onclick="S.u=null;localStorage.removeItem('ecrm4');R();" class="btn" style="width:100%;background:#dc2626;color:#fff;font-size:13px;padding:12px;border:none;border-radius:8px;font-weight:700;cursor:pointer">🚪 Cerrar Sesión</button>
+    </div>
+  </div>`;}
 
 function guardarPerfil(id){
   const nm=document.getElementById('ed_nm').value.trim();
