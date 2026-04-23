@@ -109,16 +109,22 @@ function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.
 
 async function load(){S.ld=true;R();
   try{
-    const [a,r,c,st]=await Promise.all([
+    const isAdmin=S.u?.r==='admin';
+    const calls=[
       gf('alertas&agente='+encodeURIComponent(S.u.id)),
       gf('registros','&agente='+encodeURIComponent(S.u.id)),
       gf('costos'),
       gf('estrellas&agente='+S.u.id)
-    ]);
+    ];
+    if(isAdmin)calls.push(gf('all_agents'));
+    const results=await Promise.all(calls);
+    const [a,r,c,st]=results;
     if(a)S.alertas=a;
     if(r?.registros)S.reg=r.registros;
     if(c?.productos)S.cos=c.productos;
     if(st?.estrellas)S.estrellas=st.estrellas;
+    if(isAdmin&&results[4]){S.ad=results[4].agents;S.dias7=results[4].dias7||[];}
+    try{const ft=await gf('fotos');if(ft&&ft.fotos){Object.entries(ft.fotos).forEach(([id,url])=>{const ag=AG.find(a=>a.id===id);if(ag&&url)ag.foto=url;});}}catch(e){}
   }catch(e){console.log('load',e);}
   S.ld=false;R();
   if(S.v==='registrar'){restoreForm();registrarReady();}
@@ -1291,7 +1297,54 @@ function getAgentData(id){
 
 function idH(){
   const u=S.u;
-  if(u.r==='admin') return `<div class="fi"><div class="sec"><div class="sec-t">⚙️ Admin</div><p>Panel de administración</p></div></div>`;
+  if(u.r==='admin') return adminIdH();
+function adminIdH(){
+  return `<div class="fi">
+    <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#0F4C5C);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="font-size:16px;font-weight:800">🪪 Gestión de Agentes</div>
+      <div style="font-size:11px;opacity:.9">Fotos y datos de contacto del equipo</div>
+    </div>
+    ${AG.filter(a=>!a.r).map(a=>`
+    <div class="sec" style="border-left:3px solid var(--ac)">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+        <div style="position:relative">
+          <img src="${a.foto||LOGO}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--ac)">
+          <label style="position:absolute;bottom:-2px;right:-2px;background:var(--ac);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer">📷
+            <input type="file" accept="image/*" style="display:none" onchange="uploadAgentFoto('${a.id}',this)">
+          </label>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--t2)">${a.nm}</div>
+          <div style="font-size:12px;color:var(--ac);font-weight:600">${a.z}</div>
+          <div style="font-size:10px;color:var(--t4)">${a.e||'—'}</div>
+        </div>
+      </div>
+    </div>`).join('')}
+    <div class="sec">
+      <button onclick="if(confirm('¿Borrar caché y recargar?')){localStorage.clear();caches.keys().then(k=>k.forEach(c=>caches.delete(c)));location.reload();}" class="btn" style="width:100%;background:#f59e0b;color:#fff;font-size:13px;padding:12px;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:8px">🔄 Actualizar CRM (borrar caché)</button>
+      <a href="https://wa.me/525655672426" style="display:block;background:#25D366;color:#fff;text-decoration:none;padding:12px;border-radius:8px;text-align:center;font-size:13px;font-weight:bold;margin-bottom:8px">💬 WhatsApp Neostat</a>
+      <button onclick="S.u=null;localStorage.removeItem('ecrm4');R();" class="btn" style="width:100%;background:#dc2626;color:#fff;font-size:13px;padding:12px;border:none;border-radius:8px;font-weight:700;cursor:pointer">🚪 Cerrar Sesión</button>
+    </div>
+  </div>`;
+}
+
+function uploadAgentFoto(agentId, input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const base64=e.target.result;
+    // Update AG array in memory
+    const ag=AG.find(a=>a.id===agentId);
+    if(ag)ag.foto=base64;
+    // Save to backend
+    pf({action:'update_agent_foto',agente:agentId,foto:base64}).then(()=>{
+      toast('📷 Foto actualizada');R();
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
   return `<div class="fi">
     <div class="sec" style="text-align:center;border-color:var(--ac);border-width:2px">
       <img src="${u.foto||LOGO}" style="width:80px;height:80px;border-radius:50%;margin:0 auto 10px;display:block;object-fit:cover">
