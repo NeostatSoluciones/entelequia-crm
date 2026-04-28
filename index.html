@@ -321,7 +321,7 @@ function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
       <div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📝 Tipificar visita</div>
       <div class="g2">
         <div class="fld"><label class="lbl">Interés *</label><select class="inp" id="si"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
-        <div class="fld"><label class="lbl">Resultado *</label><select class="inp" id="sr" onchange="document.getElementById('seg_monto_wrap').style.display=this.value.toLowerCase().indexOf('venta')>=0?'block':'none'"><option value="">¿Qué pasó?</option>${RES_O.map(r=>\`<option>\${r}</option>\`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Resultado *</label><select class="inp" id="sr" onchange="document.getElementById('seg_monto_wrap').style.display=this.value.toLowerCase().indexOf('venta')>=0?'block':'none'"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
         <div class="fld" id="seg_monto_wrap" style="display:none"><label class="lbl">💰 Monto venta (sin IVA) *</label><input class="inp" id="seg_monto" type="number" placeholder="0.00" inputmode="decimal"></div>
         
         <div class="fld"><label class="lbl">Próxima visita</label><input class="inp" type="date" id="sd"></div>
