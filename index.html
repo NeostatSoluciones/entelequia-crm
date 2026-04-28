@@ -32,7 +32,7 @@ const RES_O=['Precio elevado','Catálogo dejado','Muestra entregada','Cotizació
 async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
 async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'registrar',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,hosp:null,hospLoaded:false,
+let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,hosp:null,hospLoaded:false,
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
 
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
@@ -57,7 +57,7 @@ function showWelcomePopup(){
         <div style="font-size:13px;font-weight:900;color:#B8860B;margin-bottom:6px">⭐ ${starCount} OPORTUNIDADES PRIORITARIAS</div>
         ${starNames.map(n=>`<div style="padding:8px 10px;background:#FFFDE7;border-left:4px solid #D4AF37;border-radius:5px;margin-bottom:3px;font-size:13px;color:#5D4E37;font-weight:700">★ ${n}</div>`).join('')}
         ${starCount>5?`<div style="font-size:10px;color:#B8860B;margin-top:3px">+${starCount-5} más en Seguimiento</div>`:''}
-        <button onclick="cerrarWelcome();S.v='seguimiento';R();load();" style="margin-top:6px;background:#D4AF37;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%">Ver oportunidades →</button>
+        <button onclick="cerrarWelcome();S.v='cartera';R();load();" style="margin-top:6px;background:#D4AF37;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%">Ver oportunidades →</button>
       </div>`:''}
     ${a.hoyAgenda?.length>0?`
       <div style="margin-bottom:12px">
@@ -146,10 +146,8 @@ function R(){
   const content=document.getElementById('crm-content');
   if(content){
     content.innerHTML=
-      S.v==='registrar'?registrarH():
-      S.v==='seguimiento'?seguimientoH():
-      S.v==='agenda'?agendaH():
-      S.v==='hospitales'?hospitalesH():
+      S.v==='nueva'?nuevaH():
+      S.v==='cartera'?carteraH():
       S.v==='catalogo'?catalogoH():
       S.v==='cotizar'?cotizarH():
       S.v==='precios'?preciosH():
@@ -167,7 +165,7 @@ function mountApp(){
   const a=document.getElementById('app');
   const isA=S.u.r==='admin';
   const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'},{k:'config',i:'⚙️',l:'Admin'}]
-    :[{k:'registrar',i:'📝',l:'Nuevo'},{k:'seguimiento',i:'🔄',l:'Seg.'},{k:'hospitales',i:'🏥',l:'Hosp.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'agenda',i:'📅',l:'Agenda'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
+    :[{k:'nueva',i:'📝',l:'Nueva'},{k:'cartera',i:'📂',l:'Cartera'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
   a.innerHTML=
     `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v9.0</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
     +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
@@ -180,7 +178,7 @@ function nav(v){
   R();
   // Solo refrescar datos del servidor para tabs que muestran info dinámica.
   // Precios, Catálogo, ID y Config usan S.cos cacheado → no necesitan load().
-  const tabsConDatos=['seguimiento','agenda','dashboard','cotizar','hospitales'];
+  const tabsConDatos=['nueva','cartera','dashboard','cotizar'];
   if(tabsConDatos.includes(v))load();
 }
 
@@ -189,47 +187,131 @@ function loginH(){return `<div class="login-w"><div class="login-b fi"><img src=
 function doL(){const sel=document.getElementById('la');if(!sel)return;const ag=sel.value,pin=document.getElementById('lp').value,a=AG.find(x=>x.id===ag);if(!a||pin!==a.p){document.getElementById('le').style.display='block';document.getElementById('le').textContent=!a?'Selecciona usuario':'PIN incorrecto';return;}localStorage.setItem('ecrm4',JSON.stringify(a));localStorage.setItem('ecrm_lastag',a.id);S.u=a;S.v=a.r==='admin'?'dashboard':'registrar';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';load();}
 
 // === REGISTRAR (visita inicial) ===
-function registrarH(){const cols=ZC[S.u.z]||[];const h=ch();return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:800;color:var(--ac2)">📝 Nueva Visita</div><div style="font-size:8px;color:var(--t4)">${S.u.nm} · ${S.u.z}</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--ac2)">${h}</div><div style="font-size:6px;color:var(--t4)">HOY</div></div></div></div><div class="sec"><div class="sec-t">🏪 Negocio</div><div class="fld"><label class="lbl">Nombre *</label><input class="inp" id="rn" placeholder="Nombre del negocio"></div><div class="fld"><label class="lbl">Giro *</label><select class="inp" id="rg"><option value="">Seleccionar...</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select></div><div class="g2"><div class="fld"><label class="lbl">Encargado</label><input class="inp" id="re" placeholder="Nombre"></div><div class="fld"><label class="lbl">Teléfono</label><input class="inp" type="tel" id="rt" placeholder="55-XXXX-XXXX"></div></div><div class="fld"><label class="lbl">RFC (si requiere factura)</label><input class="inp" id="rfc" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div><div class="fld"><label class="lbl">Colonia</label><select class="inp" id="rc"><option value="">—</option>${cols.map(c=>`<option>${c}</option>`).join('')}<option>Otra</option></select></div></div><div class="sec"><div class="sec-t">📍 Ubicación</div><div class="gps-btn" onclick="gg()" id="gb"><span style="font-size:18px">📍</span><div><div style="font-weight:700">${S.lat?'✅ Capturada':'Capturar ubicación'}</div><div style="font-size:9px;font-weight:400;color:var(--t3)">${S.gs||'Toca para GPS + Maps'}</div></div></div><div id="gl">${S.lat?`<a href="https://www.google.com/maps?q=${S.lat},${S.lng}" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>`:''}</div></div><div class="sec"><div class="sec-t">📊 Tipificación</div><div class="g2"><div class="fld"><label class="lbl"># Visita</label><select class="inp" id="rv"><option>1</option></select></div><div class="fld"><label class="lbl">Interés *</label><select class="inp" id="ri"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div><div class="fld full"><label class="lbl">Resultado *</label><select class="inp" id="rr" onchange="document.getElementById('reg_monto_wrap').style.display=this.value.toLowerCase().indexOf('venta')>=0?'block':'none'"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
-        <div class="fld" id="reg_monto_wrap" style="display:none"><label class="lbl">💰 Monto venta (sin IVA) *</label><input class="inp" id="reg_monto" type="number" placeholder="0.00" inputmode="decimal"></div></div></div><div class="sec"><div class="sec-t">🔔 Seguimiento</div><div class="g2"><div class="fld"><label class="lbl">¿Próxima visita?</label><select class="inp" id="rx" onchange="document.getElementById('rf').style.display=this.value==='si'?'block':'none'"><option value="no">No</option><option value="si">Sí</option></select></div><div class="fld" id="rf" style="display:none"><label class="lbl">¿Cuándo?</label><input class="inp" type="date" id="rd"></div></div><div class="fld"><label class="lbl">Notas</label><textarea class="inp" id="ro" rows="2" placeholder="Observaciones..."></textarea></div></div><div class="sec"><div class="sec-t">📸 Evidencia Fotográfica</div>
-      <input type="file" accept="image/*" capture="environment" id="rph" onchange="previewPhoto(this,'rpv')" style="display:none">
-      <div onclick="document.getElementById('rph').click()" style="border:2px dashed var(--bd);border-radius:8px;padding:14px;text-align:center;cursor:pointer;color:var(--t4);font-size:10px" id="rpv">📷 Toca para abrir la cámara<br><span style="font-size:8px">Foto del local, fachada o menú</span></div>
-    </div>
-    <div class="sec" style="background:var(--ac);border:none;color:#fff;padding:18px 16px;margin-bottom:8px">
-      <div style="font-size:20px;font-weight:900;margin-bottom:4px">💰 Cotización (opcional)</div>
-      <div style="font-size:13px;color:#CADCFC;font-weight:600">Agrega productos para esta visita</div>
-    </div>
-    <div class="sec" style="border-color:var(--ac);border-width:2px">
-      <div id="cot-inline-content"></div>
-      <input class="inp" placeholder="🔍 Buscar SKU o nombre…" id="icqs" oninput="renderInlineCatalog()" style="margin-bottom:10px">
-      <div id="cot-inline-catalog"></div>
-    </div>
-    <button class="btn btn-p" onclick="doRegFull()" id="rb" style="font-size:14px;padding:13px">✅ GUARDAR Y REGISTRAR</button></div>`;}
-
-// Auto-render catalog on registrar load
-function registrarReady(){setTimeout(function(){renderInlineCot(document.getElementById('cot-inline-content'));renderInlineCatalog();},100);}
-
-function renderInlineCatalog(){
-  const el=document.getElementById('cot-inline-catalog');if(!el)return;
-  const sq=document.getElementById('icqs')?.value||'';
-  let prods=S.cos;if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
-  el.innerHTML=`<div style="max-height:380px;overflow-y:auto">${prods.slice(0,40).map((p)=>{const ri=S.cos.indexOf(p);return `
-    <div onclick="openInlineCalc(${ri})" style="padding:13px;border:2px solid var(--bd2);border-radius:10px;margin-bottom:7px;cursor:pointer;background:#fff">
-      <div style="font-size:13px;font-weight:900;color:var(--ac);margin-bottom:3px">${p.sku}</div>
-      <div style="font-size:13px;color:var(--t2);margin-bottom:8px;font-weight:600;line-height:1.3">${p.producto}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:5px">
-        <div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:9px;color:var(--ac);font-weight:800">CAJA</div>
-          <div style="font-size:13px;font-weight:900;color:var(--ac)">$${p.precio_caja>0?p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:0}):'—'}</div>
-        </div>
-        <div style="background:#fef9e7;border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:9px;color:#92400e;font-weight:800">PAQUETE</div>
-          <div style="font-size:13px;font-weight:900;color:#92400e">$${p.precio_paq>0?p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:0}):'—'}</div>
-        </div>
-        <div style="background:#fff9e6;border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:10px;color:#92400e;font-weight:800">+ IVA 16%</div>
+function nuevaH(){
+  const cols=ZC[S.u.z]||[];
+  const visitasHoy=(S.reg||[]).filter(r=>{const f=r.fecha||'';return f.startsWith(new Date().toISOString().split('T')[0])}).length;
+  return `<div class="fi">
+    <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#0F4C5C);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:16px;font-weight:800">📝 Nueva Visita</div>
+          <div style="font-size:11px;opacity:.9">${S.u.nm} · ${S.u.z}</div></div>
+        <div style="text-align:center;background:rgba(255,255,255,.2);border-radius:10px;padding:8px 14px">
+          <div style="font-size:24px;font-weight:900">${visitasHoy}</div>
+          <div style="font-size:8px;opacity:.85;letter-spacing:1px">VISITAS HOY</div>
         </div>
       </div>
-    </div>`;}).join('')}${prods.length>40?`<div style="font-size:11px;color:var(--t4);text-align:center;padding:8px;font-weight:600">Mostrando 40 de ${prods.length} · busca para filtrar</div>`:''}</div>`;
+    </div>
+    <div class="sec">
+      <div class="fld"><label class="lbl">Negocio *</label><input class="inp" id="rn" placeholder="Nombre del negocio" autocomplete="off"></div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Giro *</label><select class="inp" id="rg"><option value="">Seleccionar</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="re" placeholder="Nombre"></div>
+      </div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Email</label><input class="inp" id="rm" type="email" placeholder="correo@mail.com"></div>
+        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" id="rt" type="tel" placeholder="55 1234 5678" inputmode="tel"></div>
+      </div>
+      <div class="fld"><label class="lbl">RFC (solo si requiere factura)</label><input class="inp" id="rfc" placeholder="Opcional" style="text-transform:uppercase"></div>
+      <div class="fld"><label class="lbl">Colonia</label>
+        <select class="inp" id="rcol" onchange="if(this.value==='__otra__')document.getElementById('rcol_otra').style.display='block';else document.getElementById('rcol_otra').style.display='none';">
+          <option value="">Seleccionar</option>${cols.map(c=>`<option>${c}</option>`).join('')}
+          <option value="__otra__">📍 Otra colonia...</option>
+        </select>
+      </div>
+      <div id="rcol_otra" style="display:none">
+        <div class="g2">
+          <div class="fld"><label class="lbl">Tipo</label><select class="inp" id="rcol_tipo"><option value="expansion">Expansión</option><option value="cartera">Cartera propia</option></select></div>
+          <div class="fld"><label class="lbl">Colonia</label><input class="inp" id="rcol_text" placeholder="Escribe la colonia"></div>
+        </div>
+      </div>
+      <div class="fld"><label class="lbl">📍 Ubicación</label>
+        <button onclick="getUbi()" class="btn btn-s" style="font-size:10px;padding:6px 12px" id="ubi_btn">📍 Capturar ubicación</button>
+        <span id="ubi_ok" style="font-size:10px;color:var(--gn);display:none">✅ Ubicación capturada</span>
+      </div>
+    </div>
+    <div class="sec" style="border-color:var(--ac);border-width:2px">
+      <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px">📋 Tipificación</div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Interés *</label><select class="inp" id="ri"><option value="">Nivel</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Resultado *</label><select class="inp" id="rr" onchange="document.getElementById('reg_monto_wrap').style.display=this.value.toLowerCase().indexOf('venta')>=0?'block':'none'"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
+      </div>
+      <div class="fld" id="reg_monto_wrap" style="display:none"><label class="lbl">💰 Monto venta (sin IVA) *</label><input class="inp" id="reg_monto" type="number" placeholder="0.00" inputmode="decimal"></div>
+      <div class="fld"><label class="lbl">Notas</label><textarea class="inp" id="ro" rows="2" placeholder="Observaciones..."></textarea></div>
+    </div>
+    <button onclick="doNueva()" class="btn btn-p" style="font-size:15px;padding:14px" id="rb">✅ Guardar Visita</button>
+  </div>`;
+}
+
+function getUbi(){
+  const b=document.getElementById('ubi_btn');
+  b.textContent='⏳ Obteniendo...';b.disabled=true;
+  navigator.geolocation.getCurrentPosition(p=>{
+    S.lat=p.coords.latitude;S.lng=p.coords.longitude;
+    document.getElementById('ubi_ok').style.display='inline';
+    b.style.display='none';
+  },()=>{b.textContent='❌ Sin acceso';b.disabled=false;},{timeout:10000});
+}
+
+async function doNueva(){
+  const n=document.getElementById('rn')?.value?.trim();
+  const g=document.getElementById('rg')?.value;
+  const ri=document.getElementById('ri')?.value;
+  const rr=document.getElementById('rr')?.value;
+  if(!n){toast('⚠️ Nombre del negocio es obligatorio','err');return;}
+  if(!g){toast('⚠️ Selecciona un giro','err');return;}
+  if(!ri){toast('⚠️ Selecciona el nivel de interés','err');return;}
+  if(!rr){toast('⚠️ Selecciona el resultado','err');return;}
+  const regMonto=document.getElementById('reg_monto')?.value||'';
+  if(rr.toLowerCase().indexOf('venta')>=0&&(!regMonto||regMonto==='0')){toast('⚠️ Ingresa el monto de la venta','err');return;}
+  
+  const colSel=document.getElementById('rcol')?.value||'';
+  const colonia=colSel==='__otra__'?(document.getElementById('rcol_text')?.value||''):colSel;
+  
+  const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳ Guardando...';
+  try{
+    await pf({
+      action:'registrar_visita',agente:S.u.id,
+      negocio:n,giro:g,
+      encargado:document.getElementById('re')?.value||'',
+      email:document.getElementById('rm')?.value||'',
+      telefono:document.getElementById('rt')?.value||'',
+      rfc:document.getElementById('rfc')?.value||'',
+      colonia:colonia,
+      interes:ri,resultado:rr,
+      cotizacion_monto:regMonto||'',
+      productos:'',
+      proxima_visita:'',
+      notas:document.getElementById('ro')?.value||'',
+      lat:S.lat||'',lng:S.lng||'',maps:S.lat?('https://maps.google.com/?q='+S.lat+','+S.lng):''
+    });
+    // Reload data
+    const r=await gf('registros','&agente='+encodeURIComponent(S.u.id));
+    if(r?.registros)S.reg=r.registros;
+    S.lat='';S.lng='';
+    const visitasHoy=(S.reg||[]).filter(r=>{const f=r.fecha||'';return f.startsWith(new Date().toISOString().split('T')[0])}).length;
+    
+    // Success popup
+    const m=document.createElement('div');m.className='mbg';m.id='visitaPop';
+    m.onclick=e=>{if(e.target===m)m.remove();};
+    m.innerHTML=`<div class="mdl" style="text-align:center;padding:20px">
+      <div style="font-size:48px;margin-bottom:10px">🎯</div>
+      <div style="font-size:18px;font-weight:800;color:var(--ac)">¡Bien hecho!</div>
+      <div style="font-size:14px;color:var(--t3);margin:10px 0">Visita registrada correctamente</div>
+      <div style="background:var(--ac3);border-radius:10px;padding:14px;margin:12px 0">
+        <div style="font-size:32px;font-weight:900;color:var(--ac)">${visitasHoy}</div>
+        <div style="font-size:11px;color:var(--t4);font-weight:700">VISITAS HOY</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:4px">Meta: 20-25 visitas diarias</div>
+        <div style="background:var(--bd);border-radius:4px;height:8px;margin-top:8px;overflow:hidden">
+          <div style="background:var(--ac);height:100%;width:${Math.min(100,visitasHoy/25*100)}%;border-radius:4px;transition:.3s"></div>
+        </div>
+      </div>
+      ${visitasHoy>=20?`<div style="font-size:13px;color:var(--gn);font-weight:700">🏆 ¡Excelente ritmo!</div>`:`<div style="font-size:12px;color:var(--t4)">¡Sigue así! Te faltan ${Math.max(0,20-visitasHoy)} para la meta</div>`}
+      <button onclick="document.getElementById('visitaPop').remove()" class="btn btn-p" style="margin-top:14px;font-size:14px;padding:12px">📝 Siguiente visita</button>
+    </div>`;
+    document.body.appendChild(m);
+    R();
+  }catch(e){toast('Error: '+e,'err');}
+  b.disabled=false;b.textContent='✅ Guardar Visita';
 }
 
 function gg(){saveForm();const g=document.getElementById('gb');if(g)g.innerHTML='<span>⏳</span><div>Obteniendo...</div>';navigator.geolocation?.getCurrentPosition(p=>{S.lat=p.coords.latitude.toFixed(6);S.lng=p.coords.longitude.toFixed(6);S.gs='✅ '+S.lat+', '+S.lng;const b=document.getElementById('gb');if(b)b.innerHTML='<span>✅</span><div><div style="font-weight:700">Capturada</div><div style="font-size:9px;color:var(--t3)">'+S.lat+', '+S.lng+'</div></div>';const l=document.getElementById('gl');if(l)l.innerHTML='<a href="https://www.google.com/maps?q='+S.lat+','+S.lng+'" target="_blank" style="display:block;text-align:center;font-size:10px;color:var(--ac);margin-top:4px;text-decoration:none">🗺️ Maps →</a>';},e=>{const b=document.getElementById('gb');if(b)b.innerHTML='<span>❌</span><div>'+e.message+'</div>';},{enableHighAccuracy:true,timeout:10000});}
@@ -252,133 +334,108 @@ async function doReg(){const n=document.getElementById('rn').value.trim(),g=docu
   await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',rfc:document.getElementById('rfc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:'',cotizacion_monto:regMonto||'',proxima_visita:pv,notas:document.getElementById('ro').value});av(n);inlineQItems=[];const vc=incDay();showVisitPop(vc);S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
 
 // === SEGUIMIENTO (visitas subsecuentes) ===
-function seguimientoH(){if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
-  const biz=getBiz();const h=ch();
-  const a=S.alertas||{};
-  const starCount=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').length;
-  const starSet=new Set((S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').map(e=>e.negocio));const isStar=(neg)=>starSet.has(neg);
-  // Starred first, then by date
-  const starred=biz.filter(b=>isStar(b.negocio));
-  const noStar=biz.filter(b=>!isStar(b.negocio));
-  const sorted=[...starred,...noStar];
-  return `<div class="fi"><div class="sec" style="background:var(--ac3);border-color:var(--ac)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:900;color:var(--ac)">🔄 Seguimiento</div><div style="font-size:11px;color:var(--t4);font-weight:600">${biz.length} negocio(s) · ⭐ ${starCount} oportunidades</div></div><div style="text-align:center"><div style="font-size:22px;font-weight:900;color:var(--ac)">${h}</div><div style="font-size:9px;color:var(--t4);font-weight:700">HOY</div></div></div></div>
-  ${starCount>0?`<div class="sec" style="background:#FFF8E1;border:2px solid #D4AF37;padding:10px">
-    <div style="font-size:13px;font-weight:900;color:#B8860B;margin-bottom:4px">⭐ ${starCount} OPORTUNIDADES PRIORITARIAS</div>
-    <div style="font-size:10px;color:#92400e">Estos negocios tienen mayor probabilidad de cierre. Dalos seguimiento primero.</div>
-  </div>`:''}
-  ${(a.cotizSinAvance?.length>0||a.altoSinRevisita?.length>0)?`
-    <div class="sec" style="background:#fef9e7;border:2px solid #f59e0b;padding:10px">
-      <div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:6px">⚠️ Atención requerida</div>
-      ${a.cotizSinAvance?.length>0?`<div style="font-size:10px;color:#92400e;margin-bottom:4px"><b>${a.cotizSinAvance.length}</b> cotización${a.cotizSinAvance.length>1?'es':''} sin avance +5 días</div>`:''}
-      ${a.altoSinRevisita?.length>0?`<div style="font-size:10px;color:#92400e">🔥 <b>${a.altoSinRevisita.length}</b> interés alto sin volver +7 días</div>`:''}
-    </div>`:''}
-  ${biz.length===0?'<div class="empty">Aún no tienes negocios registrados.<br>Usa 📝 Nuevo para tu primera visita.</div>':''}
-  ${sorted.map((b,i)=>{const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';const st=isStar(b.negocio);const origIdx=biz.indexOf(b);
-    return `<div class="cd" onclick="openSeg(${origIdx})" style="cursor:pointer;border-left:4px solid ${st?'#D4AF37':ic};${st?'background:#FFFDE7;border-right:4px solid #D4AF37':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--t2)">${b.negocio}</div>
-        <div style="font-size:11px;color:var(--t4);font-weight:600">${b.giro} · ${b.visitas} visita(s) · ${b.ultimo||'—'}</div></div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}')" style="background:${st?'#D4AF37':'#e5e7eb'};border:none;cursor:pointer;font-size:20px;padding:6px 10px;border-radius:8px;color:${st?'#fff':'#9ca3af'}">${st?'★':'☆'}</button>
-          <span class="pill" style="background:${ic}15;color:${ic};font-size:11px">${b.interes?.split('—')[0]||'—'}</span>
-        </div></div>
-      ${b.resultado?`<div style="font-size:11px;color:var(--t3);margin-top:3px;font-weight:600">→ ${b.resultado}</div>`:''}
-    </div>`;}).join('')}</div>`;}
+function carteraH(){
+  if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
+  const biz=getBiz();
+  const starSet=new Set((S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').map(e=>e.negocio));
+  const isStar=neg=>starSet.has(neg);
+  const sq=S.qs?.toLowerCase()||'';
+  const filtered=sq?biz.filter(b=>b.negocio.toLowerCase().includes(sq)):biz;
+  // Sort: starred first, then by date desc
+  const sorted=[...filtered.filter(b=>isStar(b.negocio)),...filtered.filter(b=>!isStar(b.negocio))];
+  const starCount=starSet.size;
+  const ventas=biz.filter(b=>b.resultado?.toLowerCase().indexOf('venta')>=0).length;
 
-function openSeg(idx){const biz=getBiz();const b=biz[idx];if(!b)return;
-  // Get history for this business
-  const hist=S.reg.filter(r=>r.negocio===b.negocio);
-  const vn=b.visitas+1;
-  const m=document.createElement('div');m.id='sm';m.className='mbg';m.onclick=e=>{if(e.target===m)m.remove();};
-  m.innerHTML=`<div class="mdl">
-    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-      <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--ac2)">${b.negocio}</div><div style="font-size:9px;color:var(--t4)">${b.giro} ${b.maps?'· 📍':''}${hist.length>0?' · '+(hist[hist.length-1].fecha||'').substring(0,10):''}</div></div>
-      <button onclick="document.getElementById('sm').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px">✕</button>
-    </div>
-    ${b.maps?`<a href="${b.maps}" target="_blank" style="display:inline-block;font-size:9px;color:var(--ac);text-decoration:none;margin-bottom:4px">📍 Maps →</a>`:''}
-    <div class="sec" style="padding:8px;margin-bottom:6px"><div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">📇 Datos del negocio <span style="font-size:7px;color:var(--t4)">(editable)</span></div>
-      <div class="g2">
-        <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="seg_enc" value="${b.encargado||''}" placeholder="Nombre" style="font-size:11px;padding:6px 8px"></div>
-        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" id="seg_tel" value="${b.telefono||''}" placeholder="55-XXXX" type="tel" style="font-size:11px;padding:6px 8px"></div>
-        <div class="fld"><label class="lbl">RFC</label><input class="inp" id="seg_rfc" value="${b.rfc||''}" placeholder="XAXX010101000" maxlength="13" style="font-size:11px;padding:6px 8px;text-transform:uppercase"></div>
-        <div class="fld"><label class="lbl">Email</label><input class="inp" id="seg_email" value="${b.email||''}" placeholder="correo@..." type="email" style="font-size:11px;padding:6px 8px"></div>
+  return `<div class="fi">
+    <div class="sec" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="font-size:15px;font-weight:800">📂 Mi Cartera</div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:18px;font-weight:800">${biz.length}</div>
+          <div style="font-size:8px;opacity:.8">Negocios</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:18px;font-weight:800">${starCount}</div>
+          <div style="font-size:8px;opacity:.8">⭐ Prioritarios</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:18px;font-weight:800">${ventas}</div>
+          <div style="font-size:8px;opacity:.8">🛒 Ventas</div>
+        </div>
       </div>
     </div>
-    <div style="background:linear-gradient(135deg,#2da0d1,#1d7ba3);border-radius:10px;padding:12px;margin-bottom:8px;text-align:center;color:#fff">
-      <div style="font-size:38px;font-weight:800;line-height:1">${vn}</div>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;opacity:.85">VISITA #${vn}</div>
-      <div style="font-size:8px;opacity:.65;margin-top:2px">${b.visitas} visita(s) previas registradas</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:8px">
-      <button onclick="showHist('${b.negocio.replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);font-size:8px;font-weight:700;cursor:pointer">📋 Historial</button>
-      <button onclick="showSegCot('${b.negocio.replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--yw);background:#fff9e6;color:#92600a;font-size:8px;font-weight:700;cursor:pointer">💰 Cotización</button>
-      <button onclick="showVenta('${b.negocio.replace(/'/g,"\\'")}','${(b.giro||'').replace(/'/g,"\\'")}','${(b.maps||'').replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--gn);background:#eafaf1;color:var(--gn);font-size:8px;font-weight:700;cursor:pointer">🛒 Venta</button>
-      <button onclick="showEditBiz('${b.negocio.replace(/'/g,"\\'")}')" style="padding:7px;border-radius:7px;border:1px solid var(--t4);background:var(--s2);color:var(--t3);font-size:8px;font-weight:700;cursor:pointer">✏️ Editar datos</button>
-    </div>
-    <div id="seg-edit" style="display:none"></div>
-    <div id="seg-venta" style="display:none"></div>
-    <div id="seg-content">
-      <div style="font-size:10px;font-weight:700;color:var(--ac2);margin-bottom:6px">📝 Tipificar visita</div>
-      <div class="g2">
-        <div class="fld"><label class="lbl">Interés *</label><select class="inp" id="si"><option value="">—</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
-        <div class="fld"><label class="lbl">Resultado *</label><select class="inp" id="sr" onchange="document.getElementById('seg_monto_wrap').style.display=this.value.toLowerCase().indexOf('venta')>=0?'block':'none'"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
-        <div class="fld" id="seg_monto_wrap" style="display:none"><label class="lbl">💰 Monto venta (sin IVA) *</label><input class="inp" id="seg_monto" type="number" placeholder="0.00" inputmode="decimal"></div>
-        
-        <div class="fld"><label class="lbl">Próxima visita</label><input class="inp" type="date" id="sd"></div>
-        <div class="fld"><label class="lbl">⏰ Recordatorio</label><select class="inp" id="srm"><option value="">—</option><option>Llamar mañana</option><option>Enviar cotización</option><option>Entregar muestra</option><option>Confirmar pedido</option><option>Cobrar factura</option><option>Revisar stock cliente</option><option>Agendar con dueño</option></select></div>
-        <div class="fld full"><label class="lbl">📦 Stock actual del cliente</label><select class="inp" id="ssk"><option value="">—</option><option>Sin stock — necesita pronto</option><option>Poco stock — 1-2 semanas</option><option>Stock suficiente — 1 mes</option><option>Bien abastecido</option><option>No aplica</option></select></div>
-        <div class="fld full"><label class="lbl">Notas</label><textarea class="inp" id="so" rows="2" placeholder="Observaciones..."></textarea></div>
-      </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px;margin-top:4px"><div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">📸 Evidencia</div>
-        <input type="file" accept="image/*" capture="environment" id="sph" onchange="previewPhoto(this,'spv')" style="display:none">
-        <div onclick="document.getElementById('sph').click()" style="border:2px dashed var(--bd);border-radius:7px;padding:10px;text-align:center;cursor:pointer;color:var(--t4);font-size:9px" id="spv">📷 Tomar foto</div>
-      </div>
-      <div style="background:var(--ac3);border-radius:8px;padding:8px;margin-top:4px"><div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">📍 Ubicación</div><div class="gps-btn" onclick="ggSeg()" id="sgb"><span>📍</span><div><div style="font-weight:700">Capturar GPS</div></div></div><div id="sgl"></div></div>
-    </div>
-    <div id="seg-hist" style="display:none"></div>
-    <div id="seg-cot" style="display:none"></div>
-    <button class="btn btn-p" onclick="doSeg('${b.negocio.replace(/'/g,"\\'")}','${b.giro.replace(/'/g,"\\'")}',${vn})" id="sb" style="margin-top:8px">✅ GUARDAR SEGUIMIENTO (Visita #${vn})</button>
-  </div>`;document.body.appendChild(m);}
 
-function showHist(neg){
-  const hist=S.reg.filter(r=>r.negocio===neg);
-  const el=document.getElementById('seg-hist');
-  const ct=document.getElementById('seg-content');
-  const co=document.getElementById('seg-cot');
-  const cotCache=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
-  const cotBiz=cotCache.filter(c=>c.negocio===neg);
-  if(el.style.display==='none'){el.style.display='block';ct.style.display='none';co.style.display='none';
-    el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--ac2);margin-bottom:8px">📋 Historial de ${neg}</div>
-      <div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">🔄 Visitas (${hist.length})</div>
-      ${hist.length===0?'<div style="font-size:9px;color:var(--t4);padding:6px 0">Sin visitas previas</div>':''}
-      ${hist.map(r=>{const ic=r.interes?.includes('Alto')?'var(--gn)':r.interes?.includes('Medio')?'var(--yw)':'var(--t4)';
-        return `<div style="padding:5px 0;border-bottom:1px solid var(--s2)">
-          <div style="display:flex;justify-content:space-between"><div style="font-size:10px;font-weight:600;color:var(--t2)">${(r.fecha||'').substring(0,10)} ${r.hora||''}</div><span class="pill" style="background:${ic}15;color:${ic}">${r.interes?.split('—')[0]||'—'}</span></div>
-          ${r.resultado?`<div style="font-size:8px;color:var(--t3)">→ ${r.resultado}</div>`:''}
-        </div>`;}).join('')}
-      <div style="font-size:9px;font-weight:700;color:var(--yw);margin:10px 0 4px">💰 Cotizaciones (${cotBiz.length})</div>
-      ${cotBiz.length===0?'<div style="font-size:9px;color:var(--t4);padding:6px 0">Sin cotizaciones guardadas</div>':''}
-      ${cotBiz.map((c,ci)=>`<div style="padding:7px;background:var(--s2);border-radius:7px;margin-bottom:4px">
+    <div style="padding:0 2px;margin-bottom:8px">
+      <input class="inp" placeholder="🔍 Buscar negocio..." value="${S.qs||''}" oninput="S.qs=this.value;R();" style="font-size:14px;padding:12px">
+    </div>
+
+    ${sorted.length===0?(sq?'<div class="empty">Sin resultados para "'+sq+'"</div>':'<div class="empty">Sin negocios. Usa 📝 Nueva para registrar visitas.</div>'):''}
+    ${sorted.map((b,i)=>{
+      const st=isStar(b.negocio);
+      const origIdx=biz.indexOf(b);
+      const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';
+      const esVenta=b.resultado?.toLowerCase().indexOf('venta')>=0;
+      return `<div class="cd" onclick="openCartera(${origIdx})" style="cursor:pointer;border-left:4px solid ${st?'#D4AF37':ic};${st?'background:#FFFDE7;border-right:4px solid #D4AF37':''}">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="flex:1"><div style="font-size:12px;font-weight:800;color:var(--ac2)">$`+String(parseFloat(c.total||0).toLocaleString('es-MX',{minimumFractionDigits:2}))+`</div>
-          <div style="font-size:8px;color:var(--t4)">${c.fecha||''}</div>
-          <div style="font-size:8px;color:var(--t3)">${c.productos||''}</div></div>
-          <button onclick="replicarCot(${ci},'${neg.replace(/'/g,"\\\\'")}')" style="padding:4px 8px;border-radius:5px;border:1px solid var(--ac);background:var(--ac3);color:var(--ac2);cursor:pointer;font-size:8px;font-weight:700;white-space:nowrap">🔄 Replicar</button>
-        </div></div>`).join('')}
-      <button onclick="document.getElementById('seg-hist').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:8px;font-size:9px;padding:7px">← Volver a tipificar</button>`;}
-  else{el.style.display='none';ct.style.display='block';}}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:800;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${st?'⭐ ':''}${esVenta?'🛒 ':''}${b.negocio}</div>
+            <div style="font-size:10px;color:var(--t4)">${b.giro} · ${b.visitas} visita(s) · ${b.ultimo||'—'}</div>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}')" style="background:${st?'#D4AF37':'#e5e7eb'};border:none;cursor:pointer;font-size:18px;padding:5px 8px;border-radius:6px;color:${st?'#fff':'#9ca3af'}">${st?'★':'☆'}</button>
+            <span class="pill" style="background:${ic}15;color:${ic};font-size:10px">${b.interes?.split('—')[0]||'—'}</span>
+          </div>
+        </div>
+        ${b.resultado?`<div style="font-size:10px;color:var(--t3);margin-top:2px">→ ${b.resultado}</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
 
-function replicarCot(cotIdx,neg){
-  const cotCache=JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]');
-  const biz=cotCache.filter(x=>x.negocio===neg);
-  const c=biz[cotIdx];
-  if(!c||!c.items){toast('Sin productos para replicar','err');return;}
-  segQItems=[...c.items];
-  document.getElementById('seg-hist').style.display='none';
-  document.getElementById('seg-cot').style.display='block';
-  document.getElementById('seg-content').style.display='none';
-  renderSegCot(neg);
-  toast('🔄 Cotización replicada — edita y guarda');
+function openCartera(i){
+  const biz=getBiz();
+  const b=biz[i];if(!b)return;
+  const st=(S.estrellas||[]).some(e=>e.negocio===b.negocio&&e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido');
+  const regs=(S.reg||[]).filter(r=>r.negocio===b.negocio);
+  
+  const m=document.createElement('div');m.className='mbg';m.id='carteraPop';
+  m.onclick=e=>{if(e.target===m)m.remove();};
+  m.innerHTML=`<div class="mdl" style="max-width:500px;max-height:90vh;overflow-y:auto">
+    <div style="background:linear-gradient(135deg,#7c3aed,#4c1d95);margin:-13px -11px 12px;padding:14px;border-radius:12px 12px 0 0;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:16px;font-weight:800">${b.negocio}</div>
+          <div style="font-size:11px;opacity:.9">${b.giro} · ${b.visitas} visita(s)</div>
+        </div>
+        <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}');document.getElementById('carteraPop').remove();R();" style="background:rgba(255,255,255,.2);border:none;font-size:22px;padding:6px 10px;border-radius:8px;cursor:pointer">${st?'⭐':'☆'}</button>
+      </div>
+    </div>
+
+    <div style="font-size:12px;color:var(--t3);line-height:1.6;margin-bottom:12px">
+      ${b.encargado?'👤 '+b.encargado+'<br>':''}
+      ${b.telefono?'📞 '+b.telefono+'<br>':''}
+      ${b.email?'✉️ '+b.email+'<br>':''}
+      ${b.colonia?'📍 '+b.colonia:''}
+      ${b.maps?` · <a href="${b.maps}" target="_blank" style="color:var(--ac)">Maps</a>`:''}
+    </div>
+
+    <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:6px">📋 Historial de visitas</div>
+    ${regs.map(r=>`<div style="padding:8px;background:var(--s2);border-radius:6px;margin-bottom:4px;font-size:11px;border-left:3px solid var(--ac)">
+      <div style="display:flex;justify-content:space-between"><b>${r.fecha||'—'}</b><span style="color:var(--t4)">${r.interes||''}</span></div>
+      <div style="color:var(--t3)">${r.resultado||'—'}</div>
+      ${r.notas?`<div style="color:var(--t4);font-size:10px;margin-top:2px">${r.notas}</div>`:''}
+    </div>`).join('')}
+
+    <div style="display:flex;gap:6px;margin-top:14px">
+      <button onclick="document.getElementById('carteraPop').remove();openSeg(${i})" class="btn btn-p" style="flex:1;font-size:13px;padding:12px">📝 Nueva Visita</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button onclick="document.getElementById('carteraPop').remove();S.cotNeg='${b.negocio.replace(/'/g,"\\'")}';S.v='cotizar';R();" class="btn" style="flex:1;font-size:12px;padding:10px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">💰 Cotizar</button>
+      <button onclick="document.getElementById('carteraPop').remove();showVenta(${i})" class="btn" style="flex:1;font-size:12px;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">🛒 Convertir a Venta</button>
+    </div>
+    <button onclick="document.getElementById('carteraPop').remove()" class="btn btn-s" style="margin-top:8px;font-size:11px">Cerrar</button>
+  </div>`;
+  document.body.appendChild(m);
 }
 
 
@@ -675,7 +732,7 @@ function agendaH(){
   ${todos.length===0?'<div class="empty">Sin visitas programadas.<br>Agenda desde \ud83d\udcdd Nuevo o \ud83d\udd04 Seguimiento.</div>':''}
   </div>`;}
 
-function navToSeg(neg){S.v='seguimiento';R();load();setTimeout(()=>{const biz=getBiz();const idx=biz.findIndex(b=>b.negocio===neg);if(idx>=0)openSeg(idx);},800);}
+function navToSeg(neg){S.v='cartera';R();load();setTimeout(()=>{const biz=getBiz();const idx=biz.findIndex(b=>b.negocio===neg);if(idx>=0)openSeg(idx);},800);}
 
 async function toggleStar(neg){
   const was=(S.estrellas||[]).some(e=>e.negocio===neg&&e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido');
@@ -1362,6 +1419,7 @@ function uploadAgentFoto(agentId, input){
       <div style="display:grid;gap:8px;font-size:13px">
         <div style="padding:10px;background:var(--s2);border-radius:8px"><b style="color:var(--t4);font-size:10px">ZONA ASIGNADA</b><div style="font-weight:700;margin-top:2px">${u.z}</div></div>
         <div style="padding:10px;background:var(--s2);border-radius:8px"><b style="color:var(--t4);font-size:10px">ID AGENTE</b><div style="font-weight:700;margin-top:2px">${u.id}</div></div>
+        <div style="padding:10px;background:#f0fdf4;border-radius:8px;border:2px solid #16a34a"><b style="color:#16a34a;font-size:10px">🛒 VENTAS CERRADAS</b><div style="font-weight:900;margin-top:2px;font-size:18px;color:#16a34a">${(S.reg||[]).filter(r=>r.resultado&&r.resultado.toLowerCase().indexOf("venta")>=0).length}</div></div>
         <div style="padding:10px;background:var(--s2);border-radius:8px"><b style="color:var(--t4);font-size:10px">EMAIL</b><div style="font-weight:700;margin-top:2px">${u.email||'supervisor@entelequia.com.mx'}</div></div>
       </div>
     </div>
