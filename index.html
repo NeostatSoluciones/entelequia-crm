@@ -441,7 +441,7 @@ function openCartera(i){
     <div style="margin-top:14px;padding:12px;background:#f0fdf4;border:2px solid #16a34a;border-radius:10px">
       <div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:8px">💰 Cotizaciones registradas</div>
       ${cots.map((c,ci)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #dcfce7">
-        <div style="font-size:12px"><b>${c.fecha||'—'}</b> · $${parseFloat(c.cotizacion_monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+        <div style="font-size:12px"><b>${c.fecha||'—'}</b> · $${parseFloat(c.cotizacion_monto).toLocaleString('es-MX',{minimumFractionDigits:2})} <span style='font-size:9px;color:var(--t4)'>+ IVA</span></div>
         <button onclick="convertirVenta('${b.negocio.replace(/'/g,"\'")}','${b.giro||''}','${b.encargado||''}','${b.telefono||''}',${c.cotizacion_monto})" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer">🛒 Cerrar Venta</button>
       </div>`).join('')}
     </div>`:''}
@@ -461,18 +461,18 @@ function openCartera(i){
 }
 
 function convertirVenta(neg,giro,contacto,tel,monto){
-  if(!confirm('¿Confirmar venta de '+neg+' por $'+parseFloat(monto).toLocaleString('es-MX',{minimumFractionDigits:2})+'?'))return;
+  if(!confirm('¿Confirmar venta de '+neg+'?\nSubtotal: $'+parseFloat(monto).toLocaleString('es-MX',{minimumFractionDigits:2})+'\nIVA 16%: $'+(parseFloat(monto)*0.16).toFixed(2)+'\nTotal: $'+(parseFloat(monto)*1.16).toFixed(2)))return;
   document.getElementById('carteraPop')?.remove();
   const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳...';}
   pf({
     action:'registrar_venta',
     agente:S.u.id,negocio:neg,giro:giro,
     contacto:contacto,telefono:tel,
-    total:parseFloat(monto).toFixed(2),
+    total:(parseFloat(monto)*1.16).toFixed(2),
     productos:'Cotización previa',
     notas:'Venta cerrada desde cartera'
   }).then(()=>{
-    toast('🛒 ¡Venta cerrada! $'+parseFloat(monto).toLocaleString('es-MX',{minimumFractionDigits:2}));
+    toast('🛒 ¡Venta cerrada! $'+(parseFloat(monto)*1.16).toFixed(2));
     load().then(()=>R());
   });
 }
