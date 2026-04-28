@@ -1,321 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#ffffff">
-<title>Entelequia® CRM v9.0</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#ffffff;--s2:#f1f5f9;--bd:#94a3b8;--bd2:#cbd5e1;--ac:#0F4C5C;--ac2:#1D7BA3;--ac3:#d6ecf5;--tx:#0a0a0a;--t2:#1a1a1a;--t3:#374151;--t4:#475569;--rd:#dc2626;--yw:#d97706;--gn:#16a34a;--tl:#0891b2;--sage:#7FB069}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html,body{height:100%;overflow-x:hidden}body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;font-size:16px;font-weight:500}input,select,textarea,button{font-family:inherit}@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.hdr{background:#fff;padding:12px 14px;border-bottom:2px solid var(--ac);display:flex;align-items:center;justify-content:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(15,76,92,.1)}.hdr img{height:38px}.hdr-t h1{font-size:14px;color:var(--ac);letter-spacing:3px;font-weight:900}.hdr-t p{font-size:11px;color:var(--t4);letter-spacing:1px;font-weight:600;margin-top:2px}
-.bn{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;padding:5px 2px 7px;display:flex;justify-content:center;gap:1px;border-top:2px solid var(--bd2);box-shadow:0 -3px 12px rgba(0,0,0,.08)}.bn button{flex:1;max-width:64px;padding:7px 1px 5px;border-radius:9px;border:none;cursor:pointer;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--t3);min-height:54px;overflow:hidden}.bn button.on{background:var(--ac3);color:var(--ac);border:2px solid var(--ac2)}.bn button span{font-size:22px;line-height:1}
-.tst{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:10px;font-size:14px;font-weight:700;z-index:9999;animation:su .2s;box-shadow:0 4px 18px rgba(0,0,0,.15);white-space:nowrap}.tok{background:var(--ac3);color:var(--ac);border:2px solid var(--ac2)}.terr{background:#fef2f2;color:#991b1b;border:2px solid #dc2626}
-.inp{width:100%;padding:14px 14px;border-radius:10px;border:2px solid var(--bd);background:#fff;color:var(--tx);font-size:16px;font-weight:600;outline:none;-webkit-appearance:none;min-height:50px}.inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac3)}textarea.inp{resize:vertical;min-height:60px}.lbl{display:block;font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-weight:800}.fld{margin-bottom:11px}
-.sec{background:#fff;border:2px solid var(--bd2);border-radius:12px;padding:14px;margin-bottom:10px}.sec-t{font-size:15px;font-weight:800;color:var(--ac);margin-bottom:10px}
-.btn{width:100%;padding:15px 12px;border-radius:11px;border:none;font-size:16px;font-weight:800;cursor:pointer;min-height:54px}.btn:active{transform:scale(.98)}.btn-p{background:var(--ac);color:#fff;border:2px solid var(--ac)}.btn-s{background:#fff;border:2px solid var(--bd);color:var(--t3)}.btn:disabled{opacity:.4}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.full{grid-column:1/-1}.pill{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800}.cd{background:#fff;border:2px solid var(--bd2);border-radius:11px;padding:13px;margin-bottom:7px}
-.mbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-end;justify-content:center}.mdl{background:#fff;border-radius:14px 14px 0 0;width:100%;max-width:540px;max-height:92vh;overflow:auto;padding:18px 16px 22px;border-top:3px solid var(--ac)}
-.empty{text-align:center;padding:32px 14px;color:var(--t4);font-size:14px;font-weight:600}.spin{width:24px;height:24px;border:3px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite;margin:0 auto 8px}@keyframes sp{to{transform:rotate(360deg)}}
-.login-w{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:linear-gradient(180deg,#fff,#d6ecf5)}.login-b{background:#fff;border:2px solid var(--ac);border-radius:14px;padding:26px 20px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 30px rgba(15,76,92,.15)}
-.prod-row{display:flex;align-items:center;gap:9px;padding:13px 12px;border-radius:9px;border:2px solid var(--bd2);margin-bottom:6px;cursor:pointer;background:#fff;min-height:54px}
-.ql{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--s2)}
-.qty-btn{width:46px;height:46px;border-radius:10px;border:2px solid var(--ac);background:#fff;color:var(--ac);font-size:22px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.unit-sel{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}.unit-opt{padding:13px 8px;border-radius:10px;border:2px solid var(--bd);background:#fff;color:var(--t3);font-size:13px;font-weight:800;cursor:pointer;text-align:center;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.unit-opt.on{background:var(--ac3);border-color:var(--ac);color:var(--ac)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0F4C5C">
+    <title>Entelequia® CRM v9.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --s2: #f1f5f9;
+            --bd: #94a3b8;
+            --bd2: #cbd5e1;
+            --ac: #0F4C5C;
+            --ac2: #1D7BA3;
+            --ac3: #d6ecf5;
+            --tx: #0a0a0a;
+            --t2: #1a1a1a;
+            --t3: #374151;
+            --t4: #475569;
+            --rd: #dc2626;
+            --yw: #d97706;
+            --gn: #16a34a;
+            --tl: #0891b2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tx); font-size: 16px; overflow-x: hidden; }
+        
+        /* Header & Nav */
+        .hdr { background: #fff; padding: 12px 14px; border-bottom: 2px solid var(--ac); display: flex; align-items: center; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(15,76,92,.1); }
+        .hdr-t h1 { font-size: 14px; color: var(--ac); letter-spacing: 2px; font-weight: 900; }
+        .hdr-t p { font-size: 10px; color: var(--t4); font-weight: 600; }
+
+        .bn { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #fff; padding: 8px 4px; display: flex; justify-content: space-around; border-top: 2px solid var(--bd2); }
+        .bn button { background: transparent; border: none; font-size: 10px; font-weight: 800; color: var(--t3); display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+        .bn button.on { color: var(--ac); }
+        .bn button span { font-size: 20px; }
+
+        /* UI Elements */
+        .sec { background: #fff; border: 2px solid var(--bd2); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .sec-t { font-size: 15px; font-weight: 800; color: var(--ac); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .fld { margin-bottom: 14px; }
+        .lbl { display: block; font-size: 11px; color: var(--t3); text-transform: uppercase; font-weight: 800; margin-bottom: 6px; }
+        .inp { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--bd); font-size: 16px; font-weight: 600; outline: none; }
+        .inp:focus { border-color: var(--ac); background: var(--ac3); }
+        .btn { width: 100%; padding: 15px; border-radius: 10px; border: none; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-p { background: var(--ac); color: #fff; }
+        .btn-s { background: var(--s2); color: var(--t3); border: 2px solid var(--bd2); }
+        .btn:active { transform: scale(0.97); }
+
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .cd { background: #fff; border: 2px solid var(--bd2); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+        .tst { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 50px; background: var(--ac); color: #fff; font-weight: 700; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+        /* Login */
+        .login-w { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--s2); padding: 20px; }
+        .login-b { background: #fff; padding: 30px; border-radius: 20px; border: 2px solid var(--ac); width: 100%; max-width: 360px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .spin { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: rot 0.8s linear infinite; }
+        @keyframes rot { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-<div id="app"></div><div id="tbox" style="display:none"></div>
+    <div id="app"></div>
+    <div id="tst" class="tst" style="display:none"></div>
 
-<script>
-// VARIABLES GLOBALES LIMPIAS Y FUNCIONALES
-const LOGO = ''; 
-const SUG = {}; 
-let inlineQItems = [];
-let ventaQItems = [];
-let segQItems = [];
-let photoData = {reg: null, seg: null};
-let segLat = '';
-let segLng = '';
+    <script>
+        const API = 'https://script.google.com/macros/s/AKfycbwkvzqSl_3WdIADxxqJ1_YX6lLmFheBFoyXjyInyfXzq08bUI620jrvKxBgXFI11M_f/exec';
+        const AG = [
+            {id:'CarlosG', z:'CONDESA', p:'8142', nm:'Carlos Garcia'},
+            {id:'Alberto', z:'COL. JUÁREZ', p:'4910', nm:'Alberto Ruvalcaba'},
+            {id:'Carlos', z:'ROMA', p:'7151', nm:'Carlos Mejia'},
+            {id:'Jenny', z:'POLANCO', p:'4050', nm:'Jenny Moncisvais'},
+            {id:'Roberto', z:'ZONA ESMERALDA', p:'6237', nm:'Roberto Santillan'},
+            {id:'Christian', z:'SUPERVISOR', p:'2741', r:'admin', nm:'Christian Lopez'}
+        ];
+        const GIROS = ['Cafetería','Restaurante','Bar','Hotel','Panadería','Comida Rápida','Fonda','Hospital','Otro'];
+        const INT_O = ['Alto — Cotización','Medio — Info','Bajo — Futuro','Sin interés'];
+        const RES_O = ['Muestra entregada','Cotización enviada','Venta cerrada','No interesado','Cerrado','Regresar luego'];
 
-const API = 'https://script.google.com/macros/s/AKfycbwkvzqSl_3WdIADxxqJ1_YX6lLmFheBFoyXjyInyfXzq08bUI620jrvKxBgXFI11M_f/exec';
-const AG=[{id:'CarlosG',z:'CONDESA',p:'8142',nm:'Carlos Garcia',tel:'55-0000-0001',e:'campo1@entelequia.com.mx',foto:''},{id:'Alberto',z:'COL. JUÁREZ',p:'4910',nm:'Alberto Ruvalcaba',tel:'55-0000-0002',e:'campo2@entelequia.com.mx',foto:''},{id:'Carlos',z:'ROMA',p:'7151',nm:'Carlos Mejia',tel:'55-0000-0003',e:'campo3@entelequia.com.mx',foto:''},{id:'Vacante',z:'SANTA MARÍA LA RIBERA',p:'8091',nm:'Vacante',tel:'—',e:'',foto:''},{id:'Jenny',z:'POLANCO',p:'4050',nm:'Jenny Moncisvais',tel:'55-0000-0005',e:'campo5@entelequia.com.mx',foto:''},{id:'Roberto',z:'ZONA ESMERALDA',p:'6237',nm:'Roberto Santillan',tel:'55-0000-0006',e:'',foto:''},{id:'Christian',z:'SUPERVISOR',p:'2741',r:'admin',nm:'Christian Lopez',tel:'55-0000-0000',e:'supervisor@entelequia.com.mx',foto:''}];
-const ZC={'CONDESA':['Condesa','Hipódromo'],'COL. JUÁREZ':['Juárez','Cuauhtémoc','Zona Rosa'],'ROMA':['Roma Norte','Roma Sur','Doctores','Narvarte'],'SANTA MARÍA LA RIBERA':['Santa María la Ribera','Santa María Insurgentes','Atlampa'],'POLANCO':['Polanco I-V','Chapultepec Morales','Granada','Anzures'],'ZONA ESMERALDA':['Hacienda de Valle Escondido','Club de Golf Hacienda','Condado de Sayavedra','Lomas de la Hacienda','Bosque Esmeralda','Rincón Esmeralda']};
-const GIROS=['Cafetería / Coffee Shop','Restaurante','Bar / Cantina','Café Gourmet','Bistrot / Wine Bar','Hotel','Nevería / Heladería','Panadería','Food Truck','Taquería','Comida Rápida','Pizzería','Sushi / Japonés','Juice Bar','Catering','Fonda','Coworking','Hospital / Clínica','Escuela','Otro'];
-const INT_O=['Alto — Quiere cotización','Medio — Pide más info','Bajo — Tal vez después','Sin interés'];
-const RES_O=['Precio elevado','Catálogo dejado','Muestra entregada','Cotización en sitio','Cotización por enviar','Pidió que regrese','No estaba el encargado','Cerrado / No encontrado','No interesado','Venta cerrada'];
-const HOSP_RES = ['Interesado — pide cotización','Interesado — pide muestras','Ya tiene proveedor','No interesado','No encontré encargado','Cerrado / No encontrado','Venta cerrada','Precio elevado'];
+        let S = {
+            u: JSON.parse(localStorage.getItem('ecrm_u') || 'null'),
+            v: 'nueva',
+            reg: [],
+            ld: false,
+            lat: '', lng: ''
+        };
 
-async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
-async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
+        function toast(m) {
+            const t = document.getElementById('tst');
+            t.textContent = m; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',idAgent:'',alertas:null,welcomeShown:false,hosp:null,hospLoaded:false,
-  form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
+        async function pf(d) {
+            try {
+                await fetch(API, { method: 'POST', body: JSON.stringify(d), mode: 'no-cors' });
+                return true;
+            } catch (e) { return false; }
+        }
 
-function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
+        async function gf(a, q='') {
+            try {
+                const r = await fetch(`${API}?action=${a}${q}`);
+                return await r.json();
+            } catch (e) { return null; }
+        }
 
-function showWelcomePopup(){
-  if(!S.alertas)return;
-  const a=S.alertas;
-  const starCount=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').length;
-  const starNames=(S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').map(e=>e.negocio).slice(0,5);
-  const total=(a.hoyAgenda?.length||0)+(a.cotizSinAvance?.length||0)+(a.altoSinRevisita?.length||0)+starCount;
-  if(total===0)return;
-  const m=document.createElement('div');m.className='mbg';m.id='welcomePop';
-  m.onclick=e=>{if(e.target===m)cerrarWelcome();};
-  m.innerHTML=`<div class="mdl" style="max-width:480px">
-    <div style="background:linear-gradient(135deg,#1D7BA3,#0F4C5C);margin:-13px -11px 12px;padding:18px 16px;border-radius:12px 12px 0 0;color:#fff">
-      <div style="font-size:18px;font-weight:800">👋 ¡Buen día, ${S.u.nm.split(' ')[0]}!</div>
-    </div>
-    <button onclick="cerrarWelcome()" class="btn btn-p" style="margin-top:6px;font-size:13px;padding:12px">✅ Empezar el día</button>
-  </div>`;
-  document.body.appendChild(m);
-}
-function cerrarWelcome(){const e=document.getElementById('welcomePop');if(e)e.remove();}
+        function R() {
+            const app = document.getElementById('app');
+            if (!S.u) { app.innerHTML = loginH(); return; }
 
-function saveForm(){['rn','rg','re','rt','rc','rv','ri','rr','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el)S.form[id]=el.value;});}
-function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el&&S.form[id])el.value=S.form[id];});},50);}
+            app.innerHTML = `
+                <div class="hdr">
+                    <div class="hdr-t">
+                        <h1>ENTELEQUIA® CRM</h1>
+                        <p>${S.u.nm} | ${S.u.z}</p>
+                    </div>
+                </div>
+                <div style="padding: 16px 16px 80px">
+                    ${S.v === 'nueva' ? nuevaH() : S.v === 'cartera' ? carteraH() : dashboardH()}
+                </div>
+                <div class="bn">
+                    <button class="${S.v==='nueva'?'on':''}" onclick="nav('nueva')"><span>📝</span>Nueva</button>
+                    <button class="${S.v==='cartera'?'on':''}" onclick="nav('cartera')"><span>📂</span>Cartera</button>
+                    ${S.u.r === 'admin' ? `<button class="${S.v==='dash'?'on':''}" onclick="nav('dash')"><span>📊</span>Dash</button>` : ''}
+                    <button onclick="logout()"><span>🚪</span>Salir</button>
+                </div>
+            `;
+        }
 
-function getBiz(){
-  const biz={};
-  S.reg.forEach(r=>{
-    if(!r.negocio)return;
-    const k=r.negocio;
-    if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',ultimaHora:'',interes:'',resultado:'',maps:r.maps||'',encargado:'',telefono:'',colonia:'',email:'',rfc:''};
-    biz[k].visitas++;
-    const f=r.fecha||'';const h=r.hora||'';
-    if(f>biz[k].ultimo||(f===biz[k].ultimo&&h>biz[k].ultimaHora)){biz[k].ultimo=f;biz[k].ultimaHora=h;}
-    biz[k].interes=r.interes||biz[k].interes;
-    biz[k].resultado=r.resultado||biz[k].resultado;
-    if(r.maps)biz[k].maps=r.maps;
-    if(r.encargado)biz[k].encargado=r.encargado;
-    if(r.telefono)biz[k].telefono=r.telefono;
-  });
-  return Object.values(biz).sort((a,b)=>{const ka=(a.ultimo||'')+' '+(a.ultimaHora||'');const kb=(b.ultimo||'')+' '+(b.ultimaHora||'');return kb.localeCompare(ka);});
-}
+        function nav(v) { S.v = v; R(); if(v==='cartera' || v==='dash') load(); }
 
-async function load(){
-  S.ld=true;R();
-  try{
-    const isAdmin=S.u?.r==='admin';
-    const calls=[
-      gf('alertas&agente='+encodeURIComponent(S.u.id)),
-      gf('registros','&agente='+encodeURIComponent(S.u.id)),
-      gf('costos'),
-      gf('estrellas&agente='+S.u.id)
-    ];
-    if(isAdmin)calls.push(gf('all_agents'));
-    const results=await Promise.all(calls);
-    const [a,r,c,st]=results;
-    if(a)S.alertas=a;
-    if(r?.registros)S.reg=r.registros;
-    if(c?.productos)S.cos=c.productos;
-    if(st?.estrellas)S.estrellas=st.estrellas;
-    if(isAdmin&&results[4]){S.ad=results[4].agents;S.dias7=results[4].dias7||[];}
-  }catch(e){console.log('load',e);}
-  S.ld=false;R();
-  if(S.v==='nueva'){restoreForm();}
-}
+        function loginH() {
+            return `
+                <div class="login-w">
+                    <div class="login-b">
+                        <h2 style="text-align:center; color:var(--ac); margin-bottom:20px;">Acceso CRM</h2>
+                        <div class="fld">
+                            <label class="lbl">Agente</label>
+                            <select id="li-u" class="inp">
+                                <option value="">Seleccionar...</option>
+                                ${AG.map(a => `<option value="${a.id}">${a.nm}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="fld">
+                            <label class="lbl">PIN</label>
+                            <input id="li-p" type="password" class="inp" placeholder="****" inputmode="numeric">
+                        </div>
+                        <button class="btn btn-p" onclick="doL()">Entrar</button>
+                    </div>
+                </div>
+            `;
+        }
 
-function R(){
-  if(S.v==='nueva')saveForm();
-  const a=document.getElementById('app');
-  if(!S.u){a.innerHTML=loginH();return;}
-  if(!document.getElementById('crm-content')){mountApp();}
-  const content=document.getElementById('crm-content');
-  if(content){
-    content.innerHTML=
-      S.v==='nueva'?nuevaH():
-      S.v==='cartera'?carteraH():
-      S.v==='catalogo'?catalogoH():
-      S.v==='cotizar'?cotizarH():
-      S.v==='precios'?preciosH():
-      S.v==='dashboard'?dashboardH():
-      S.v==='id'?idH():'';
-  }
-  document.querySelectorAll('.bn button[data-tab]').forEach(b=>{
-    b.classList.toggle('on',b.dataset.tab===S.v);
-  });
-  if(S.v==='nueva'){restoreForm();}
-}
+        function doL() {
+            const id = document.getElementById('li-u').value;
+            const pin = document.getElementById('li-p').value;
+            const user = AG.find(a => a.id === id);
+            if (user && user.p === pin) {
+                S.u = user;
+                localStorage.setItem('ecrm_u', JSON.stringify(user));
+                R();
+            } else { toast('PIN Incorrecto'); }
+        }
 
-function mountApp(){
-  const a=document.getElementById('app');
-  const isA=S.u.r==='admin';
-  const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}]
-    :[{k:'nueva',i:'📝',l:'Nueva'},{k:'cartera',i:'📂',l:'Cartera'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
-  a.innerHTML=
-    `<div class="hdr"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v9.0</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
-    +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
-    +`<div class="bn">${tabs.map(t=>`<button data-tab="${t.k}" class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
-}
+        function logout() { localStorage.removeItem('ecrm_u'); S.u = null; R(); }
 
-function nav(v){
-  if(S.v==='nueva')saveForm();
-  S.v=v;
-  R();
-}
+        function nuevaH() {
+            return `
+                <div class="sec">
+                    <div class="sec-t">Datos del Negocio</div>
+                    <div class="fld"><label class="lbl">Nombre Comercial *</label><input id="rn" class="inp" placeholder="Ej. Café Central"></div>
+                    <div class="g2">
+                        <div class="fld"><label class="lbl">Giro</label>
+                            <select id="rg" class="inp">${GIROS.map(g => `<option>${g}</option>`).join('')}</select>
+                        </div>
+                        <div class="fld"><label class="lbl">Contacto</label><input id="re" class="inp" placeholder="Nombre"></div>
+                    </div>
+                    <div class="fld"><label class="lbl">Teléfono</label><input id="rt" class="inp" type="tel" placeholder="5512345678"></div>
+                    <button class="btn btn-s" id="btn-ubi" onclick="getUbi()">📍 Capturar Ubicación</button>
+                    <p id="ubi-ok" style="display:none; font-size:11px; color:var(--gn); margin-top:5px; font-weight:700">✅ Ubicación lista</p>
+                </div>
+                <div class="sec" style="border-color: var(--ac2)">
+                    <div class="sec-t">Tipificación</div>
+                    <div class="g2">
+                        <div class="fld"><label class="lbl">Interés</label>
+                            <select id="ri" class="inp">${INT_O.map(i => `<option>${i}</option>`).join('')}</select>
+                        </div>
+                        <div class="fld"><label class="lbl">Resultado</label>
+                            <select id="rr" class="inp">${RES_O.map(r => `<option>${r}</option>`).join('')}</select>
+                        </div>
+                    </div>
+                    <div class="fld"><label class="lbl">Notas</label><textarea id="ro" class="inp" style="height:60px"></textarea></div>
+                    <button class="btn btn-p" id="btn-save" onclick="doReg()">✅ Guardar Registro</button>
+                </div>
+            `;
+        }
 
-function loginH(){
-  return `<div class="login-w"><div class="login-b fi"><div style="font-size:8px;color:var(--ac2);letter-spacing:3px;font-weight:800;margin-bottom:14px">CRM × NEOSTAT</div><div class="fld"><label class="lbl">Usuario</label><select class="inp" id="la"><option value="">Seleccionar...</option>${AG.map(a=>`<option value="${a.id}">${a.nm} — ${a.z}</option>`).join('')}</select></div><div class="fld"><label class="lbl">Contraseña</label><input class="inp" type="password" id="lp" maxlength="4" inputmode="numeric" placeholder="····"></div><button class="btn btn-p" onclick="doL()" style="margin-top:3px">Ingresar</button><div id="le" style="margin-top:4px;font-size:9px;color:var(--rd);display:none"></div></div></div>`;
-}
+        function getUbi() {
+            navigator.geolocation.getCurrentPosition(p => {
+                S.lat = p.coords.latitude; S.lng = p.coords.longitude;
+                document.getElementById('ubi-ok').style.display = 'block';
+                document.getElementById('btn-ubi').style.display = 'none';
+            }, () => toast('Error de GPS'));
+        }
 
-function doL(){
-  const sel=document.getElementById('la');if(!sel)return;
-  const ag=sel.value,pin=document.getElementById('lp').value,a=AG.find(x=>x.id===ag);
-  if(!a||pin!==a.p){document.getElementById('le').style.display='block';document.getElementById('le').textContent=!a?'Selecciona usuario':'PIN incorrecto';return;}
-  localStorage.setItem('ecrm4',JSON.stringify(a));
-  S.u=a;S.v=a.r==='admin'?'dashboard':'nueva';
-  load();
-}
+        async function doReg() {
+            const n = document.getElementById('rn').value.trim();
+            if (!n) return toast('Nombre requerido');
+            
+            const b = document.getElementById('btn-save');
+            b.disabled = true; b.innerHTML = '<div class="spin"></div>';
 
-function nuevaH(){
-  const cols=ZC[S.u.z]||[];
-  const visitasHoy=(S.reg||[]).filter(r=>{const f=r.fecha||'';return f.startsWith(new Date().toISOString().split('T')[0])}).length;
-  return `<div class="fi">
-    <div class="sec" style="border-color:var(--ac)">
-      <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px">📂 Negocio</div>
-      <select class="inp" id="cotBizSel" onchange="fillCotBiz(this.value)" style="font-size:14px;padding:10px;margin-bottom:6px">
-        <option value="">— Nuevo negocio —</option>
-        ${getBiz().map(b=>`<option value="\${b.negocio}" \${S.cotNeg===b.negocio?'selected':''}>\${b.negocio} (\${b.giro})</option>`).join('')}
-      </select>
-    </div>
-    <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#0F4C5C);color:#fff;padding:14px 12px;border-radius:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-size:16px;font-weight:800">📝 Nueva Visita</div>
-          <div style="font-size:11px;opacity:.9">${S.u.nm} · ${S.u.z}</div></div>
-        <div style="text-align:center;background:rgba(255,255,255,.2);border-radius:10px;padding:8px 14px">
-          <div style="font-size:24px;font-weight:900">${visitasHoy}</div>
-          <div style="font-size:8px;opacity:.85;letter-spacing:1px">VISITAS HOY</div>
-        </div>
-      </div>
-    </div>
-    <div class="sec">
-      <div class="fld"><label class="lbl">Negocio *</label><input class="inp" id="rn" placeholder="Nombre del negocio" autocomplete="off"></div>
-      <div class="g2">
-        <div class="fld"><label class="lbl">Giro *</label><select class="inp" id="rg"><option value="">Seleccionar</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select></div>
-        <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="re" placeholder="Nombre"></div>
-      </div>
-      <div class="g2">
-        <div class="fld"><label class="lbl">Email</label><input class="inp" id="rm" type="email" placeholder="correo@mail.com"></div>
-        <div class="fld"><label class="lbl">Teléfono</label><input class="inp" id="rt" type="tel" placeholder="55 1234 5678" inputmode="tel"></div>
-      </div>
-      <div class="fld"><label class="lbl">📍 Ubicación</label>
-        <button onclick="getUbi()" class="btn btn-s" style="font-size:10px;padding:6px 12px" id="ubi_btn">📍 Capturar ubicación</button>
-        <span id="ubi_ok" style="font-size:10px;color:var(--gn);display:none">✅ Ubicación capturada</span>
-      </div>
-    </div>
-    <div class="sec" style="border-color:var(--ac);border-width:2px">
-      <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px">📋 Tipificación</div>
-      <div class="g2">
-        <div class="fld"><label class="lbl">Interés *</label><select class="inp" id="ri"><option value="">Nivel</option>${INT_O.map(i=>`<option>${i}</option>`).join('')}</select></div>
-        <div class="fld"><label class="lbl">Resultado *</label><select class="inp" id="rr" onchange="document.getElementById('reg_monto_wrap').style.display=this.value.toLowerCase().indexOf('venta')>=0?'block':'none'"><option value="">¿Qué pasó?</option>${RES_O.map(r=>`<option>${r}</option>`).join('')}</select></div>
-      </div>
-      <div class="fld" id="reg_monto_wrap" style="display:none"><label class="lbl">💰 Monto venta (sin IVA) *</label><input class="inp" id="reg_monto" type="number" placeholder="0.00" inputmode="decimal"></div>
-      <div class="fld"><label class="lbl">Notas</label><textarea class="inp" id="ro" rows="2" placeholder="Observaciones..."></textarea></div>
-    </div>
-    <button onclick="doNueva()" class="btn btn-p" style="font-size:15px;padding:14px" id="rb">✅ Guardar Visita</button>
-  </div>`;
-}
+            const payload = {
+                action: 'registrar_visita',
+                agente: S.u.id,
+                negocio: n,
+                giro: document.getElementById('rg').value,
+                encargado: document.getElementById('re').value,
+                telefono: document.getElementById('rt').value,
+                interes: document.getElementById('ri').value,
+                resultado: document.getElementById('rr').value,
+                notas: document.getElementById('ro').value,
+                lat: S.lat, lng: S.lng,
+                maps: S.lat ? `https://www.google.com/maps?q=${S.lat},${S.lng}` : ''
+            };
 
-function getUbi(){
-  const b=document.getElementById('ubi_btn');
-  b.textContent='⏳ Obteniendo...';b.disabled=true;
-  navigator.geolocation.getCurrentPosition(p=>{
-    S.lat=p.coords.latitude;S.lng=p.coords.longitude;
-    document.getElementById('ubi_ok').style.display='inline';
-    b.style.display='none';
-  },()=>{b.textContent='❌ Sin acceso';b.disabled=false;},{timeout:10000});
-}
+            const ok = await pf(payload);
+            if (ok) {
+                toast('¡Visita guardada!');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                toast('Error al guardar');
+                b.disabled = false; b.textContent = '✅ Guardar Registro';
+            }
+        }
 
-async function doNueva(){
-  const n=document.getElementById('rn')?.value?.trim();
-  const g=document.getElementById('rg')?.value;
-  const ri=document.getElementById('ri')?.value;
-  const rr=document.getElementById('rr')?.value;
-  if(!n){toast('⚠️ Nombre del negocio es obligatorio','err');return;}
-  if(!g){toast('⚠️ Selecciona un giro','err');return;}
-  if(!ri){toast('⚠️ Selecciona el nivel de interés','err');return;}
-  if(!rr){toast('⚠️ Selecciona el resultado','err');return;}
-  const regMonto=document.getElementById('reg_monto')?.value||'';
-  if(rr.toLowerCase().indexOf('venta')>=0&&(!regMonto||regMonto==='0')){toast('⚠️ Ingresa el monto de la venta','err');return;}
-  
-  const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳ Guardando...';
-  try{
-    const mapsLink = (S.lat&&S.lng) ? `https://maps.google.com/?q=${S.lat},${S.lng}` : '';
-    await pf({
-      action:'registrar_visita',agente:S.u.id,
-      negocio:n,giro:g,
-      encargado:document.getElementById('re')?.value||'',
-      email:document.getElementById('rm')?.value||'',
-      telefono:document.getElementById('rt')?.value||'',
-      interes:ri,resultado:rr,
-      cotizacion_monto:regMonto||'',
-      productos:'',
-      proxima_visita:'',
-      notas:document.getElementById('ro')?.value||'',
-      lat:S.lat||'',lng:S.lng||'',maps:mapsLink
-    });
-    
-    toast('✅ Visita registrada');
-    S.lat='';S.lng='';
-    S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''};
-    load();
-  }catch(e){toast('Error: '+e,'err');}
-  b.disabled=false;b.textContent='✅ Guardar Visita';
-}
+        function carteraH() {
+            if (S.ld) return '<div style="text-align:center; padding:40px;"><div class="spin" style="border-top-color:var(--ac); margin:0 auto;"></div><p>Cargando cartera...</p></div>';
+            return `
+                <div class="sec-t">Mi Cartera (${S.reg.length})</div>
+                ${S.reg.length === 0 ? '<p style="text-align:center; color:var(--t4);">No hay registros aún.</p>' : 
+                  S.reg.map(r => `
+                    <div class="cd">
+                        <div style="font-weight:900; font-size:14px;">${r.negocio}</div>
+                        <div style="font-size:11px; color:var(--t4); margin-top:2px;">${r.fecha} | ${r.interes}</div>
+                        <div style="font-size:12px; margin-top:4px;"><b>Resultado:</b> ${r.resultado}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
 
-function carteraH(){
-  if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
-  const biz=getBiz();
-  return `<div class="fi">
-    <div class="sec" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;padding:14px 12px;border-radius:12px">
-      <div style="font-size:15px;font-weight:800">📂 Mi Cartera</div>
-      <div style="display:flex;gap:6px;margin-top:10px">
-        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:18px;font-weight:800">${biz.length}</div>
-          <div style="font-size:8px;opacity:.8">Negocios</div>
-        </div>
-      </div>
-    </div>
-    ${biz.length===0? '<div class="empty">Sin negocios. Usa 📝 Nueva para registrar visitas.</div>':''}
-    ${biz.map((b,i)=>`
-      <div class="cd">
-        <div style="font-size:14px;font-weight:800;color:var(--t2)">${b.negocio}</div>
-        <div style="font-size:10px;color:var(--t4)">${b.giro} · ${b.visitas} visita(s) · Última: ${b.ultimo||'—'}</div>
-        <div style="font-size:10px;color:var(--t3);margin-top:2px">Resultado: ${b.resultado||'—'}</div>
-      </div>
-    `).join('')}
-  </div>`;
-}
+        function dashboardH() {
+            return `<div class="sec"><div class="sec-t">Admin Dash</div><p>Sincronizando datos del equipo...</p></div>`;
+        }
 
-function catalogoH(){
-  return `<div class="fi"><div class="sec"><div class="sec-t">📚 Catálogo</div><p style="font-size:13px;color:var(--t4)">Función de catálogo cargada exitosamente.</p></div></div>`;
-}
+        async function load() {
+            S.ld = true; R();
+            const data = await gf('registros', `&agente=${S.u.id}`);
+            if (data && data.registros) S.reg = data.registros;
+            S.ld = false; R();
+        }
 
-function cotizarH(){
-  return `<div class="fi"><div class="sec"><div class="sec-t">💰 Cotizaciones</div><p style="font-size:13px;color:var(--t4)">Módulo de cotizaciones listo.</p></div></div>`;
-}
-
-function preciosH(){
-  return `<div class="fi"><div class="sec"><div class="sec-t">🏷️ Precios</div><p style="font-size:13px;color:var(--t4)">Módulo de precios listo.</p></div></div>`;
-}
-
-function dashboardH(){
-  if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando datos en vivo...</div>`;
-  return `<div class="fi"><div class="sec"><div class="sec-t">📊 Dashboard</div><p style="font-size:13px;color:var(--t4)">Dashboard de supervisión en línea.</p></div></div>`;
-}
-
-function idH(){
-  return `<div class="fi"><div class="sec"><div class="sec-t">🪪 ID Agente</div>
-    <button onclick="S.u=null;localStorage.removeItem('ecrm4');R();" class="btn" style="width:100%;background:#dc2626;color:#fff;font-size:13px;padding:12px;border:none;border-radius:8px;font-weight:700;cursor:pointer">🚪 Cerrar Sesión</button>
-  </div></div>`;
-}
-
-function fillCotBiz(val){}
-
-// Inicialización
-R();
-</script>
+        R();
+    </script>
 </body>
 </html>
