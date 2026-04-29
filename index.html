@@ -195,7 +195,7 @@ function nuevaH(){
       <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px">📂 Negocio</div>
       <select class="inp" id="cotBizSel" onchange="fillCotBiz(this.value)" style="font-size:14px;padding:10px;margin-bottom:6px">
         <option value="">— Nuevo negocio —</option>
-        ${getBiz().map(b=>`<option value="\${b.negocio}" \${S.cotNeg===b.negocio?'selected':''}>\${b.negocio} (\${b.giro})</option>`).join('')}
+        ${getBiz().map(b=>`<option value="${b.negocio}" ${S.cotNeg===b.negocio?'selected':''}>${b.negocio} (${b.giro})</option>`).join('')}
       </select>
     </div>
     <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#0F4C5C);color:#fff;padding:14px 12px;border-radius:12px">
@@ -398,7 +398,7 @@ function carteraH(){
             <div style="font-size:10px;color:var(--t4)">${b.giro} · ${b.visitas} visita(s) · ${b.ultimo||'—'}</div>
           </div>
           <div style="display:flex;gap:4px;align-items:center">
-            <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\\'")}')" style="background:${st?'#D4AF37':'#e5e7eb'};border:none;cursor:pointer;font-size:18px;padding:5px 8px;border-radius:6px;color:${st?'#fff':'#9ca3af'}">${st?'★':'☆'}</button>
+            <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\u0027")}')" style="background:${st?'#D4AF37':'#e5e7eb'};border:none;cursor:pointer;font-size:18px;padding:5px 8px;border-radius:6px;color:${st?'#fff':'#9ca3af'}">${st?'★':'☆'}</button>
             <span class="pill" style="background:${ic}15;color:${ic};font-size:10px">${b.interes?.split('—')[0]||'—'}</span>
           </div>
         </div>
@@ -538,7 +538,7 @@ function showEditBiz(neg){
         <div class="fld"><label class="lbl">🧾 RFC</label><input class="inp" id="edr" value="${saved.rfc||''}" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div>
       </div>
       <div style="font-size:8px;color:var(--t4);margin:4px 0">💡 Estos datos se usan para cotizaciones y facturación</div>
-      <button onclick="saveEditBiz('${neg.replace(/'/g,"\\'")}')" class="btn btn-p" style="font-size:11px;padding:9px;margin-top:4px">💾 Guardar datos</button>
+      <button onclick="saveEditBiz('${neg.replace(/'/g,"\u0027")}')" class="btn btn-p" style="font-size:11px;padding:9px;margin-top:4px">💾 Guardar datos</button>
       <button onclick="document.getElementById('seg-edit').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:4px;font-size:9px;padding:7px">← Volver</button>`;
   } else {el.style.display='none';ct.style.display='block';}
 }
@@ -579,14 +579,14 @@ function renderVentaWithCots(neg,giro,maps,cotBiz){
   const el=document.getElementById('seg-venta');if(!el)return;
   el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--gn);margin-bottom:6px">🛒 Registrar Venta — ${neg}</div>
     ${cotBiz.length>0?`<div style="font-size:9px;font-weight:700;color:var(--ac2);margin-bottom:4px">📋 Cotizaciones existentes — toca para convertir en venta</div>
-      ${cotBiz.map((c,ci)=>`<div onclick="cotToVenta(${ci},'${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="padding:7px;background:var(--s2);border-radius:7px;margin-bottom:4px;cursor:pointer;border:1px solid var(--bd)">
+      ${cotBiz.map((c,ci)=>`<div onclick="cotToVenta(${ci},'${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" style="padding:7px;background:var(--s2);border-radius:7px;margin-bottom:4px;cursor:pointer;border:1px solid var(--bd)">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div><div style="font-size:12px;font-weight:800;color:var(--ac2)">$${parseFloat(c.total||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
           <div style="font-size:8px;color:var(--t4)">${c.fecha||''} · ${c.productos||''}</div></div>
           <span style="padding:3px 6px;border-radius:5px;background:#eafaf1;color:var(--gn);font-size:8px;font-weight:700">🛒 Vender</span>
         </div></div>`).join('')}
       <div style="font-size:8px;color:var(--t4);text-align:center;margin:4px 0">— o crear venta nueva —</div>`:''}
-    <button onclick="renderVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" class="btn btn-s" style="font-size:10px;padding:8px;margin-bottom:6px">➕ Nueva venta manual</button>
+    <button onclick="renderVenta('${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" class="btn btn-s" style="font-size:10px;padding:8px;margin-bottom:6px">➕ Nueva venta manual</button>
     <button onclick="document.getElementById('seg-venta').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="font-size:9px;padding:7px">← Volver</button>`;
 }
 
@@ -603,19 +603,19 @@ function renderVenta(neg,giro,maps){
   const cotBiz=cotCache.filter(c=>c.negocio===neg);
   el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--gn);margin-bottom:6px">🛒 Registrar Venta — ${neg}</div>
     ${cotBiz.length>0?`<div style="font-size:9px;font-weight:700;color:var(--yw);margin-bottom:4px">💰 Cotizaciones existentes — toca para convertir en venta</div>
-      ${cotBiz.map((c,ci)=>`<div onclick="cotToVenta(${ci},'`+neg.replace(/'/g,"\\'")+`','`+giro.replace(/'/g,"\\'")+`','`+maps.replace(/'/g,"\\'")+`')" style="padding:6px;background:#fff9e6;border:1px solid #f39c1233;border-radius:6px;margin-bottom:3px;cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:11px;font-weight:700;color:var(--ac2)">$`+String(parseFloat(c.total||0).toLocaleString('es-MX',{minimumFractionDigits:2}))+`</div><span style="padding:2px 6px;border-radius:4px;background:var(--gn)15;color:var(--gn);font-size:8px;font-weight:700">🛒 Vender</span></div><div style="font-size:8px;color:var(--t4)">${c.fecha||''} · ${c.productos||''}</div></div>`).join('')}
+      ${cotBiz.map((c,ci)=>`<div onclick="cotToVenta(${ci},'`+neg.replace(/'/g,"\u0027")+`','`+giro.replace(/'/g,"\u0027")+`','`+maps.replace(/'/g,"\u0027")+`')" style="padding:6px;background:#fff9e6;border:1px solid #f39c1233;border-radius:6px;margin-bottom:3px;cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:11px;font-weight:700;color:var(--ac2)">$`+String(parseFloat(c.total||0).toLocaleString('es-MX',{minimumFractionDigits:2}))+`</div><span style="padding:2px 6px;border-radius:4px;background:var(--gn)15;color:var(--gn);font-size:8px;font-weight:700">🛒 Vender</span></div><div style="font-size:8px;color:var(--t4)">${c.fecha||''} · ${c.productos||''}</div></div>`).join('')}
       <div style="font-size:8px;color:var(--t4);margin:6px 0 4px;text-align:center">— o agrega productos manualmente —</div>`:''}
-    ${ventaQItems.length>0?`<div style="margin-bottom:6px">${ventaQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><span style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</span> <span style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</span></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="ventaQItems.splice(${i},1);renderVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
+    ${ventaQItems.length>0?`<div style="margin-bottom:6px">${ventaQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><span style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</span> <span style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</span></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="ventaQItems.splice(${i},1);renderVenta('${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
       <div style="display:flex;justify-content:space-between;border-top:2px solid var(--bd);padding-top:4px"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz</div><div style="font-size:14px;font-weight:800;color:var(--gn)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div>`:''}
-    <div style="margin-bottom:6px"><div class="fld"><label class="lbl">📋 ¿Usar cotización existente?</label><select class="inp" id="vcot" onchange='useCotForVenta(this.value,"${neg.replace(/'/g,'\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" ><option value="">— Agregar productos manualmente —</option>${(JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]')).filter(c=>c.negocio===neg).map((c,i)=>`<option value="${i}">$`+String(parseFloat(c.total||0).toFixed(2))+` · ${c.fecha||''} · ${(c.productos||'').substring(0,30)}</option>`).join('')}</select></div></div>
+    <div style="margin-bottom:6px"><div class="fld"><label class="lbl">📋 ¿Usar cotización existente?</label><select class="inp" id="vcot" onchange='useCotForVenta(this.value,"${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" ><option value="">— Agregar productos manualmente —</option>${(JSON.parse(localStorage.getItem('cots_'+S.u?.id)||'[]')).filter(c=>c.negocio===neg).map((c,i)=>`<option value="${i}">$`+String(parseFloat(c.total||0).toFixed(2))+` · ${c.fecha||''} · ${(c.productos||'').substring(0,30)}</option>`).join('')}</select></div></div>
     <div class="g2" style="margin-bottom:6px">
       <div class="fld"><label class="lbl">Forma de Pago</label><select class="inp" id="vfp"><option value="">—</option><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Crédito 15 días</option><option>Crédito 30 días</option></select></div>
       <div class="fld"><label class="lbl">Contacto</label><input class="inp" id="vco" placeholder="Nombre"></div>
       <div class="fld full"><label class="lbl">Notas</label><textarea class="inp" id="vno" rows="1" placeholder="Factura, entrega..."></textarea></div>
     </div>
-    <input class="inp" placeholder="🔍 Agregar productos..." id="vqs" oninput="renderVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="margin-bottom:4px;font-size:10px" value="${sq}">
-    <div style="max-height:160px;overflow-y:auto">${prods.slice(0,25).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openVentaCalc(${ri},'${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" style="padding:4px 6px"><div style="font-size:7px;font-weight:700;color:var(--ac2);min-width:40px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>
-    ${ventaQItems.length>0?`<button onclick="saveVenta('${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')" class="btn btn-p" style="margin-top:6px;background:linear-gradient(135deg,#27ae60,#1abc9c)" id="svb">🛒 CONFIRMAR VENTA · $${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</button>`:''}
+    <input class="inp" placeholder="🔍 Agregar productos..." id="vqs" oninput="renderVenta('${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" style="margin-bottom:4px;font-size:10px" value="${sq}">
+    <div style="max-height:160px;overflow-y:auto">${prods.slice(0,25).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openVentaCalc(${ri},'${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" style="padding:4px 6px"><div style="font-size:7px;font-weight:700;color:var(--ac2);min-width:40px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>
+    ${ventaQItems.length>0?`<button onclick="saveVenta('${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')" class="btn btn-p" style="margin-top:6px;background:linear-gradient(135deg,#27ae60,#1abc9c)" id="svb">🛒 CONFIRMAR VENTA · $${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</button>`:''}
     <button onclick="document.getElementById('seg-venta').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:4px;font-size:9px;padding:7px">← Volver</button>`;}
 
 function cotToVenta(cotIdx,neg,giro,maps){
@@ -634,7 +634,7 @@ function openVentaCalc(idx,neg,giro,maps){const p=S.cos[idx];if(!p)return;
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px"><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/CAJA</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/PAQ</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div>
     <div class="g2"><div class="fld"><label class="lbl">Compra por</label><select class="inp" id="vct" onchange='vcc(${idx})'>${p.pz_emp>0?`<option value="empaque">Empaque (${p.pz_emp} pz)</option>`:''}${p.pz_caja>0?`<option value="caja">Caja (${p.pz_caja} pz)</option>`:''}</select></div><div class="fld"><label class="lbl">Cantidad</label><input class="inp" type="number" id="vcq" value="1" min="1" oninput="vcc(${idx})" inputmode="numeric"></div></div>
     <div style="background:var(--s2);border-radius:7px;padding:8px;margin:4px 0;display:flex;justify-content:space-between"><div><div style="font-size:7px;color:var(--t4);font-weight:700">PIEZAS</div><div style="font-size:13px;font-weight:800" id="vcpz">0</div></div><div style="text-align:right"><div style="font-size:7px;color:var(--t4);font-weight:700">TOTAL</div><div style="font-size:16px;font-weight:800;color:var(--gn)" id="vctt">$0</div></div></div>
-    <button class="btn btn-p" style="background:linear-gradient(135deg,#27ae60,#1abc9c)" onclick="addVQ(${idx},'${neg.replace(/'/g,"\\'")}','${giro.replace(/'/g,"\\'")}','${maps.replace(/'/g,"\\'")}')">➕ Agregar</button></div>`;
+    <button class="btn btn-p" style="background:linear-gradient(135deg,#27ae60,#1abc9c)" onclick="addVQ(${idx},'${neg.replace(/'/g,"\u0027")}','${giro.replace(/'/g,"\u0027")}','${maps.replace(/'/g,"\u0027")}')">➕ Agregar</button></div>`;
   document.body.appendChild(c);vcc(idx);}
 
 function vcc(i){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja',q=parseInt(document.getElementById('vcq')?.value)||1;const pr=t==='caja'?p.precio_caja:p.precio_paq;document.getElementById('vcpz').textContent=q;document.getElementById('vctt').textContent='$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});}
@@ -677,12 +677,12 @@ function renderSegCot(neg){
   let prods=S.cos;const sq=document.getElementById('scqs')?.value||'';
   if(sq){const q=sq.toUpperCase();prods=prods.filter(p=>p.sku.toUpperCase().includes(q)||p.producto.toUpperCase().includes(q));}
   el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--yw);margin-bottom:6px">💰 Cotización para ${neg}</div>
-    ${segQItems.length>0?`<div style="margin-bottom:6px">${segQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><div style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</div><div style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</div></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="segQItems.splice(${i},1);renderSegCot('${neg.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
+    ${segQItems.length>0?`<div style="margin-bottom:6px">${segQItems.map((it,i)=>`<div class="ql"><div style="flex:1"><div style="font-size:9px;font-weight:700;color:var(--ac2)">${it.sku}</div><div style="font-size:8px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${it.pz.toLocaleString()} pz</div></div><div style="font-size:10px;font-weight:700">$${it.total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div><button onclick="segQItems.splice(${i},1);renderSegCot('${neg.replace(/'/g,"\u0027")}')" style="background:none;border:none;color:var(--rd);cursor:pointer;font-size:10px">✕</button></div>`).join('')}
       <div style="display:flex;justify-content:space-between;border-top:2px solid var(--bd);padding-top:4px;margin-top:3px"><div style="font-size:8px;color:var(--t4)">${pzT.toLocaleString()} pz</div><div style="font-size:14px;font-weight:800;color:var(--ac2)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
       <div style="padding:4px 6px;background:#fff9e6;border:1px solid #f39c1233;border-radius:4px;font-size:8px;color:#92600a;margin-top:3px">💡 IVA incluido · Envío GRATIS > $2,500</div>
-      <button onclick="saveSegCot('${neg.replace(/'/g,"\\'")}')" class="btn btn-p" style="margin-top:5px;font-size:11px;padding:9px" id="scb">📋 Guardar Cotización</button></div>`:''}
-    <input class="inp" placeholder="🔍 SKU o nombre..." id="scqs" oninput="renderSegCot('${neg.replace(/'/g,"\\'")}')" style="margin-bottom:4px;font-size:11px" value="${sq}">
-    <div style="max-height:200px;overflow-y:auto">${prods.slice(0,30).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openSegCalc(${ri},'${neg.replace(/'/g,"\\'")}')"><div style="font-size:8px;font-weight:700;color:var(--ac2);min-width:45px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>
+      <button onclick="saveSegCot('${neg.replace(/'/g,"\u0027")}')" class="btn btn-p" style="margin-top:5px;font-size:11px;padding:9px" id="scb">📋 Guardar Cotización</button></div>`:''}
+    <input class="inp" placeholder="🔍 SKU o nombre..." id="scqs" oninput="renderSegCot('${neg.replace(/'/g,"\u0027")}')" style="margin-bottom:4px;font-size:11px" value="${sq}">
+    <div style="max-height:200px;overflow-y:auto">${prods.slice(0,30).map((p,i)=>{const ri=S.cos.indexOf(p);return `<div class="prod-row" onclick="openSegCalc(${ri},'${neg.replace(/'/g,"\u0027")}')"><div style="font-size:8px;font-weight:700;color:var(--ac2);min-width:45px">${p.sku}</div><div style="font-size:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div><div style="font-size:8px;font-weight:700">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>`;}).join('')}</div>
     <button onclick="document.getElementById('seg-cot').style.display='none';document.getElementById('seg-content').style.display='block'" class="btn btn-s" style="margin-top:6px;font-size:9px;padding:7px">← Volver</button>`;}
 
 function openSegCalc(idx,neg){const p=S.cos[idx];if(!p)return;
@@ -691,7 +691,7 @@ function openSegCalc(idx,neg){const p=S.cos[idx];if(!p)return;
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px"><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/CAJA</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_caja.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div><div style="background:var(--ac3);border-radius:6px;padding:6px;text-align:center"><div style="font-size:7px;color:var(--ac2);font-weight:700">$/PAQ</div><div style="font-size:13px;font-weight:800;color:var(--ac2)">$${p.precio_paq.toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div></div>
     <div class="g2"><div class="fld"><label class="lbl">Compra por</label><select class="inp" id="sct" onchange='scc(${idx})'>${p.pz_emp>0?`<option value="empaque">Empaque (${p.pz_emp} pz)</option>`:''}${p.pz_caja>0?`<option value="caja">Caja (${p.pz_caja} pz)</option>`:''}</select></div><div class="fld"><label class="lbl">Cantidad</label><input class="inp" type="number" id="scq" value="1" min="1" oninput="scc(${idx})" inputmode="numeric"></div></div>
     <div style="background:var(--s2);border-radius:7px;padding:8px;margin:5px 0;display:flex;justify-content:space-between"><div><div style="font-size:7px;color:var(--t4);font-weight:700">PIEZAS</div><div style="font-size:13px;font-weight:800" id="scpz">0</div></div><div style="text-align:right"><div style="font-size:7px;color:var(--t4);font-weight:700">TOTAL (IVA INCL.)</div><div style="font-size:16px;font-weight:800;color:var(--ac2)" id="sctt">$0</div></div></div>
-    <button class="btn btn-p" onclick="addSegQ(${idx},'${neg.replace(/'/g,"\\'")}')">➕ Agregar</button></div>`;
+    <button class="btn btn-p" onclick="addSegQ(${idx},'${neg.replace(/'/g,"\u0027")}')">➕ Agregar</button></div>`;
   document.body.appendChild(c);scc(idx);}
 
 function scc(i){const p=S.cos[i],t=document.getElementById('sct')?.value||'caja',q=parseInt(document.getElementById('scq')?.value)||1;const pr=t==='caja'?p.precio_caja:p.precio_paq;document.getElementById('scpz').textContent=q;document.getElementById('sctt').textContent='$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});}
@@ -1067,7 +1067,7 @@ function cotizarH(){
       <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:6px">📂 Cotizar para</div>
       <select class="inp" onchange="fillCotBiz(this.value)" style="font-size:13px;padding:10px">
         <option value="">— Nuevo negocio (llenar datos) —</option>
-        \${getBiz().map(b=>`<option value="\${b.negocio}" \${S.cotNeg===b.negocio?'selected':''}>\${b.negocio} (\${b.giro})</option>`).join('')}
+        ${getBiz().map(b=>`<option value="${b.negocio}" ${S.cotNeg===b.negocio?'selected':''}>${b.negocio} (${b.giro})</option>`).join('')}
       </select>
     </div>
     <div class="sec" style="background:var(--ac);border:none;color:#fff;padding:18px 16px">
@@ -1486,17 +1486,6 @@ function uIdPh(input,id){
   };
   r.readAsDataURL(f);
 }
-
-// ============================================================
-// HOSPITALES — Prospección vertical DENUE
-// ============================================================
-
-async 
-
-
-
-
-async 
 
 function configH(){const isA=S.u.r==='admin';return `<div class="fi"><div class="sec"><div class="sec-t">⚙️ Sistema</div><div style="font-size:9px;color:var(--t3);line-height:1.6">👤 ${S.u.nm} · ${S.u.z}<br>📦 Productos: ${S.cos.length}${!isA?'<br>📋 Registros: '+S.reg.length+' · 🗺️ Sugeridos: '+ms().length:''}</div></div>${isA?`<div class="sec" style="border-color:var(--rd)"><div class="sec-t" style="color:var(--rd)">🗑️ Admin</div>${AG.filter(a=>!a.r).map(a=>`<button class="btn btn-s" onclick="rAg('${a.id}')" style="font-size:9px;padding:7px;border-color:var(--rd)20;color:var(--rd);margin-bottom:3px">🗑️ ${a.nm}</button>`).join('')}<button class="btn btn-s" onclick="rAll()" style="font-size:10px;padding:9px;border-color:var(--rd);color:var(--rd);font-weight:800;margin-top:6px">⚠️ BORRAR TODO</button></div>`:''}<div class="sec"><div class="sec-t">📱 Instalar</div><div style="font-size:9px;color:var(--t3)"><b>iPhone:</b> Safari → Compartir → Agregar a inicio<br><b>Android:</b> Chrome → ⋮ → Agregar a inicio</div></div><button class="btn btn-s" onclick="if(confirm('¿Cerrar sesión?')){localStorage.removeItem('ecrm4');S.u=null;R();}" style="color:var(--rd);border-color:#e74c3c25">🚪 Cerrar Sesión</button></div>`;}
 async function rAg(a){if(!confirm('¿Borrar '+a+'?'))return;await pf({action:'resetear_agente',agente:a});toast('🗑️');load();}
