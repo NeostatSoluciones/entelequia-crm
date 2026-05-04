@@ -469,27 +469,36 @@ function openCartera(i){
   document.body.appendChild(m);
 }
 
-function convertirVenta(neg,giro,contacto,tel,monto){
-  if(!confirm('¿Confirmar venta de '+neg+'?\nSubtotal: $'+parseFloat(monto).toLocaleString('es-MX',{minimumFractionDigits:2})+'\nIVA 16%: $'+(parseFloat(monto)*0.16).toFixed(2)+'\nTotal: $'+(parseFloat(monto)*1.16).toFixed(2)))return;
+function convertirVenta(neg,giro,contacto,tel,monto,folio){
+  // FIX v7: monto ya es total CON IVA. Desglosamos hacia atrás solo para mostrar.
+  const tot=parseFloat(monto);
+  const sub=tot/1.16;
+  const iva=tot-sub;
+  if(!confirm('¿Confirmar venta de '+neg+'?\nFolio: '+folio+'\nSubtotal: $'+sub.toFixed(2)+'\nIVA 16%: $'+iva.toFixed(2)+'\nTotal: $'+tot.toFixed(2)))return;
   document.getElementById('carteraPop')?.remove();
   const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳...';}
   pf({
     action:'registrar_venta',
-    agente:S.u.id,negocio:neg,giro:giro,
+    agente:S.u.id,
+    agente_nombre:S.u.nm,
+    folioCotizacion:folio,
+    negocio:neg,giro:giro,
     contacto:contacto,telefono:tel,
-    total:(parseFloat(monto)*1.16).toFixed(2),
-    productos:'Cotización previa',
+    total:tot.toFixed(2),
+    productos:'Cotización previa · '+folio,
     notas:'Venta cerrada desde cartera'
   }).then(()=>{
-    toast('🛒 ¡Venta cerrada! $'+(parseFloat(monto)*1.16).toFixed(2));
+    toast('🛒 ¡Venta cerrada! $'+tot.toFixed(2));
     load().then(()=>R());
   });
 }
 
 function convertirVentaManual(neg,giro,contacto,tel){
-  const monto=prompt('💰 Monto de la venta (sin IVA):');
-  if(!monto||parseFloat(monto)<=0){toast('⚠️ Ingresa un monto válido','err');return;}
-  convertirVenta(neg,giro,contacto,tel,monto);
+  const folio=prompt('📋 Folio de cotización oficial (S-XXXX o COT-XXXX):');
+  if(!folio||!folio.trim()){toast('⚠️ Folio obligatorio','err');return;}
+  const monto=prompt('💰 Total CON IVA (tal cual aparece en la cotización oficial):');
+  if(!monto||parseFloat(monto)<=0){toast('⚠️ Ingresa un total válido','err');return;}
+  convertirVenta(neg,giro,contacto,tel,monto,folio.trim());
 }
 
 
@@ -641,13 +650,23 @@ function vcc(i){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja'
 
 function addVQ(i,neg,giro,maps){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja',q=parseInt(document.getElementById('vcq')?.value)||1;const pr=t==='caja'?p.precio_caja:p.precio_paq;ventaQItems.push({sku:p.sku,tipo:t,qty:q,pz:q,total:pr*q});document.getElementById('vcm')?.remove();toast('✅ '+p.sku);renderVenta(neg,giro,maps);}
 
-async function saveVenta(neg,giro,maps){const b=document.getElementById('svb');if(b){b.disabled=true;b.textContent='⏳...';}
-  const total=ventaQItems.reduce((s,i)=>s+i.total,0);
-  await pf({action:'registrar_venta',agente:S.u.id,negocio:neg,giro:giro,contacto:document.getElementById('vco')?.value||'',
+async function saveVenta(neg,giro,maps){
+  const folio=prompt('📋 Folio de cotización oficial (S-XXXX o COT-XXXX):');
+  if(!folio||!folio.trim()){toast('⚠️ Folio obligatorio','err');return;}
+  const b=document.getElementById('svb');if(b){b.disabled=true;b.textContent='⏳...';}
+  // FIX v7: total de items es subtotal SIN IVA. Sumamos IVA antes de mandar.
+  const sub=ventaQItems.reduce((s,i)=>s+i.total,0);
+  const totalConIVA=+(sub*1.16).toFixed(2);
+  await pf({action:'registrar_venta',
+    agente:S.u.id,
+    agente_nombre:S.u.nm,
+    folioCotizacion:folio.trim(),
+    negocio:neg,giro:giro,contacto:document.getElementById('vco')?.value||'',
     productos:ventaQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),
-    cantidad:ventaQItems.reduce((s,i)=>s+i.pz,0),total:total.toFixed(2),
+    cantidad:ventaQItems.reduce((s,i)=>s+i.pz,0),
+    total:totalConIVA.toFixed(2),
     forma_pago:document.getElementById('vfp')?.value||'',notas:document.getElementById('vno')?.value||'',maps:maps});
-  toast('🛒 ¡Venta registrada! $'+total.toLocaleString('es-MX',{minimumFractionDigits:2}));
+  toast('🛒 ¡Venta registrada! $'+totalConIVA.toLocaleString('es-MX',{minimumFractionDigits:2}));
   ventaQItems=[];document.getElementById('sm')?.remove();load();}
 
 function useCotForVenta(idx,neg,giro,maps){
