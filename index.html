@@ -30,7 +30,30 @@ const INT_O=['Alto — Quiere cotización','Medio — Pide más info','Bajo — 
 const RES_O=['Precio elevado','Catálogo dejado','Muestra entregada','Cotización en sitio','Cotización por enviar','Pidió que regrese','No estaba el encargado','Cerrado / No encontrado','No interesado','Venta cerrada'];
 
 async function gf(a,x=''){try{const r=await fetch(API+'?action='+a+x,{redirect:'follow'});return await r.json();}catch{return null;}}
-async function pf(d){try{await fetch(API,{method:'POST',body:JSON.stringify(d),mode:'no-cors'});return true;}catch{return false;}}
+async function pf(d){
+  try {
+    const r = await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify(d),
+      headers: {'Content-Type': 'text/plain;charset=utf-8'}
+    });
+    const json = await r.json();
+    // Sync contador del día desde backend si fue registro de visita
+    if(json && json.ok && json.totalHoy != null && d.action === 'registrar_visita' && S.u){
+      const hoy = new Date().toISOString().split('T')[0];
+      const k = 'dv_' + S.u.id + '_' + hoy;
+      localStorage.setItem(k, String(json.totalHoy));
+    }
+    // Mostrar error si lo hay
+    if(json && json.ok === false && json.error){
+      try { toast('⚠️ ' + json.error, 'err'); } catch(e){}
+    }
+    return json;
+  } catch(e) {
+    try { toast('⚠️ Sin conexión — reintenta', 'err'); } catch(_) {}
+    return {ok: false, error: 'Error de red: ' + (e && e.message || '')};
+  }
+}
 
 let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
@@ -93,12 +116,21 @@ function ch(){
   return Math.max(server,local);
 }
 function incDay(){
+  // FIX v8: pf() ya sincroniza el localStorage con totalHoy del backend,
+  // así que solo leemos el valor actual (no incrementamos).
+  // Fallback: si por lo que sea no llegó respuesta del backend, sí incrementamos.
   const hoy=new Date().toISOString().split('T')[0];
   const k='dv_'+S.u?.id+'_'+hoy;
-  const prev=parseInt(localStorage.getItem(k)||'0');
-  const nv=prev+1;
-  localStorage.setItem(k,String(nv));
-  return nv;
+  const cur=parseInt(localStorage.getItem(k)||'0');
+  // Si el contador no se movió desde el último, incrementar como fallback offline
+  if(cur === (window.__lastDayCount||0)){
+    const nv=cur+1;
+    localStorage.setItem(k,String(nv));
+    window.__lastDayCount=nv;
+    return nv;
+  }
+  window.__lastDayCount=cur;
+  return cur;
 }
 function saveForm(){['rn','rg','re','rt','rc','rv','ri','rr','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el)S.form[id]=el.value;});}
 function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr','rx','rd','ro','rfc'].forEach(id=>{const el=document.getElementById(id);if(el&&S.form[id])el.value=S.form[id];});if(S.form.rx==='si'){const fp=document.getElementById('rf');if(fp)fp.style.display='block';}},50);}
