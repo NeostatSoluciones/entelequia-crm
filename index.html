@@ -139,7 +139,8 @@ function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr',
 function getBizInfo(neg){const r=S.reg.filter(x=>x.negocio===neg);const last=r[r.length-1]||{};return{contacto:last.encargado||'',telefono:last.telefono||'',giro:last.giro||'',maps:last.maps||''};}
 function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.negocio;if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',ultimaHora:'',interes:'',resultado:'',maps:r.maps||'',encargado:'',telefono:'',colonia:'',email:'',rfc:''};biz[k].visitas++;const f=r.fecha||'';const h=r.hora||'';if(f>biz[k].ultimo||(f===biz[k].ultimo&&h>biz[k].ultimaHora)){biz[k].ultimo=f;biz[k].ultimaHora=h;}biz[k].interes=r.interes||biz[k].interes;biz[k].resultado=r.resultado||biz[k].resultado;if(r.maps)biz[k].maps=r.maps;if(r.encargado)biz[k].encargado=r.encargado;if(r.telefono)biz[k].telefono=r.telefono;if(r.colonia)biz[k].colonia=r.colonia;if(r.email)biz[k].email=r.email;if(r.rfc)biz[k].rfc=r.rfc;});return Object.values(biz).sort((a,b)=>{const ka=(a.ultimo||'')+' '+(a.ultimaHora||'');const kb=(b.ultimo||'')+' '+(b.ultimaHora||'');return kb.localeCompare(ka);});}
 
-async function load(){S.ld=true;R();
+async function load(silent=false){
+  if(!silent){S.ld=true;R();}
   try{
     const isAdmin=S.u?.r==='admin';
     const calls=[
@@ -167,14 +168,22 @@ async function load(){S.ld=true;R();
       S.totalVentasSem=results[5].totalVentasSem||0;
       S.lastSync=new Date();
     }
-    try{const ft=await gf('fotos');if(ft&&ft.fotos){Object.entries(ft.fotos).forEach(([id,url])=>{const ag=AG.find(a=>a.id===id);if(ag&&url)ag.foto=url;});}}catch(e){}
+    if(!silent){try{const ft=await gf('fotos');if(ft&&ft.fotos){Object.entries(ft.fotos).forEach(([id,url])=>{const ag=AG.find(a=>a.id===id);if(ag&&url)ag.foto=url;});}}catch(e){}}
   }catch(e){console.log('load',e);}
-  S.ld=false;R();
-  if(S.v==='registrar'){restoreForm();registrarReady();}
+  if(!silent){S.ld=false;}
+  // Re-render: en silent solo si no hay modal abierto (no interrumpir lo que el usuario está mirando)
+  if(silent){
+    if(!document.querySelector('.mbg')) R();
+  } else {
+    R();
+  }
+  if(!silent && S.v==='registrar'){restoreForm();registrarReady();}
   // Welcome popup una vez por sesión
-  const hoyKey='wp_'+new Date().toISOString().split('T')[0];
-  if(!localStorage.getItem(hoyKey)&&S.u?.r!=='admin'&&S.alertas){localStorage.setItem(hoyKey,'1');setTimeout(()=>showWelcomePopup(),400);}
-  else if(S.u?.r!=='admin'&&!S.welcomeShown){S.welcomeShown=true;setTimeout(()=>toast('📋 No olvides tipificar tus visitas'),800);}
+  if(!silent){
+    const hoyKey='wp_'+new Date().toISOString().split('T')[0];
+    if(!localStorage.getItem(hoyKey)&&S.u?.r!=='admin'&&S.alertas){localStorage.setItem(hoyKey,'1');setTimeout(()=>showWelcomePopup(),400);}
+    else if(S.u?.r!=='admin'&&!S.welcomeShown){S.welcomeShown=true;setTimeout(()=>toast('📋 No olvides tipificar tus visitas'),800);}
+  }
 }
 
 function R(){
@@ -1169,6 +1178,17 @@ function siguienteCorte(){
   return {etiqueta:etiqueta, faltan:faltan, target:target};
 }
 
+// Cuánto tiempo pasó desde el último sync con el backend
+function tiempoDesdeSync(){
+  if(!S.lastSync) return 'sincronizando…';
+  const diff=(new Date()-S.lastSync)/1000; // segundos
+  if(diff<60) return 'sync hace <1 min';
+  const mins=Math.floor(diff/60);
+  if(mins<60) return 'sync hace '+mins+' min';
+  const horas=Math.floor(mins/60);
+  return 'sync hace '+horas+'h '+(mins%60)+'m';
+}
+
 // Cambiar periodo manteniendo offset 0 (volver a actual)
 function cambiarPeriodo(p){
   S.dv=p;
@@ -1276,10 +1296,10 @@ function dashboardH(){
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
         <div style="flex:1;min-width:0">
           <div style="font-size:15px;font-weight:800">📊 Panel de Supervisión</div>
-          <div style="font-size:9px;opacity:.9;margin-top:3px">
+          <div style="font-size:9px;opacity:.9;margin-top:3px;line-height:1.4">
             ${usaHistorico
               ? `<span style="display:inline-block;width:7px;height:7px;background:#fbbf24;border-radius:50%;margin-right:4px"></span>📜 PERIODO CERRADO · ${etiquetaCorta}`
-              : `<span style="display:inline-block;width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;animation:pulse 1.5s infinite;margin-right:4px"></span>EN VIVO · próximo corte ${proxCorte.etiqueta} en ${proxCorte.faltan}`
+              : `<span style="display:inline-block;width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;margin-right:4px"></span>EN VIVO · ${tiempoDesdeSync()} · corte ${proxCorte.etiqueta} en ${proxCorte.faltan}`
             }
           </div>
         </div>
@@ -2460,17 +2480,19 @@ function showVisitPop(n){
   setTimeout(()=>{try{p.remove();}catch(e){}},2500);
 }
 R();if(S.u)load();
-// Auto-refresh dashboard supervisor cada 10 segundos (solo en modo "actual")
-setInterval(()=>{
-  if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)) load();
-},10000);
-
-// Refrescar el header del dashboard cada 30s para actualizar el contador de "próximo corte"
-// (sin ir al backend — solo re-renderiza el header en modo actual)
+// Auto-refresh dashboard supervisor cada 5 minutos en SILENCIO (sin spinner que tape la pantalla).
+// Solo refresca cuando: es admin, está en dashboard, no hay modal abierto, está en modo actual (no histórico)
 setInterval(()=>{
   if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)){
-    // Solo si NO estamos editando algo (modal abierto)
+    if(!document.querySelector('.mbg')) load(true);  // true = silent mode
+  }
+},300000); // 5 minutos = 300,000 ms
+
+// Refrescar SOLO el header cada 60s para actualizar contador de "próximo corte" y "última sync"
+// (no va al backend, solo re-renderiza)
+setInterval(()=>{
+  if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)){
     if(!document.querySelector('.mbg')) R();
   }
-},30000);
+},60000);
 </script></body></html>
