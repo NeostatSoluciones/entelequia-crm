@@ -55,7 +55,7 @@ async function pf(d){
   }
 }
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
+let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',dvOff:0,hist:null,cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
 
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
@@ -1142,61 +1142,166 @@ function copiarDatosBanco(){
 function fmtMoney(n){return '$'+(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function fmtMoneyK(n){if(!n)return '$0';if(n>=1000)return '$'+(n/1000).toFixed(1)+'k';return '$'+Math.round(n);}
 
+// === HELPERS DE FECHA / NAVEGACIÓN HISTÓRICA ===
+function fechaCorta(d){const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return d.getDate()+' '+meses[d.getMonth()]+' '+d.getFullYear();}
+function lunesDe(fecha){const d=new Date(fecha);const dia=d.getDay();const diff=d.getDate()-dia+(dia===0?-6:1);return new Date(d.getFullYear(),d.getMonth(),diff);}
+function etqSemana(fecha){const lun=lunesDe(fecha);const dom=new Date(lun.getFullYear(),lun.getMonth(),lun.getDate()+6);const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return lun.getDate()+' '+meses[lun.getMonth()]+' — '+dom.getDate()+' '+meses[dom.getMonth()];}
+function etqMes(fecha){const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];return meses[fecha.getMonth()]+' '+fecha.getFullYear();}
+
+// Calcula el siguiente corte (12pm o 12am) y cuánto falta
+function siguienteCorte(){
+  const ahora=new Date();
+  const h=ahora.getHours(), m=ahora.getMinutes(), s=ahora.getSeconds();
+  let proxH, etiqueta;
+  if(h<12){ proxH=12; etiqueta='12 pm'; }
+  else { proxH=24; etiqueta='12 am'; }
+  // Calcular ms hasta el siguiente corte
+  const target=new Date(ahora);
+  target.setHours(proxH===24?0:proxH, 0, 0, 0);
+  if(proxH===24) target.setDate(target.getDate()+1);
+  const diffMs=target-ahora;
+  const horas=Math.floor(diffMs/(1000*60*60));
+  const mins=Math.floor((diffMs%(1000*60*60))/(1000*60));
+  let faltan;
+  if(horas>0) faltan=horas+'h '+(mins<10?'0':'')+mins+'m';
+  else if(mins>0) faltan=mins+'m';
+  else faltan='<1m';
+  return {etiqueta:etiqueta, faltan:faltan, target:target};
+}
+
+// Cambiar periodo manteniendo offset 0 (volver a actual)
+function cambiarPeriodo(p){
+  S.dv=p;
+  S.dvOff=0;
+  S.hist=null;
+  R();
+}
+
+// Navegar al periodo anterior/siguiente
+async function navegarPeriodo(delta){
+  const newOff=(S.dvOff||0)+delta;
+  if(newOff>0) return; // No permitir ir al futuro
+  S.dvOff=newOff;
+  if(newOff===0){
+    S.hist=null;
+    R();
+    return;
+  }
+  // Cargar histórico
+  S.ld=true; R();
+  try{
+    const periodo=S.dv==='hoy'?'dia':S.dv;
+    const r=await gf('historico','&periodo='+periodo+'&offset='+newOff);
+    if(r&&r.ok!==false){ S.hist=r; }
+    else{ toast(r?.error||'Error cargando histórico','err'); S.dvOff=0; }
+  }catch(e){ toast('Error: '+e.message,'err'); S.dvOff=0; }
+  S.ld=false; R();
+}
+
+// Volver a la vista actual (cancela histórico)
+function volverActual(){
+  S.dvOff=0;
+  S.hist=null;
+  R();
+}
+
 function dashboardH(){
   if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando datos en vivo...</div>`;
   if(!S.ad)return `<div class="empty">Sin datos<br><button onclick="load()" class="btn btn-s" style="width:auto;padding:5px 10px;font-size:9px;margin-top:5px">🔄 Reintentar</button></div>`;
-  const A=S.ad;
+  // === MODO HISTÓRICO vs ACTUAL ===
+  const offset=S.dvOff||0;
+  const usaHistorico=offset!==0;
+
+  // Decidir fuente de datos
+  let A, tVis=0, tCot=0, tVen=0, tMonto=0, tIA=0, totClaves=0;
+  let ventasRec=[], negsClave=[], pendsHoy=[];
+  let labelPeriodo='', etiquetaCorta='';
+  let serie=[0,0,0,0,0,0,0], dias7=[], diasCorta=[];
+  let agSorted=[];
+
+  if(usaHistorico && S.hist && S.hist.agents){
+    // Modo histórico: viene de getHistorico
+    A=S.hist.agents;
+    const T=S.hist.totales||{};
+    tVis=T.visitas||0; tCot=T.cotizaciones||0; tVen=T.ventas||0;
+    tMonto=T.montoVentas||0; tIA=T.intAlto||0; totClaves=T.claves||0;
+    ventasRec=S.hist.ventas||[];
+    negsClave=[]; // No mostramos claves activas en histórico (son estado actual)
+    pendsHoy=[];
+    labelPeriodo=S.hist.rango?.label||'';
+    etiquetaCorta=S.hist.rango?.etiquetaCorta||'';
+    // Sin serie7 en histórico — escondemos esa sección
+    agSorted=Object.entries(A).sort((a,b)=>(b[1].visitas||0)-(a[1].visitas||0));
+  } else {
+    // Modo actual: viene de supervisor_snapshot (lo de antes)
+    A=S.ad;
+    const periodo=S.dv;
+    const key=periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes';
+    const keyC=periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes';
+    const keyV=periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes';
+    Object.values(A).forEach(a=>{
+      tVis+=a[key]||0;
+      tCot+=a[keyC]||0;
+      tVen+=a[keyV]||0;
+      if(periodo==='mes')tMonto+=a.ventasMesMonto||0;
+      tIA+=a.intAlto||0;
+    });
+    if(periodo!=='mes')tMonto=Object.values(A).reduce((s,a)=>s+(a.ventasMesMonto||0),0);
+    Object.values(A).forEach(a=>{(a.serie7||[]).forEach((v,i)=>serie[i]+=v);});
+    dias7=S.dias7||[];
+    diasCorta=dias7.map(d=>{const dt=new Date(d+'T12:00:00');return ['D','L','M','M','J','V','S'][dt.getDay()];});
+    agSorted=Object.entries(A).sort((a,b)=>(b[1][key]||0)-(a[1][key]||0));
+    ventasRec=S.ventasRecientes||[];
+    negsClave=S.negociosClave||[];
+    pendsHoy=S.pendientesHoy||[];
+    totClaves=negsClave.length;
+    labelPeriodo=(S.dv==='hoy'?'HOY':S.dv==='semana'?'SEMANA ACTUAL':'MES ACTUAL');
+    etiquetaCorta=(S.dv==='hoy'?fechaCorta(new Date()):S.dv==='semana'?etqSemana(new Date()):etqMes(new Date()));
+  }
+  const maxSerie=Math.max(...serie,1);
+
+  // === INDICADOR DE CORTE (12am / 12pm) ===
+  const proxCorte=siguienteCorte();
+  const totVtaSem=usaHistorico?(S.hist?.totales?.montoVentas||0):(S.totalVentasSem||0);
+
+  // Periodo (key visible)
   const periodo=S.dv;
   const key=periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes';
   const keyC=periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes';
   const keyV=periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes';
   
-  // Totales del equipo
-  let tVis=0,tCot=0,tVen=0,tMonto=0,tIA=0;
-  Object.values(A).forEach(a=>{
-    tVis+=a[key]||0;
-    tCot+=a[keyC]||0;
-    tVen+=a[keyV]||0;
-    if(periodo==='mes')tMonto+=a.ventasMesMonto||0;
-    else tMonto+=(a[keyV]||0)*0; // sólo mes tiene monto detallado
-    tIA+=a.intAlto||0;
-  });
-  // Para hoy/semana mostramos monto total del MES como referencia
-  if(periodo!=='mes')tMonto=Object.values(A).reduce((s,a)=>s+(a.ventasMesMonto||0),0);
-  
-  // Serie 7 días (suma equipo)
-  const serie=[0,0,0,0,0,0,0];
-  Object.values(A).forEach(a=>{(a.serie7||[]).forEach((v,i)=>serie[i]+=v);});
-  const maxSerie=Math.max(...serie,1);
-  const dias7=S.dias7||[];
-  const diasCorta=dias7.map(d=>{const dt=new Date(d+'T12:00:00');return ['D','L','M','M','J','V','S'][dt.getDay()];});
-  
-  // Ranking de agentes ordenado
-  const agSorted=Object.entries(A).sort((a,b)=>(b[1][key]||0)-(a[1][key]||0));
-  
-  const ahora=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const ventasRec=S.ventasRecientes||[];
-  const negsClave=S.negociosClave||[];
-  const pendsHoy=S.pendientesHoy||[];
-  const totVtaHoy=S.totalVentasHoy||0;
-  const totVtaSem=S.totalVentasSem||0;
-  const totClaves=negsClave.length;
-  
-  return `<div class="fi">
+  return `<div class="fi" id="dashRoot">
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#1D7BA3,#2da0d1);color:#fff;padding:14px 12px;border-radius:12px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
-        <div>
+        <div style="flex:1;min-width:0">
           <div style="font-size:15px;font-weight:800">📊 Panel de Supervisión</div>
-          <div style="font-size:9px;opacity:.85;display:flex;align-items:center;gap:5px;margin-top:2px">
-            <span style="display:inline-block;width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;animation:pulse 1.5s infinite"></span>
-            EN VIVO · sync ${ahora} · refresca cada 10s
+          <div style="font-size:9px;opacity:.9;margin-top:3px">
+            ${usaHistorico
+              ? `<span style="display:inline-block;width:7px;height:7px;background:#fbbf24;border-radius:50%;margin-right:4px"></span>📜 PERIODO CERRADO · ${etiquetaCorta}`
+              : `<span style="display:inline-block;width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;animation:pulse 1.5s infinite;margin-right:4px"></span>EN VIVO · próximo corte ${proxCorte.etiqueta} en ${proxCorte.faltan}`
+            }
           </div>
         </div>
-        <button onclick="load()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px" title="Actualizar ahora">🔄</button>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button onclick="exportarDashboard()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px" title="Exportar / Imprimir">🖨️</button>
+          <button onclick="${usaHistorico?'volverActual()':'load()'}" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px" title="${usaHistorico?'Volver al periodo actual':'Actualizar ahora'}">${usaHistorico?'⏎':'🔄'}</button>
+        </div>
       </div>
-      <div style="display:flex;gap:4px">
-        ${[['hoy','📅 HOY'],['semana','📆 SEMANA'],['mes','📊 MES']].map(([k,l])=>`<button onclick="S.dv='${k}';R()" style="flex:1;padding:9px;border-radius:8px;border:none;background:${S.dv===k?'#fff':'rgba(255,255,255,.18)'};color:${S.dv===k?'#1D7BA3':'#fff'};font-size:11px;font-weight:800;cursor:pointer">${l}</button>`).join('')}
+
+      <!-- Selector de periodo -->
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        ${[['hoy','📅 DÍA'],['semana','📆 SEMANA'],['mes','📊 MES']].map(([k,l])=>`<button onclick="cambiarPeriodo('${k}')" style="flex:1;padding:9px;border-radius:8px;border:none;background:${S.dv===k?'#fff':'rgba(255,255,255,.18)'};color:${S.dv===k?'#1D7BA3':'#fff'};font-size:11px;font-weight:800;cursor:pointer">${l}</button>`).join('')}
+      </div>
+
+      <!-- Navegación temporal con flechas -->
+      <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.15);padding:6px 8px;border-radius:8px">
+        <button onclick="navegarPeriodo(-1)" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:800" title="Periodo anterior">◀</button>
+        <div style="flex:1;text-align:center;font-size:11px;font-weight:800;color:#fff">
+          ${labelPeriodo}
+          ${usaHistorico?'<div style="font-size:9px;opacity:.85;font-weight:600">'+etiquetaCorta+'</div>':''}
+        </div>
+        <button onclick="navegarPeriodo(1)" ${offset>=0?'disabled style="background:rgba(255,255,255,.05);border:none;color:rgba(255,255,255,.3);width:32px;height:30px;border-radius:6px;cursor:not-allowed;font-size:14px;font-weight:800"':'style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:800"'} title="Periodo siguiente">▶</button>
       </div>
     </div>
 
@@ -1205,26 +1310,26 @@ function dashboardH(){
       <div style="background:#fff;border:2px solid var(--ac);border-radius:10px;padding:11px;text-align:center">
         <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">📋 VISITAS</div>
         <div style="font-size:28px;font-weight:800;color:var(--ac2);line-height:1.1">${tVis}</div>
-        <div style="font-size:8px;color:var(--t4)">${periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes'}</div>
+        <div style="font-size:8px;color:var(--t4)">${usaHistorico?etiquetaCorta:(periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes')}</div>
       </div>
       <div style="background:#fff;border:2px solid #f39c12;border-radius:10px;padding:11px;text-align:center">
         <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">💰 COTIZACIONES</div>
         <div style="font-size:28px;font-weight:800;color:#d97706;line-height:1.1">${tCot}</div>
-        <div style="font-size:8px;color:var(--t4)">${periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes'}</div>
+        <div style="font-size:8px;color:var(--t4)">${usaHistorico?etiquetaCorta:(periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes')}</div>
       </div>
       <div style="background:#fff;border:2px solid #27ae60;border-radius:10px;padding:11px;text-align:center">
         <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">🛒 VENTAS</div>
         <div style="font-size:28px;font-weight:800;color:#27ae60;line-height:1.1">${tVen}</div>
-        <div style="font-size:8px;color:var(--t4)">${periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes'}</div>
+        <div style="font-size:8px;color:var(--t4)">${usaHistorico?etiquetaCorta:(periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes')}</div>
       </div>
       <div style="background:linear-gradient(135deg,#27ae60,#1abc9c);color:#fff;border-radius:10px;padding:11px;text-align:center">
-        <div style="font-size:9px;opacity:.9;font-weight:700;letter-spacing:.5px">💵 INGRESOS MES</div>
+        <div style="font-size:9px;opacity:.9;font-weight:700;letter-spacing:.5px">💵 ${usaHistorico?'FACTURADO':'INGRESOS MES'}</div>
         <div style="font-size:24px;font-weight:800;line-height:1.1">${fmtMoney(tMonto)}</div>
-        <div style="font-size:8px;opacity:.85">facturación del mes</div>
+        <div style="font-size:8px;opacity:.85">${usaHistorico?'total del periodo':'facturación del mes'}</div>
       </div>
     </div>
 
-    <!-- Mini gráfico 7 días -->
+    ${!usaHistorico?`<!-- Mini gráfico 7 días -->
     <div class="sec">
       <div class="sec-t">📈 Visitas — últimos 7 días (equipo)</div>
       <div style="display:flex;align-items:flex-end;gap:4px;height:80px;padding:5px 0">
@@ -1239,24 +1344,29 @@ function dashboardH(){
         }).join('')}
       </div>
       <div style="font-size:8px;color:var(--t4);text-align:center;margin-top:3px">Suma de visitas de todos los agentes</div>
-    </div>
+    </div>`:''}
 
     <!-- Tabla agentes -->
     <div class="sec">
-      <div class="sec-t">👥 Por agente — ${periodo==='hoy'?'Hoy':periodo==='semana'?'Esta Semana':'Este Mes'}</div>
+      <div class="sec-t">👥 Por agente — ${labelPeriodo}${usaHistorico?' · '+etiquetaCorta:''}</div>
       <div style="display:grid;grid-template-columns:1.5fr .65fr .65fr .65fr .65fr 1fr;gap:3px;padding:6px 4px;background:var(--ac3);border-radius:6px;font-size:8px;font-weight:800;color:var(--ac2);text-transform:uppercase;letter-spacing:.3px">
         <div>Agente</div>
         <div style="text-align:center">📋Vis</div>
         <div style="text-align:center">💰Cot</div>
         <div style="text-align:center">🛒Ven</div>
         <div style="text-align:center">⭐Clv</div>
-        <div style="text-align:right">💵 $ Mes</div>
+        <div style="text-align:right">💵 $${usaHistorico?'':' Mes'}</div>
       </div>
       ${agSorted.map(([id,a])=>{
-        const v=a[key]||0,c=a[keyC]||0,vt=a[keyV]||0;
-        const sc=a.semaforo;
-        const clv=a.clavesActivas||0;
-        return `<div onclick="abrirAgenteDetalle('${id}','${(a.nombre||'').replace(/'/g,'&#39;')}')" style="display:grid;grid-template-columns:1.5fr .65fr .65fr .65fr .65fr 1fr;gap:3px;padding:9px 4px;border-bottom:1px solid var(--bd);align-items:center;cursor:pointer">
+        // En histórico todos los campos están en .visitas/.cotizaciones/.ventas/.montoVentas/.claves
+        // En vivo dependen de S.dv (key/keyC/keyV)
+        const v = usaHistorico ? (a.visitas||0) : (a[key]||0);
+        const c = usaHistorico ? (a.cotizaciones||0) : (a[keyC]||0);
+        const vt = usaHistorico ? (a.ventas||0) : (a[keyV]||0);
+        const clv = usaHistorico ? (a.claves||0) : (a.clavesActivas||0);
+        const monto = usaHistorico ? (a.montoVentas||0) : (a.ventasMesMonto||0);
+        const sc = a.semaforo || (usaHistorico?'📜':'');
+        return `<div ${!usaHistorico?`onclick="abrirAgenteDetalle('${id}','${(a.nombre||'').replace(/'/g,'&#39;')}')"`:''} style="display:grid;grid-template-columns:1.5fr .65fr .65fr .65fr .65fr 1fr;gap:3px;padding:9px 4px;border-bottom:1px solid var(--bd);align-items:center;${!usaHistorico?'cursor:pointer':''}">
           <div style="min-width:0">
             <div style="font-size:11px;font-weight:700;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sc} ${a.nombre}</div>
             <div style="font-size:8px;color:var(--t4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.zona}</div>
@@ -1265,30 +1375,30 @@ function dashboardH(){
           <div style="text-align:center;font-size:13px;font-weight:800;color:#d97706">${c}</div>
           <div style="text-align:center;font-size:13px;font-weight:800;color:#27ae60">${vt}</div>
           <div style="text-align:center;font-size:13px;font-weight:800;color:${clv>0?'#92400E':'var(--t4)'}">${clv}</div>
-          <div style="text-align:right;font-size:11px;font-weight:800;color:#27ae60">${fmtMoneyK(a.ventasMesMonto||0)}</div>
+          <div style="text-align:right;font-size:11px;font-weight:800;color:#27ae60">${fmtMoneyK(monto)}</div>
         </div>`;
       }).join('')}
-      <div style="font-size:9px;color:var(--t4);text-align:center;margin-top:6px;font-style:italic">👆 Toca un agente para ver detalle y convertir negocios en Clave</div>
+      ${!usaHistorico?'<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:6px;font-style:italic">👆 Toca un agente para ver detalle y convertir negocios en Clave</div>':''}
     </div>
 
     <!-- 🛒 ÚLTIMAS VENTAS EN VIVO -->
     <div class="sec" style="border:2px solid #16a34a;background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)">
       <div class="sec-t" style="color:#16a34a;display:flex;justify-content:space-between;align-items:center">
-        <span>🛒 Últimas ventas · sync directo</span>
-        <span style="font-size:9px;background:#16a34a;color:#fff;padding:3px 7px;border-radius:5px;font-weight:800">${fmtMoney(totVtaSem)} sem</span>
+        <span>🛒 ${usaHistorico?'Ventas del periodo':'Últimas ventas · sync directo'}</span>
+        <span style="font-size:9px;background:#16a34a;color:#fff;padding:3px 7px;border-radius:5px;font-weight:800">${fmtMoney(totVtaSem)} ${usaHistorico?'total':'sem'}</span>
       </div>
-      ${ventasRec.length===0?'<div style="font-size:11px;color:var(--t4);padding:8px;text-align:center">Sin ventas registradas aún</div>':''}
-      ${ventasRec.slice(0,6).map(v=>`<div style="display:grid;grid-template-columns:1fr auto;gap:6px;padding:7px 4px;border-bottom:1px solid #dcfce7;align-items:center">
+      ${ventasRec.length===0?'<div style="font-size:11px;color:var(--t4);padding:8px;text-align:center">Sin ventas en este periodo</div>':''}
+      ${ventasRec.slice(0,usaHistorico?20:6).map(v=>`<div style="display:grid;grid-template-columns:1fr auto;gap:6px;padding:7px 4px;border-bottom:1px solid #dcfce7;align-items:center">
         <div style="min-width:0">
           <div style="font-size:11px;font-weight:800;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.negocio||'—'}</div>
           <div style="font-size:9px;color:var(--t4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.fecha} · ${v.agente}${v.folio?' · '+v.folio:''}</div>
         </div>
         <div style="font-size:13px;font-weight:800;color:#16a34a;text-align:right;flex-shrink:0">${fmtMoney(v.monto||0)}</div>
       </div>`).join('')}
-      ${ventasRec.length>6?`<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:4px">+ ${ventasRec.length-6} más este mes</div>`:''}
+      ${ventasRec.length>(usaHistorico?20:6)?`<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:4px">+ ${ventasRec.length-(usaHistorico?20:6)} más en el periodo</div>`:''}
     </div>
 
-    <!-- ⭐ NEGOCIOS CLAVE ACTIVOS -->
+    ${!usaHistorico?`<!-- ⭐ NEGOCIOS CLAVE ACTIVOS (solo en vivo) -->
     <div class="sec" style="border:2px solid #D4AF37;background:linear-gradient(135deg,#fffbeb 0%,#fff 100%)">
       <div class="sec-t" style="color:#92400E;display:flex;justify-content:space-between;align-items:center">
         <span>⭐ Negocios Clave activos</span>
@@ -1311,7 +1421,7 @@ function dashboardH(){
         </div>`;
       }).join('')}
       ${negsClave.length>5?`<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:4px">+ ${negsClave.length-5} más activos</div>`:''}
-    </div>
+    </div>`:''}
 
     ${pendsHoy.length>0?`<!-- 🔔 SEGUIMIENTOS PENDIENTES -->
     <div class="sec" style="border:2px solid #f59e0b;background:linear-gradient(135deg,#fef3c7 0%,#fff 100%)">
@@ -1520,6 +1630,200 @@ function imprimirReporte(){
   w.document.close();
   setTimeout(()=>w.print(),300);
 }
+
+// === EXPORTAR DASHBOARD ===
+// Genera una versión imprimible del dashboard actual (en vivo o histórico)
+// y la abre en nueva ventana lista para "Guardar como PDF" o imprimir
+function exportarDashboard(){
+  const offset=S.dvOff||0;
+  const usaHistorico=offset!==0;
+  const A = usaHistorico ? (S.hist?.agents||{}) : (S.ad||{});
+  const periodo=S.dv;
+
+  // Calcular totales y datos según modo
+  let tVis=0,tCot=0,tVen=0,tMonto=0,tIA=0,totClaves=0;
+  let labelPeriodo='', etiquetaCorta='';
+  let ventasRec=[];
+
+  if(usaHistorico){
+    const T=S.hist?.totales||{};
+    tVis=T.visitas||0; tCot=T.cotizaciones||0; tVen=T.ventas||0;
+    tMonto=T.montoVentas||0; tIA=T.intAlto||0; totClaves=T.claves||0;
+    ventasRec=S.hist?.ventas||[];
+    labelPeriodo=S.hist?.rango?.label||'';
+    etiquetaCorta=S.hist?.rango?.etiquetaCorta||'';
+  } else {
+    const key=periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes';
+    const keyC=periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes';
+    const keyV=periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes';
+    Object.values(A).forEach(a=>{
+      tVis+=a[key]||0; tCot+=a[keyC]||0; tVen+=a[keyV]||0;
+      if(periodo==='mes')tMonto+=a.ventasMesMonto||0;
+      tIA+=a.intAlto||0;
+    });
+    if(periodo!=='mes')tMonto=Object.values(A).reduce((s,a)=>s+(a.ventasMesMonto||0),0);
+    ventasRec=S.ventasRecientes||[];
+    labelPeriodo=periodo==='hoy'?'HOY':periodo==='semana'?'SEMANA ACTUAL':'MES ACTUAL';
+    etiquetaCorta=periodo==='hoy'?fechaCorta(new Date()):periodo==='semana'?etqSemana(new Date()):etqMes(new Date());
+    totClaves=(S.negociosClave||[]).length;
+  }
+
+  // Tabla agentes
+  const agentes=Object.entries(A).map(([id,a])=>{
+    const v = usaHistorico ? (a.visitas||0) : (a[periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes']||0);
+    const c = usaHistorico ? (a.cotizaciones||0) : (a[periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes']||0);
+    const vt = usaHistorico ? (a.ventas||0) : (a[periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes']||0);
+    const clv = usaHistorico ? (a.claves||0) : (a.clavesActivas||0);
+    const monto = usaHistorico ? (a.montoVentas||0) : (a.ventasMesMonto||0);
+    const ratio = v>0 ? Math.round(c/v*100) : 0;
+    return {nombre:a.nombre, zona:a.zona, v:v, c:c, vt:vt, clv:clv, monto:monto, ratio:ratio};
+  }).sort((a,b)=>b.v-a.v);
+
+  const fmtMx=n=>(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fechaGen=new Date().toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'});
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Entelequia · ${labelPeriodo}</title>
+<style>
+  @page{size:letter;margin:1.4cm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1a1a1a;background:#fff;padding:24px;line-height:1.5;font-size:12px;max-width:920px;margin:0 auto}
+  h1{font-size:24px;font-weight:600;color:#1570a6;margin:0 0 4px;letter-spacing:-.01em}
+  h2{font-size:13px;font-weight:600;color:#1a1a1a;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #e5e7eb;padding-bottom:6px;margin:24px 0 10px}
+  .meta{color:#6b7280;font-size:11px;margin-bottom:20px}
+  .badge-period{display:inline-block;background:#1570a6;color:#fff;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .badge-hist{background:#92400e}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 24px}
+  .kpi{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
+  .kpi-label{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;font-weight:600}
+  .kpi-value{font-size:24px;font-weight:600;color:#111827}
+  .kpi-foot{font-size:10px;color:#6b7280;margin-top:2px}
+  .kpi.green .kpi-value{color:#047857}
+  .kpi.amber .kpi-value{color:#b45309}
+  .kpi.gold .kpi-value{color:#92400e}
+  table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+  th{text-align:left;font-weight:600;background:#f3f4f6;padding:8px 10px;border-bottom:1px solid #e5e7eb;color:#4b5563;font-size:10px;text-transform:uppercase;letter-spacing:.4px}
+  td{padding:9px 10px;border-bottom:1px solid #f3f4f6}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  td.center,th.center{text-align:center}
+  .total-row{background:#fffbeb;font-weight:700}
+  .total-row td{border-top:2px solid #f59e0b;border-bottom:none}
+  .footer{margin-top:30px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#9ca3af;text-align:center}
+  .actions{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #e5e7eb;margin-bottom:18px;display:flex;gap:8px;justify-content:flex-end}
+  .actions button{background:#1570a6;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+  .actions button.secondary{background:#fff;color:#1570a6;border:1px solid #1570a6}
+  @media print{.actions{display:none}body{padding:0}}
+</style></head><body>
+
+<div class="actions">
+  <button onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+  <button class="secondary" onclick="window.close()">Cerrar</button>
+</div>
+
+<h1>Reporte Entelequia × Neostat</h1>
+<p class="meta">
+  <span class="badge-period ${usaHistorico?'badge-hist':''}">${usaHistorico?'📜 PERIODO CERRADO':'⚡ EN VIVO'}</span>
+  &nbsp; ${labelPeriodo} · ${etiquetaCorta} · Generado ${fechaGen}
+</p>
+
+<h2>KPIs del periodo</h2>
+<div class="kpis">
+  <div class="kpi">
+    <div class="kpi-label">📋 Visitas</div>
+    <div class="kpi-value">${tVis}</div>
+    <div class="kpi-foot">total del equipo</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-label">💰 Cotizaciones</div>
+    <div class="kpi-value">${tCot}</div>
+    <div class="kpi-foot">${tVis>0?Math.round(tCot/tVis*100):0}% conv. visitas</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">🛒 Ventas</div>
+    <div class="kpi-value">${tVen}</div>
+    <div class="kpi-foot">${tCot>0?Math.round(tVen/tCot*100):0}% conv. cotiz.</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">💵 Facturado</div>
+    <div class="kpi-value">$${fmtMx(tMonto)}</div>
+    <div class="kpi-foot">${tVen>0?'$'+fmtMx(tMonto/tVen)+' ticket prom.':'—'}</div>
+  </div>
+</div>
+
+<h2>Por asesor</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Asesor</th>
+      <th>Zona</th>
+      <th class="center num">📋 Vis</th>
+      <th class="center num">💰 Cot</th>
+      <th class="center num">🛒 Ven</th>
+      <th class="center num">⭐ Clv</th>
+      <th class="num">$ Facturado</th>
+      <th class="center num">% Conv</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${agentes.map(a=>`<tr>
+      <td><strong>${a.nombre}</strong></td>
+      <td style="color:#6b7280">${a.zona}</td>
+      <td class="center num">${a.v}</td>
+      <td class="center num">${a.c}</td>
+      <td class="center num" style="color:#047857;font-weight:700">${a.vt}</td>
+      <td class="center num" style="color:#92400e;font-weight:700">${a.clv||'—'}</td>
+      <td class="num" style="font-weight:700">$${fmtMx(a.monto)}</td>
+      <td class="center num">${a.ratio}%</td>
+    </tr>`).join('')}
+    <tr class="total-row">
+      <td colspan="2"><strong>TOTAL EQUIPO</strong></td>
+      <td class="center num">${tVis}</td>
+      <td class="center num">${tCot}</td>
+      <td class="center num">${tVen}</td>
+      <td class="center num">${totClaves}</td>
+      <td class="num">$${fmtMx(tMonto)}</td>
+      <td class="center num">${tVis>0?Math.round(tCot/tVis*100):0}%</td>
+    </tr>
+  </tbody>
+</table>
+
+${ventasRec.length>0?`
+<h2>Detalle de ventas (${ventasRec.length})</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Fecha</th>
+      <th>Negocio</th>
+      <th>Asesor</th>
+      <th>Folio</th>
+      <th class="num">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${ventasRec.map(v=>`<tr>
+      <td>${v.fecha||'—'}</td>
+      <td><strong>${v.negocio||'—'}</strong></td>
+      <td style="color:#6b7280">${v.agente||'—'}</td>
+      <td style="color:#6b7280;font-family:monospace;font-size:10px">${v.folio||'—'}</td>
+      <td class="num" style="color:#047857;font-weight:700">$${fmtMx(v.monto||0)}</td>
+    </tr>`).join('')}
+  </tbody>
+</table>`:''}
+
+<div class="footer">
+  Entelequia® CRM × Neostat · Reporte generado por ${S.u?.nm||'Supervisor'} el ${fechaGen}<br>
+  ${usaHistorico?'Periodo cerrado · datos consolidados':'Datos en vivo al momento de la exportación'}
+</div>
+
+</body></html>`;
+
+  const w=window.open('','_blank','width=900,height=1000');
+  if(!w){ toast('⚠️ Permite las ventanas emergentes','err'); return; }
+  w.document.write(html);
+  w.document.close();
+  // Sin auto-print: dejar que el usuario decida (puede revisar antes)
+  toast('📄 Reporte abierto en nueva ventana');
+}
+
 function stc(l,v,c){return `<div class="st"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${c};opacity:.5"></div><div class="st-l">${l}</div><div class="st-n" style="color:${c}">${v}</div></div>`;}
 
 // === COTIZAR ===
@@ -2156,6 +2460,17 @@ function showVisitPop(n){
   setTimeout(()=>{try{p.remove();}catch(e){}},2500);
 }
 R();if(S.u)load();
-// Auto-refresh dashboard supervisor cada 10 segundos
-setInterval(()=>{if(S.u?.r==='admin'&&S.v==='dashboard'&&!S.ld)load();},10000);
+// Auto-refresh dashboard supervisor cada 10 segundos (solo en modo "actual")
+setInterval(()=>{
+  if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)) load();
+},10000);
+
+// Refrescar el header del dashboard cada 30s para actualizar el contador de "próximo corte"
+// (sin ir al backend — solo re-renderiza el header en modo actual)
+setInterval(()=>{
+  if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)){
+    // Solo si NO estamos editando algo (modal abierto)
+    if(!document.querySelector('.mbg')) R();
+  }
+},30000);
 </script></body></html>
