@@ -9,7 +9,7 @@
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.full{grid-column:1/-1}.pill{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:800}.cd{background:#fff;border:2px solid var(--bd2);border-radius:11px;padding:13px;margin-bottom:7px}
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-end;justify-content:center}.mdl{background:#fff;border-radius:14px 14px 0 0;width:100%;max-width:540px;max-height:92vh;overflow:auto;padding:18px 16px 22px;border-top:3px solid var(--ac)}
 .stg{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px;margin-bottom:10px}.st{background:#fff;border:2px solid var(--bd2);border-radius:10px;padding:10px;position:relative;overflow:hidden}.st-n{font-size:22px;font-weight:900}.st-l{font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;font-weight:800}
-.empty{text-align:center;padding:32px 14px;color:var(--t4);font-size:14px;font-weight:600}.spin{width:24px;height:24px;border:3px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite;margin:0 auto 8px}@keyframes sp{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.empty{text-align:center;padding:32px 14px;color:var(--t4);font-size:14px;font-weight:600}.spin{width:24px;height:24px;border:3px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite;margin:0 auto 8px}@keyframes sp{to{transform:rotate(360deg)}}
 .login-w{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:linear-gradient(180deg,#fff,#d6ecf5)}.login-b{background:#fff;border:2px solid var(--ac);border-radius:14px;padding:26px 20px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 30px rgba(15,76,92,.15)}
 .ag-card{background:#fff;border:2px solid var(--bd2);border-radius:11px;padding:13px;margin-bottom:6px}.prod-row{display:flex;align-items:center;gap:9px;padding:13px 12px;border-radius:9px;border:2px solid var(--bd2);margin-bottom:6px;cursor:pointer;background:#fff;min-height:54px}.prod-row:active{border-color:var(--ac);background:var(--ac3)}
 .ql{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--s2)}.ql:last-child{border:none}.gps-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;border-radius:10px;border:2px solid var(--ac);background:var(--ac3);cursor:pointer;width:100%;font-size:14px;color:var(--ac);font-weight:800;min-height:50px}.gps-btn:active{background:var(--ac);color:#fff}
@@ -55,7 +55,7 @@ async function pf(d){
   }
 }
 
-let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',dvOff:0,hist:null,acum:null,acumAgrup:'mes',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
+let S={u:JSON.parse(localStorage.getItem('ecrm4')||localStorage.getItem('ecrm3')||localStorage.getItem('ecrm2')||localStorage.getItem('ecrm')||'null'),v:'nueva',reg:[],cos:[],ad:null,ld:false,qi:[],qs:'',lat:'',lng:'',gs:'',ss:'',dv:'hoy',cotNeg:'',cotEmail:'',cotCon:'',cotTel:'',cotRfc:'',cotUnit:'caja',precSearch:'',estrellas:[],cotContacto:'',cotTelefono:'',cotRfc:'',idAgent:'',alertas:null,welcomeShown:false,
   form:{rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:''}};
 
 function toast(m,t='ok'){const b=document.getElementById('tbox');b.className='tst '+(t==='ok'?'tok':'terr');b.textContent=m;b.style.display='block';setTimeout(()=>{b.style.display='none';},2200);}
@@ -80,7 +80,7 @@ function showWelcomePopup(){
         <div style="font-size:13px;font-weight:900;color:#B8860B;margin-bottom:6px">⭐ ${starCount} OPORTUNIDADES PRIORITARIAS</div>
         ${starNames.map(n=>`<div style="padding:8px 10px;background:#FFFDE7;border-left:4px solid #D4AF37;border-radius:5px;margin-bottom:3px;font-size:13px;color:#5D4E37;font-weight:700">★ ${n}</div>`).join('')}
         ${starCount>5?`<div style="font-size:10px;color:#B8860B;margin-top:3px">+${starCount-5} más en Seguimiento</div>`:''}
-        <button onclick="cerrarWelcome();S.v='clave';R();load();" style="margin-top:6px;background:#D4AF37;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%">Ver Negocios Clave →</button>
+        <button onclick="cerrarWelcome();S.v='cartera';R();load();" style="margin-top:6px;background:#D4AF37;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%">Ver oportunidades →</button>
       </div>`:''}
     ${a.hoyAgenda?.length>0?`
       <div style="margin-bottom:12px">
@@ -139,55 +139,35 @@ function restoreForm(){setTimeout(()=>{['rn','rg','re','rt','rc','rv','ri','rr',
 function getBizInfo(neg){const r=S.reg.filter(x=>x.negocio===neg);const last=r[r.length-1]||{};return{contacto:last.encargado||'',telefono:last.telefono||'',giro:last.giro||'',maps:last.maps||''};}
 function getBiz(){const biz={};S.reg.forEach(r=>{if(!r.negocio)return;const k=r.negocio;if(!biz[k])biz[k]={negocio:k,giro:r.giro||'',visitas:0,ultimo:'',ultimaHora:'',interes:'',resultado:'',maps:r.maps||'',encargado:'',telefono:'',colonia:'',email:'',rfc:''};biz[k].visitas++;const f=r.fecha||'';const h=r.hora||'';if(f>biz[k].ultimo||(f===biz[k].ultimo&&h>biz[k].ultimaHora)){biz[k].ultimo=f;biz[k].ultimaHora=h;}biz[k].interes=r.interes||biz[k].interes;biz[k].resultado=r.resultado||biz[k].resultado;if(r.maps)biz[k].maps=r.maps;if(r.encargado)biz[k].encargado=r.encargado;if(r.telefono)biz[k].telefono=r.telefono;if(r.colonia)biz[k].colonia=r.colonia;if(r.email)biz[k].email=r.email;if(r.rfc)biz[k].rfc=r.rfc;});return Object.values(biz).sort((a,b)=>{const ka=(a.ultimo||'')+' '+(a.ultimaHora||'');const kb=(b.ultimo||'')+' '+(b.ultimaHora||'');return kb.localeCompare(ka);});}
 
-async function load(silent=false){
-  if(!silent){S.ld=true;R();}
+async function load(){S.ld=true;R();
   try{
     const isAdmin=S.u?.r==='admin';
     const calls=[
       gf('alertas&agente='+encodeURIComponent(S.u.id)),
       gf('registros','&agente='+encodeURIComponent(S.u.id)),
       gf('costos'),
-      gf('estrellas&agente='+S.u.id),
-      gf('negocios_clave','&agente='+encodeURIComponent(S.u.id))
+      gf('estrellas&agente='+S.u.id)
     ];
-    if(isAdmin)calls.push(gf('supervisor_snapshot'));
+    if(isAdmin)calls.push(gf('all_agents'));
     const results=await Promise.all(calls);
-    const [a,r,c,st,kc]=results;
+    const [a,r,c,st]=results;
     if(a)S.alertas=a;
     if(r?.registros)S.reg=r.registros;
     if(c?.productos)S.cos=c.productos;
     if(st?.estrellas)S.estrellas=st.estrellas;
-    if(kc?.negocios)S.claves=kc.negocios;
-    if(isAdmin&&results[5]){
-      S.ad=results[5].agents;
-      S.dias7=results[5].dias7||[];
-      S.ventasRecientes=results[5].ventasRecientes||[];
-      S.negociosClave=results[5].negociosClave||[];
-      S.pendientesHoy=results[5].pendientesHoy||[];
-      S.totalVentasHoy=results[5].totalVentasHoy||0;
-      S.totalVentasSem=results[5].totalVentasSem||0;
-      S.lastSync=new Date();
-    }
-    if(!silent){try{const ft=await gf('fotos');if(ft&&ft.fotos){Object.entries(ft.fotos).forEach(([id,url])=>{const ag=AG.find(a=>a.id===id);if(ag&&url)ag.foto=url;});}}catch(e){}}
+    if(isAdmin&&results[4]){S.ad=results[4].agents;S.dias7=results[4].dias7||[];}
+    try{const ft=await gf('fotos');if(ft&&ft.fotos){Object.entries(ft.fotos).forEach(([id,url])=>{const ag=AG.find(a=>a.id===id);if(ag&&url)ag.foto=url;});}}catch(e){}
   }catch(e){console.log('load',e);}
-  if(!silent){S.ld=false;}
-  // Re-render: en silent solo si no hay modal abierto (no interrumpir lo que el usuario está mirando)
-  if(silent){
-    if(!document.querySelector('.mbg')) R();
-  } else {
-    R();
-  }
-  if(!silent && S.v==='registrar'){restoreForm();registrarReady();}
+  S.ld=false;R();
+  if(S.v==='nueva'){restoreForm();registrarReady();}
   // Welcome popup una vez por sesión
-  if(!silent){
-    const hoyKey='wp_'+new Date().toISOString().split('T')[0];
-    if(!localStorage.getItem(hoyKey)&&S.u?.r!=='admin'&&S.alertas){localStorage.setItem(hoyKey,'1');setTimeout(()=>showWelcomePopup(),400);}
-    else if(S.u?.r!=='admin'&&!S.welcomeShown){S.welcomeShown=true;setTimeout(()=>toast('📋 No olvides tipificar tus visitas'),800);}
-  }
+  const hoyKey='wp_'+new Date().toISOString().split('T')[0];
+  if(!localStorage.getItem(hoyKey)&&S.u?.r!=='admin'&&S.alertas){localStorage.setItem(hoyKey,'1');setTimeout(()=>showWelcomePopup(),400);}
+  else if(S.u?.r!=='admin'&&!S.welcomeShown){S.welcomeShown=true;setTimeout(()=>toast('📋 No olvides tipificar tus visitas'),800);}
 }
 
 function R(){
-  if(S.v==='registrar')saveForm();
+  if(S.v==='nueva')saveForm();
   const a=document.getElementById('app');
   if(!S.u){a.innerHTML=loginH();return;}
   // Si la estructura aún no existe, montarla por primera vez
@@ -199,45 +179,76 @@ function R(){
   if(content){
     content.innerHTML=
       S.v==='nueva'?nuevaH():
-      S.v==='clave'?claveH():
+      S.v==='cartera'?carteraH():
       S.v==='catalogo'?catalogoH():
       S.v==='cotizar'?cotizarH():
       S.v==='precios'?preciosH():
       S.v==='dashboard'?dashboardH():
-      S.v==='acumulado'?acumuladoH():
+      S.v==='venta'?ventaH():
+      S.v==='plan'?planH():
+      S.v==='pipeline'?pipelineH():
       S.v==='id'?idH():configH();
   }
   // Actualizar solo la clase .on del nav (sin reconstruirlo)
   document.querySelectorAll('.bn button[data-tab]').forEach(b=>{
     b.classList.toggle('on',b.dataset.tab===S.v);
   });
-  if(S.v==='registrar'){restoreForm();registrarReady();}
+  if(S.v==='nueva'){restoreForm();registrarReady();}
 }
 
 function mountApp(){
   const a=document.getElementById('app');
   const isA=S.u.r==='admin';
-  const tabs=isA?[{k:'dashboard',i:'📊',l:'Dash'},{k:'acumulado',i:'📈',l:'Acum.'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'config',i:'⚙️',l:'Admin'}]
-    :[{k:'nueva',i:'📝',l:'Nueva'},{k:'clave',i:'⭐',l:'Clave'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'id',i:'🪪',l:'ID'}];
+  // v10: bottom nav rediseñado — quitamos ID; agregamos Venta/Plan (agente) y Pipeline (admin).
+  // Cerrar sesión y Actualizar caché viven ahora en el menú ⋮ del header.
+  const tabs=isA
+    ?[{k:'dashboard',i:'📊',l:'Dash'},{k:'pipeline',i:'📅',l:'Pipeline'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'},{k:'config',i:'⚙️',l:'Admin'}]
+    :[{k:'nueva',i:'📝',l:'Nueva'},{k:'cartera',i:'📂',l:'Cartera'},{k:'venta',i:'🎉',l:'Venta'},{k:'plan',i:'📅',l:'Plan'},{k:'cotizar',i:'💰',l:'Cotiz.'},{k:'catalogo',i:'📚',l:'Catál.'}];
   a.innerHTML=
-    `<div class="hdr"><img src="${LOGO}"><div class="hdr-t"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v9.0</span></h1><p>${S.u.nm} · ${S.u.z}</p></div></div>`
+    `<div class="hdr"><img src="${LOGO}"><div class="hdr-t" style="flex:1;text-align:center"><h1>CRM × Neostat <span style="font-size:9px;background:var(--gn);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:900">v10</span></h1><p>${S.u.nm} · ${S.u.z}</p></div><button onclick="toggleHeaderMenu()" id="hdr-menu-btn" style="background:none;border:none;cursor:pointer;font-size:24px;padding:4px 8px;color:var(--ac);font-weight:bold" title="Menú">⋮</button></div>`
+    +`<div id="hdr-menu" style="display:none;position:absolute;top:60px;right:8px;z-index:200;background:#fff;border:2px solid var(--ac);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.18);padding:6px;min-width:200px"></div>`
     +`<div id="crm-content" style="padding:5px 7px 70px"></div>`
     +`<div class="bn">${tabs.map(t=>`<button data-tab="${t.k}" class="${S.v===t.k?'on':''}" onclick="nav('${t.k}')"><span>${t.i}</span>${t.l}</button>`).join('')}</div>`;
 }
 
+// v10: menú del header con Cerrar sesión + Actualizar caché (visible en todas las pestañas)
+function toggleHeaderMenu(){
+  const m=document.getElementById('hdr-menu');
+  if(!m)return;
+  if(m.style.display==='block'){m.style.display='none';return;}
+  m.innerHTML=`
+    <button onclick="document.getElementById('hdr-menu').style.display='none';location.reload();" style="width:100%;padding:11px;border-radius:7px;border:none;background:var(--ac3);color:var(--ac);font-weight:800;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">🔄</span> Actualizar</button>
+    <button onclick="if(confirm('¿Borrar caché y recargar?')){localStorage.clear();caches?.keys()?.then(k=>k.forEach(c=>caches.delete(c)));location.reload();}" style="width:100%;padding:11px;border-radius:7px;border:none;background:#fff7ed;color:#c2410c;font-weight:800;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">🧹</span> Limpiar caché</button>
+    <a href="https://wa.me/525655672426" target="_blank" style="display:flex;align-items:center;gap:8px;padding:11px;border-radius:7px;background:#dcfce7;color:#15803d;text-decoration:none;font-weight:800;font-size:13px;margin-bottom:4px"><span style="font-size:16px">💬</span> WhatsApp soporte</a>
+    <button onclick="if(confirm('¿Cerrar sesión?')){['ecrm','ecrm2','ecrm3','ecrm4'].forEach(k=>localStorage.removeItem(k));S.u=null;S.v='nueva';document.getElementById('hdr-menu').style.display='none';R();}" style="width:100%;padding:11px;border-radius:7px;border:none;background:#fef2f2;color:var(--rd);font-weight:800;cursor:pointer;font-size:13px;text-align:left;display:flex;align-items:center;gap:8px;border:1px solid #fecaca"><span style="font-size:16px">🚪</span> Cerrar sesión</button>
+  `;
+  m.style.display='block';
+  // Auto-cerrar al hacer click fuera
+  setTimeout(()=>{
+    const closer=function(ev){
+      if(!m.contains(ev.target)&&ev.target.id!=='hdr-menu-btn'){
+        m.style.display='none';
+        document.removeEventListener('click',closer,true);
+      }
+    };
+    document.addEventListener('click',closer,true);
+  },50);
+}
+
 function nav(v){
-  if(S.v==='registrar')saveForm();
+  if(S.v==='nueva')saveForm();
   S.v=v;
   R();
   // Solo refrescar datos del servidor para tabs que muestran info dinámica.
-  // Precios, Catálogo, ID y Config usan S.cos cacheado → no necesitan load().
-  const tabsConDatos=['nueva','clave','dashboard','cotizar'];
+  // Precios, Catálogo y Config usan S.cos cacheado → no necesitan load().
+  // v10: venta, plan y pipeline también necesitan datos frescos.
+  const tabsConDatos=['nueva','cartera','dashboard','cotizar','venta','plan','pipeline'];
   if(tabsConDatos.includes(v))load();
 }
 
 // === LOGIN ===
 function loginH(){return `<div class="login-w"><div class="login-b fi"><img src="${LOGO}" style="height:42px;margin-bottom:6px"><div style="font-size:8px;color:var(--ac2);letter-spacing:3px;font-weight:800;margin-bottom:14px">CRM × NEOSTAT</div><div class="fld"><label class="lbl">Usuario</label><select class="inp" id="la"><option value="">Seleccionar...</option>${AG.map(a=>`<option value="${a.id}" ${localStorage.getItem('ecrm_lastag')===a.id?'selected':''}>${a.nm} — ${a.z}</option>`).join('')}</select></div><div class="fld"><label class="lbl">Contraseña</label><input class="inp" type="password" id="lp" maxlength="4" inputmode="numeric" placeholder="····" onkeydown="if(event.key==='Enter')doL()"></div><button class="btn btn-p" onclick="doL()" style="margin-top:3px">Ingresar</button><div id="le" style="margin-top:4px;font-size:9px;color:var(--rd);display:none"></div></div></div>`;}
-function doL(){const sel=document.getElementById('la');if(!sel)return;const ag=sel.value,pin=document.getElementById('lp').value,a=AG.find(x=>x.id===ag);if(!a||pin!==a.p){document.getElementById('le').style.display='block';document.getElementById('le').textContent=!a?'Selecciona usuario':'PIN incorrecto';return;}localStorage.setItem('ecrm4',JSON.stringify(a));localStorage.setItem('ecrm_lastag',a.id);S.u=a;S.v=a.r==='admin'?'dashboard':'registrar';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';load();}
+function doL(){const sel=document.getElementById('la');if(!sel)return;const ag=sel.value,pin=document.getElementById('lp').value,a=AG.find(x=>x.id===ag);if(!a||pin!==a.p){document.getElementById('le').style.display='block';document.getElementById('le').textContent=!a?'Selecciona usuario':'PIN incorrecto';return;}localStorage.setItem('ecrm4',JSON.stringify(a));localStorage.setItem('ecrm_lastag',a.id);S.u=a;S.v=a.r==='admin'?'dashboard':'nueva';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';load();}
 
 // === REGISTRAR (visita inicial) ===
 function nuevaH(){
@@ -262,7 +273,7 @@ function nuevaH(){
       </div>
     </div>
     <div class="sec">
-      <div class="fld"><label class="lbl">Negocio *</label><input class="inp" id="rn" placeholder="Nombre del negocio" autocomplete="off" oninput="autoCompleteNeg(this.value,'r')"><div id="rn_ac" style="display:none;background:#fff;border:1px solid var(--bd);border-radius:6px;margin-top:2px;max-height:180px;overflow-y:auto;position:relative;z-index:5"></div></div>
+      <div class="fld"><label class="lbl">Negocio *</label><input class="inp" id="rn" placeholder="Nombre del negocio" autocomplete="off"></div>
       <div class="g2">
         <div class="fld"><label class="lbl">Giro *</label><select class="inp" id="rg"><option value="">Seleccionar</option>${GIROS.map(g=>`<option>${g}</option>`).join('')}</select></div>
         <div class="fld"><label class="lbl">Encargado</label><input class="inp" id="re" placeholder="Nombre"></div>
@@ -388,10 +399,10 @@ async function doRegFull(){
   b.textContent='📝 Registrando visita...';
   const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';
   await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:enc,telefono:tel,colonia:col,rfc:rfc,latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:'',cotizacion_monto:regMonto||'',proxima_visita:pv,notas:document.getElementById('ro').value});
-  av(n);const vc=incDay();S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';S.v='registrar';R();showVisitPop(vc);b.disabled=false;b.textContent='✅ GUARDAR Y REGISTRAR';
+  av(n);const vc=incDay();S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';S.v='nueva';R();showVisitPop(vc);b.disabled=false;b.textContent='✅ GUARDAR Y REGISTRAR';
 }
 async function doReg(){const n=document.getElementById('rn').value.trim(),g=document.getElementById('rg').value,ri=document.getElementById('ri').value,rr=document.getElementById('rr').value;if(!n){toast('⚠️ Nombre del negocio es obligatorio','err');return;}if(!g){toast('⚠️ Selecciona un giro','err');return;}if(!ri){toast('⚠️ Selecciona el nivel de interés','err');return;}if(!rr){toast('⚠️ Selecciona el resultado de la visita','err');return;}const regMonto=document.getElementById('reg_monto')?.value||'';if(rr.toLowerCase().indexOf('venta')>=0&&(!regMonto||regMonto==='0')){toast('⚠️ Ingresa el monto de la venta','err');return;}const b=document.getElementById('rb');b.disabled=true;b.textContent='⏳...';const pv=document.getElementById('rx').value==='si'?document.getElementById('rd')?.value:'';if(photoData.reg){b.textContent='📷 Subiendo foto...';await pf({action:'upload_photo',agente:S.u.id,negocio:n,photo:photoData.reg});photoData.reg=null;}
-  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',rfc:document.getElementById('rfc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:'',cotizacion_monto:regMonto||'',proxima_visita:pv,notas:document.getElementById('ro').value});av(n);inlineQItems=[];const vc=incDay();showVisitPop(vc);S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';S.v='registrar';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
+  await pf({action:'registrar_visita',agente:S.u.id,negocio:n,giro:g,encargado:document.getElementById('re').value,telefono:document.getElementById('rt').value,colonia:document.getElementById('rc')?.value||'',rfc:document.getElementById('rfc')?.value||'',latitud:S.lat,longitud:S.lng,num_visita:'1',tipo:'Inicial',interes:document.getElementById('ri').value,resultado:document.getElementById('rr').value,productos:'',cotizacion_monto:regMonto||'',proxima_visita:pv,notas:document.getElementById('ro').value});av(n);inlineQItems=[];const vc=incDay();showVisitPop(vc);S.lat='';S.lng='';S.gs='';S.form={rn:'',rg:'',re:'',rt:'',rc:'',rv:'1',ri:'',rr:'',rp:'',rx:'no',rd:'',ro:'',rfc:''};const rmw=document.getElementById('reg_monto_wrap');if(rmw)rmw.style.display='none';const rmi=document.getElementById('reg_monto');if(rmi)rmi.value='';S.v='nueva';R();b.disabled=false;b.textContent='✅ REGISTRAR VISITA';}
 
 // === SEGUIMIENTO (visitas subsecuentes) ===
 
@@ -403,287 +414,96 @@ async function toggleStar(neg){
   pf({action:'toggle_estrella',agente:S.u.id,negocio:neg});
 }
 
-function claveH(){
+function carteraH(){
   if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
-  const claves=(S.claves||[]).filter(c=>!S.u||c.agente===S.u.nm);
-  const sq=(S.qs||'').toLowerCase();
-  const filtered=sq?claves.filter(c=>(c.negocio||'').toLowerCase().includes(sq)):claves;
-  // Ordenar por potencial $ desc
-  const sorted=[...filtered].sort((a,b)=>(b.potencial||0)-(a.potencial||0));
-  const totalPotencial=claves.reduce((s,c)=>s+(c.potencial||0),0);
-
-  const catColor={
-    'Cadena':'#7c3aed',
-    'Alto Volumen':'#0891b2',
-    'Estratégico':'#d97706',
-    'VIP':'#be123c'
-  };
-  const catEmoji={
-    'Cadena':'🔗',
-    'Alto Volumen':'📦',
-    'Estratégico':'🎯',
-    'VIP':'👑'
-  };
+  const biz=getBiz();
+  const starSet=new Set((S.estrellas||[]).filter(e=>e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido').map(e=>e.negocio));
+  const isStar=neg=>starSet.has(neg);
+  const sq=S.qs?.toLowerCase()||'';
+  const filtered=sq?biz.filter(b=>b.negocio.toLowerCase().includes(sq)):biz;
+  // Sort: starred first, then by date desc
+  const sorted=[...filtered.filter(b=>isStar(b.negocio)),...filtered.filter(b=>!isStar(b.negocio))];
+  const starCount=starSet.size;
+  const ventas=biz.filter(b=>b.resultado?.toLowerCase().indexOf('venta')>=0).length;
 
   return `<div class="fi">
-    <!-- Header dorado distintivo -->
-    <div class="sec" style="background:linear-gradient(135deg,#D4AF37,#92400E);color:#fff;padding:14px 12px;border-radius:12px">
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div>
-          <div style="font-size:15px;font-weight:800">⭐ Negocios Clave</div>
-          <div style="font-size:9px;opacity:.85">Cuentas estratégicas · Alto valor</div>
-        </div>
-        <button onclick="load()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:13px">🔄</button>
-      </div>
+    <div class="sec" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="font-size:15px;font-weight:800">📂 Mi Cartera</div>
       <div style="display:flex;gap:6px;margin-top:10px">
         <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:18px;font-weight:800">${claves.length}</div>
-          <div style="font-size:8px;opacity:.8">⭐ Activos</div>
+          <div style="font-size:18px;font-weight:800">${biz.length}</div>
+          <div style="font-size:8px;opacity:.8">Negocios</div>
         </div>
-        <div style="flex:2;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
-          <div style="font-size:14px;font-weight:800">${fmtMoney(totalPotencial)}</div>
-          <div style="font-size:8px;opacity:.8">💰 Potencial mensual</div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:18px;font-weight:800">${starCount}</div>
+          <div style="font-size:8px;opacity:.8">⭐ Prioritarios</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:6px;text-align:center">
+          <div style="font-size:18px;font-weight:800">${ventas}</div>
+          <div style="font-size:8px;opacity:.8">🛒 Ventas</div>
         </div>
       </div>
     </div>
 
-    <!-- CTA crear -->
-    <button onclick="abrirFormClave()" class="btn btn-p" style="width:100%;font-size:14px;padding:14px;background:linear-gradient(135deg,#D4AF37,#92400E);border:none;color:#fff;font-weight:800;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 12px rgba(212,175,55,.3)">
-      ⭐ Registrar Negocio Clave
-    </button>
-
-    <div style="padding:0 2px;margin-bottom:6px">
-      <input class="inp" placeholder="🔍 Buscar negocio clave..." value="${S.qs||''}" oninput="clearTimeout(S._sqt);S._sqt=setTimeout(()=>{S.qs=this.value;R();},500);" style="font-size:13px;padding:10px">
+    <div style="padding:0 2px;margin-bottom:8px">
+      <input class="inp" placeholder="🔍 Buscar negocio..." value="${S.qs||''}" oninput="clearTimeout(S._sqt);S._sqt=setTimeout(()=>{S.qs=this.value;R();},500);" style="font-size:14px;padding:12px">
     </div>
 
-    ${sorted.length===0?`<div class="empty" style="padding:30px 12px">
-      <div style="font-size:32px;margin-bottom:8px">⭐</div>
-      <div style="font-size:13px;color:var(--t3);font-weight:700;margin-bottom:6px">Sin Negocios Clave aún</div>
-      <div style="font-size:11px;color:var(--t4);line-height:1.4">Marca como Clave a tus cuentas más estratégicas:<br>cadenas, alto volumen, decisores VIP.</div>
-    </div>`:''}
-
-    ${sorted.map((c)=>{
-      const color=catColor[c.categoriaClave]||'#D4AF37';
-      const emoji=catEmoji[c.categoriaClave]||'⭐';
-      return `<div class="cd" style="cursor:pointer;border-left:5px solid ${color};background:linear-gradient(90deg,#fffbeb 0%,#fff 30%);box-shadow:0 1px 3px rgba(212,175,55,.2)" onclick="openHistorial('${(c.negocio||'').replace(/'/g,'&#39;')}')">
-        <div style="display:flex;justify-content:space-between;align-items:start;gap:6px">
+    ${sorted.length===0?(sq?'<div class="empty">Sin resultados para "'+sq+'"</div>':'<div class="empty">Sin negocios. Usa 📝 Nueva para registrar visitas.</div>'):''}
+    ${sorted.map((b,i)=>{
+      const st=isStar(b.negocio);
+      const origIdx=biz.indexOf(b);
+      const ic=b.interes?.includes('Alto')?'var(--gn)':b.interes?.includes('Medio')?'var(--yw)':'var(--t4)';
+      const esVenta=b.resultado?.toLowerCase().indexOf('venta')>=0;
+      return `<div class="cd" onclick="openCartera(${origIdx})" style="cursor:pointer;border-left:4px solid ${st?'#D4AF37':ic};${st?'background:#FFFDE7;border-right:4px solid #D4AF37':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:800;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${emoji} ${c.negocio||'—'}</div>
-            <div style="font-size:9px;color:var(--t4);margin-top:2px">${c.colonia||'—'} · ${c.encargado||'sin encargado'}${c.telefono?' · '+c.telefono:''}</div>
-            ${c.razon?`<div style="font-size:10px;color:var(--t3);margin-top:4px;font-style:italic">"${c.razon}"</div>`:''}
+            <div style="font-size:14px;font-weight:800;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${st?'⭐ ':''}${esVenta?'🛒 ':''}${b.negocio}</div>
+            <div style="font-size:10px;color:var(--t4)">${b.giro} · ${b.visitas} visita(s) · ${b.ultimo||'—'}</div>
           </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:9px;color:#fff;background:${color};padding:3px 7px;border-radius:5px;font-weight:800;letter-spacing:.3px">${(c.categoriaClave||'CLAVE').toUpperCase()}</div>
-            ${c.potencial?`<div style="font-size:11px;font-weight:800;color:#27ae60;margin-top:4px">${fmtMoney(c.potencial)}/mes</div>`:''}
+          <div style="display:flex;gap:4px;align-items:center">
+            <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\u0027")}')" style="background:${st?'#D4AF37':'#e5e7eb'};border:none;cursor:pointer;font-size:18px;padding:5px 8px;border-radius:6px;color:${st?'#fff':'#9ca3af'}">${st?'★':'☆'}</button>
+            <span class="pill" style="background:${ic}15;color:${ic};font-size:10px">${b.interes?.split('—')[0]||'—'}</span>
           </div>
         </div>
-        <div style="display:flex;gap:5px;margin-top:8px">
-          ${c.telefono?`<a href="tel:${c.telefono}" onclick="event.stopPropagation()" style="flex:1;text-align:center;background:#25D366;color:#fff;padding:7px;border-radius:6px;text-decoration:none;font-size:11px;font-weight:700">📞 Llamar</a>`:''}
-          <button onclick="event.stopPropagation();visitaSobreClave('${(c.negocio||'').replace(/'/g,'&#39;')}','${(c.encargado||'').replace(/'/g,'&#39;')}','${c.telefono||''}','${(c.colonia||'').replace(/'/g,'&#39;')}','${(c.email||'').replace(/'/g,'&#39;')}')" style="flex:1;background:#D4AF37;color:#fff;border:none;padding:7px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">📝 Visita</button>
-          <button onclick="event.stopPropagation();desmarcarClavePrompt('${(c.negocio||'').replace(/'/g,'&#39;')}')" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:7px 10px;border-radius:6px;font-size:11px;cursor:pointer">✕</button>
-        </div>
+        ${b.resultado?`<div style="font-size:10px;color:var(--t3);margin-top:2px">→ ${b.resultado}</div>`:''}
       </div>`;
     }).join('')}
   </div>`;
 }
 
-function visitaSobreClave(neg,enc,tel,col,em){
-  // Pre-rellenar form de visita con datos del negocio clave
-  S.form=S.form||{};
-  S.form.rn=neg;
-  S.form.re=enc||'';
-  S.form.rt=tel||'';
-  S.form.rc=col||'';
-  S.form._em=em||'';
-  S.v='nueva';
-  R();
-  setTimeout(()=>{ const el=document.getElementById('rn'); if(el) el.value=neg; toast('📝 Datos pre-cargados desde Negocio Clave'); }, 200);
-}
-
-function abrirFormClave(){
-  // Modal con formulario tipo "Visita Nueva" + 4 campos extra de Clave
-  const m=document.createElement('div'); m.className='mbg'; m.id='claveForm';
-  m.onclick=e=>{ if(e.target===m) m.remove(); };
-  m.innerHTML=`<div class="mdl" style="max-width:500px;max-height:92vh;overflow-y:auto">
-    <div style="background:linear-gradient(135deg,#D4AF37,#92400E);margin:-13px -11px 14px;padding:14px;border-radius:12px 12px 0 0;color:#fff">
-      <div style="font-size:16px;font-weight:800">⭐ Registrar Negocio Clave</div>
-      <div style="font-size:11px;opacity:.9">Cuenta estratégica · seguimiento prioritario</div>
-    </div>
-
-    <div class="fld"><label class="lbl">🏢 Negocio *</label>
-      <input class="inp" id="kc_neg" autocomplete="off" oninput="autoCompleteNeg(this.value,'kc_')" placeholder="Ej. Sushi Roll Polanco">
-      <div id="kc_ac" style="display:none;background:#fff;border:1px solid var(--bd);border-radius:6px;margin-top:2px;max-height:180px;overflow-y:auto"></div>
-    </div>
-    <div class="fld"><label class="lbl">🍽️ Giro</label>
-      <select class="inp" id="kc_giro">
-        <option value="">—</option>
-        <option>Restaurante</option><option>Cafetería</option><option>Coffee Shop</option>
-        <option>Bar</option><option>Hotel</option><option>Cadena</option><option>Catering</option>
-        <option>Panadería</option><option>Otro</option>
-      </select>
-    </div>
-    <div class="fld"><label class="lbl">👤 Encargado / Decisor</label>
-      <input class="inp" id="kc_enc" placeholder="Nombre del decisor">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-      <div class="fld"><label class="lbl">📞 Teléfono</label><input class="inp" id="kc_tel" type="tel"></div>
-      <div class="fld"><label class="lbl">📍 Colonia</label><input class="inp" id="kc_col" placeholder="Polanco / Roma..."></div>
-    </div>
-    <div class="fld"><label class="lbl">✉️ Email</label><input class="inp" id="kc_em" type="email"></div>
-
-    <!-- Bloque dorado: campos exclusivos de Clave -->
-    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #D4AF37;border-radius:10px;padding:12px;margin:10px 0">
-      <div style="font-size:12px;font-weight:800;color:#92400E;margin-bottom:8px">⭐ Clasificación Clave</div>
-      <div class="fld"><label class="lbl">🏆 Categoría *</label>
-        <select class="inp" id="kc_cat" style="border-color:#D4AF37">
-          <option value="">— Selecciona —</option>
-          <option value="Cadena">🔗 Cadena (multi-sucursal)</option>
-          <option value="Alto Volumen">📦 Alto Volumen (consumo grande)</option>
-          <option value="Estratégico">🎯 Estratégico (referente / influencia)</option>
-          <option value="VIP">👑 VIP (decisor de alto perfil)</option>
-        </select>
-      </div>
-      <div class="fld"><label class="lbl">💰 Potencial mensual estimado ($)</label>
-        <input class="inp" id="kc_pot" type="number" min="0" step="100" placeholder="Ej. 15000" style="border-color:#D4AF37">
-      </div>
-      <div class="fld"><label class="lbl">📌 Razón de prioridad</label>
-        <textarea class="inp" id="kc_raz" rows="2" placeholder="Ej. Cadena con 12 sucursales, decisor en CDMX" style="border-color:#D4AF37;resize:vertical"></textarea>
-      </div>
-    </div>
-
-    <!-- Datos de visita estándar -->
-    <div class="fld"><label class="lbl">🌡️ Interés</label>
-      <select class="inp" id="kc_int">
-        <option value="">—</option>
-        <option value="Alto — listo para cotizar">🟢 Alto — listo para cotizar</option>
-        <option value="Medio — pide más información">🟡 Medio — pide más información</option>
-        <option value="Bajo — tal vez después">🔴 Bajo — tal vez después</option>
-      </select>
-    </div>
-    <div class="fld"><label class="lbl">📋 Resultado de la visita</label>
-      <input class="inp" id="kc_res" placeholder="Ej. Pasar mañana 4pm con muestras">
-    </div>
-    <div class="fld"><label class="lbl">📅 Próxima visita</label>
-      <input class="inp" id="kc_prox" type="date">
-    </div>
-    <div class="fld"><label class="lbl">📝 Notas</label>
-      <textarea class="inp" id="kc_not" rows="2" style="resize:vertical"></textarea>
-    </div>
-
-    <div style="display:flex;gap:6px;margin-top:14px">
-      <button onclick="document.getElementById('claveForm').remove()" class="btn btn-s" style="flex:1">Cancelar</button>
-      <button onclick="guardarClave()" class="btn btn-p" style="flex:2;background:linear-gradient(135deg,#D4AF37,#92400E);border:none;color:#fff;font-weight:800">⭐ Guardar Negocio Clave</button>
-    </div>
-  </div>`;
-  document.body.appendChild(m);
-}
-
-async function guardarClave(){
-  const neg=document.getElementById('kc_neg').value.trim();
-  const cat=document.getElementById('kc_cat').value;
-  if(!neg){ toast('⚠️ Negocio obligatorio','err'); return; }
-  if(!cat){ toast('⚠️ Selecciona categoría clave','err'); return; }
-  const btn=event?.target; if(btn){ btn.disabled=true; btn.textContent='⏳ Guardando...'; }
-  try{
-    const r=await pf({
-      action:'registrar_visita',
-      agente:S.u.id, agente_nombre:S.u.nm,
-      negocio:neg,
-      giro:document.getElementById('kc_giro').value,
-      encargado:document.getElementById('kc_enc').value,
-      telefono:document.getElementById('kc_tel').value,
-      colonia:document.getElementById('kc_col').value,
-      email:document.getElementById('kc_em').value,
-      interes:document.getElementById('kc_int').value,
-      resultado:document.getElementById('kc_res').value,
-      proxima_visita:document.getElementById('kc_prox').value,
-      notas:document.getElementById('kc_not').value,
-      // Campos clave
-      es_clave:'TRUE',
-      categoria_clave:cat,
-      potencial_mensual:document.getElementById('kc_pot').value||0,
-      razon_clave:document.getElementById('kc_raz').value
-    });
-    if(r&&r.ok){
-      toast('⭐ ¡Negocio Clave registrado!');
-      document.getElementById('claveForm').remove();
-      await load();
-      R();
-    } else {
-      toast(r?.error||'Error al guardar','err');
-      if(btn){ btn.disabled=false; btn.textContent='⭐ Guardar Negocio Clave'; }
-    }
-  }catch(e){
-    toast('Error: '+e.message,'err');
-    if(btn){ btn.disabled=false; btn.textContent='⭐ Guardar Negocio Clave'; }
-  }
-}
-
-async function desmarcarClavePrompt(neg){
-  if(!confirm('¿Quitar a "'+neg+'" de Negocios Clave?\n(El historial de visitas se conserva)')) return;
-  const r=await pf({action:'desmarcar_clave',agente:S.u.id,agente_nombre:S.u.nm,negocio:neg});
-  if(r&&r.ok){ toast('Negocio desmarcado'); await load(); R(); }
-  else toast(r?.error||'Error','err');
-}
-
-// Marcar como clave un negocio existente (desde panel supervisor o desde form)
-async function marcarClavePrompt(negocio,agenteNombre){
-  const cat=prompt('🏆 Categoría Clave para "'+negocio+'":\n\n1 = 🔗 Cadena\n2 = 📦 Alto Volumen\n3 = 🎯 Estratégico\n4 = 👑 VIP\n\nEscribe el número:');
-  if(!cat) return;
-  const cats=['Cadena','Alto Volumen','Estratégico','VIP'];
-  const catName=cats[parseInt(cat)-1];
-  if(!catName){ toast('Categoría inválida','err'); return; }
-  const pot=prompt('💰 Potencial mensual estimado ($) — opcional:');
-  const raz=prompt('📌 Razón de prioridad — opcional:');
-  const r=await pf({
-    action:'marcar_clave',
-    agente:S.u.id, agente_nombre:agenteNombre||S.u.nm,
-    negocio:negocio,
-    categoria_clave:catName,
-    potencial_mensual:pot||0,
-    razon_clave:raz||'',
-    marcado_por:S.u.nm
-  });
-  if(r&&r.ok){ toast('⭐ '+negocio+' ahora es '+catName); await load(); R(); }
-  else toast(r?.error||'Error','err');
-}
-
-// Modal de historial — antes openCartera, ahora se invoca desde claveH y desde autocomplete
-function openHistorial(neg){
-  const regs=(S.reg||[]).filter(r=>r.negocio===neg);
-  const claveInfo=(S.claves||[]).find(c=>c.negocio===neg);
-  const last=regs[regs.length-1]||{};
+function openCartera(i){
+  const biz=getBiz();
+  const b=biz[i];if(!b)return;
+  const st=(S.estrellas||[]).some(e=>e.negocio===b.negocio&&e.estatus!=='Removida'&&e.estatus!=='Convertido'&&e.estatus!=='Perdido');
+  const regs=(S.reg||[]).filter(r=>r.negocio===b.negocio);
+  // Find cotizaciones for this business
   const cots=regs.filter(r=>r.cotizacion_monto && parseFloat(r.cotizacion_monto)>0);
-
-  const m=document.createElement('div');m.className='mbg';m.id='histPop';
+  
+  const m=document.createElement('div');m.className='mbg';m.id='carteraPop';
   m.onclick=e=>{if(e.target===m)m.remove();};
   m.innerHTML=`<div class="mdl" style="max-width:500px;max-height:90vh;overflow-y:auto">
-    <div style="background:${claveInfo?'linear-gradient(135deg,#D4AF37,#92400E)':'linear-gradient(135deg,#1D7BA3,#2da0d1)'};margin:-13px -11px 12px;padding:14px;border-radius:12px 12px 0 0;color:#fff">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:16px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${claveInfo?'⭐ ':''}${neg}</div>
-          <div style="font-size:11px;opacity:.9">${regs.length} visita(s)${claveInfo?' · '+claveInfo.categoriaClave:''}</div>
+    <div style="background:linear-gradient(135deg,#7c3aed,#4c1d95);margin:-13px -11px 12px;padding:14px;border-radius:12px 12px 0 0;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:16px;font-weight:800">${b.negocio}</div>
+          <div style="font-size:11px;opacity:.9">${b.giro} · ${b.visitas} visita(s)</div>
         </div>
-        <button onclick="document.getElementById('histPop').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:16px">✕</button>
+        <button onclick="event.stopPropagation();toggleStar('${b.negocio.replace(/'/g,"\'")}');document.getElementById('carteraPop').remove();R();" style="background:rgba(255,255,255,.2);border:none;font-size:22px;padding:6px 10px;border-radius:8px;cursor:pointer">${st?'⭐':'☆'}</button>
       </div>
     </div>
 
-    <div style="font-size:12px;color:var(--t3);line-height:1.7;margin-bottom:10px;background:var(--s2);padding:10px;border-radius:8px">
-      ${last.encargado?'👤 <b>'+last.encargado+'</b><br>':''}
-      ${last.telefono?'📞 <a href="tel:'+last.telefono+'" style="color:var(--ac)">'+last.telefono+'</a><br>':''}
-      ${last.email?'✉️ '+last.email+'<br>':''}
-      ${last.colonia?'📍 '+last.colonia:''}
+    <div style="font-size:12px;color:var(--t3);line-height:1.6;margin-bottom:12px">
+      ${b.encargado?'👤 '+b.encargado+'<br>':''}
+      ${b.telefono?'📞 <a href="tel:'+b.telefono+'" style="color:var(--ac)">'+b.telefono+'</a><br>':''}
+      ${b.email?'✉️ '+b.email+'<br>':''}
+      ${b.colonia?'📍 '+b.colonia:''}
+      ${b.maps?' · <a href="'+b.maps+'" target="_blank" style="color:var(--ac)">Maps</a>':''}
     </div>
-
-    ${claveInfo?`<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #D4AF37;border-radius:8px;padding:10px;margin-bottom:10px">
-      <div style="font-size:11px;font-weight:800;color:#92400E">⭐ NEGOCIO CLAVE · ${claveInfo.categoriaClave}</div>
-      ${claveInfo.potencial?'<div style="font-size:13px;font-weight:800;color:#27ae60;margin-top:4px">Potencial: '+fmtMoney(claveInfo.potencial)+'/mes</div>':''}
-      ${claveInfo.razon?'<div style="font-size:11px;color:#78350f;margin-top:4px;font-style:italic">"'+claveInfo.razon+'"</div>':''}
-    </div>`:''}
 
     <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:6px">📋 Historial de visitas</div>
     ${regs.length===0?'<div style="font-size:11px;color:var(--t4);padding:6px">Sin visitas registradas</div>':''}
-    ${regs.slice(-5).reverse().map(r=>`<div style="padding:8px;background:var(--s2);border-radius:6px;margin-bottom:4px;font-size:11px;border-left:3px solid var(--ac)">
+    ${regs.map(r=>`<div style="padding:8px;background:var(--s2);border-radius:6px;margin-bottom:4px;font-size:11px;border-left:3px solid var(--ac)">
       <div style="display:flex;justify-content:space-between"><b>${r.fecha||'—'}</b><span style="color:var(--t4)">${r.interes||''}</span></div>
       <div style="color:var(--t3)">${r.resultado||'—'}</div>
       ${r.cotizacion_monto?'<div style="color:var(--gn);font-weight:700">💰 $'+parseFloat(r.cotizacion_monto).toLocaleString('es-MX',{minimumFractionDigits:2})+'</div>':''}
@@ -693,98 +513,52 @@ function openHistorial(neg){
     ${cots.length>0?`
     <div style="margin-top:14px;padding:12px;background:#f0fdf4;border:2px solid #16a34a;border-radius:10px">
       <div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:8px">💰 Cotizaciones registradas</div>
-      ${cots.map((c)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #dcfce7">
+      ${cots.map((c,ci)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #dcfce7">
         <div style="font-size:12px"><b>${c.fecha||'—'}</b> · $${parseFloat(c.cotizacion_monto).toLocaleString('es-MX',{minimumFractionDigits:2})} <span style='font-size:9px;color:var(--t4)'>+ IVA</span></div>
-        <button onclick="convertirVenta('${neg.replace(/'/g,'&#39;')}','${(last.giro||'').replace(/'/g,'&#39;')}','${(last.encargado||'').replace(/'/g,'&#39;')}','${last.telefono||''}',${c.cotizacion_monto})" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer">🛒 Cerrar Venta</button>
+        <button onclick="convertirVenta('${b.negocio.replace(/'/g,"\'")}','${b.giro||''}','${b.encargado||''}','${b.telefono||''}',${c.cotizacion_monto})" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer">🛒 Cerrar Venta</button>
       </div>`).join('')}
     </div>`:''}
 
     <div style="display:flex;gap:6px;margin-top:14px">
-      <button onclick="document.getElementById('histPop').remove();visitaSobreClave('${neg.replace(/'/g,'&#39;')}','${(last.encargado||'').replace(/'/g,'&#39;')}','${last.telefono||''}','${(last.colonia||'').replace(/'/g,'&#39;')}','${(last.email||'').replace(/'/g,'&#39;')}')" class="btn btn-p" style="flex:1;font-size:13px;padding:12px">📝 Nueva Visita</button>
-      ${!claveInfo?`<button onclick="document.getElementById('histPop').remove();marcarClavePrompt('${neg.replace(/'/g,'&#39;')}','${S.u.nm}')" style="flex:1;background:linear-gradient(135deg,#D4AF37,#92400E);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer">⭐ Marcar Clave</button>`:''}
+      <button onclick="document.getElementById('carteraPop').remove();openSeg(${i})" class="btn btn-p" style="flex:1;font-size:13px;padding:12px">📝 Nueva Visita</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button onclick="document.getElementById('carteraPop').remove();S.cotNeg='${b.negocio.replace(/'/g,"\'")}';S.cotCon='${(b.encargado||'').replace(/'/g,"\'")}';S.cotTel='${b.telefono||''}';S.cotEmail='${b.email||''}';S.v='cotizar';R();" class="btn" style="flex:1;font-size:12px;padding:10px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">💰 Nueva Cotización</button>
     </div>
     ${cots.length===0?`<div style="margin-top:6px">
-      <button onclick="convertirVentaManual('${neg.replace(/'/g,'&#39;')}','${(last.giro||'').replace(/'/g,'&#39;')}','${(last.encargado||'').replace(/'/g,'&#39;')}','${last.telefono||''}')" class="btn" style="width:100%;font-size:12px;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">🛒 Registrar Venta (sin cotización)</button>
+      <button onclick="convertirVentaManual('${b.negocio.replace(/'/g,"\'")}','${b.giro||''}','${b.encargado||''}','${b.telefono||''}')" class="btn" style="width:100%;font-size:12px;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">🛒 Registrar Venta (sin cotización)</button>
     </div>`:''}
+    <button onclick="document.getElementById('carteraPop').remove()" class="btn btn-s" style="margin-top:8px;font-size:11px">Cerrar</button>
   </div>`;
   document.body.appendChild(m);
 }
 
-// AUTOCOMPLETE de negocio en formularios
-async function autoCompleteNeg(q,prefix){
-  prefix=prefix||'r'; // r para form Nueva, kc_ para form Clave
-  q=(q||'').trim();
-  const acId=prefix==='r'?'rn_ac':prefix+'ac';
-  const ac=document.getElementById(acId);
-  if(!ac) return;
-  if(q.length<2){ ac.style.display='none'; ac.innerHTML=''; return; }
-  clearTimeout(S._acT);
-  S._acT=setTimeout(async()=>{
-    try{
-      const r=await gf('historial_negocio','&q='+encodeURIComponent(q));
-      if(!r||!r.matches||r.matches.length===0){ ac.style.display='none'; ac.innerHTML=''; return; }
-      ac.innerHTML=r.matches.map((m,i)=>`<div style="padding:8px 10px;border-bottom:1px solid var(--bd);cursor:pointer;font-size:12px" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'" onclick="usarMatch(${i},'${prefix}')">
-        <div style="font-weight:700">${m.esClave?'⭐ ':''}${m.negocio}</div>
-        <div style="font-size:9px;color:var(--t4)">${m.numVisitas} visita(s) · última ${m.ultimaVisita} · ${m.encargado||'sin encargado'}${m.telefono?' · '+m.telefono:''}</div>
-      </div>`).join('');
-      S._acMatches=r.matches;
-      ac.style.display='block';
-    }catch(e){ ac.style.display='none'; }
-  }, 350);
-}
-
-function usarMatch(idx,prefix){
-  const m=(S._acMatches||[])[idx]; if(!m) return;
-  prefix=prefix||'r';
-  const setIf=(id,val)=>{ const el=document.getElementById(id); if(el && val) el.value=val; };
-  if(prefix==='r'){
-    setIf('rn',m.negocio); setIf('rg',m.giro); setIf('re',m.encargado);
-    setIf('rt',m.telefono); setIf('rc',m.colonia); setIf('rd',m.direccion);
-    setIf('rfc',m.rfc);
-    // visita siguiente
-    const rv=document.getElementById('rv'); if(rv) rv.value=String((m.numVisitas||0)+1);
-    // Email puede no estar en el form principal
-    if(S.form){ S.form.rn=m.negocio; S.form.rg=m.giro; S.form.re=m.encargado; S.form.rt=m.telefono; S.form.rc=m.colonia; S.form.rv=String((m.numVisitas||0)+1); }
-    document.getElementById('rn_ac').style.display='none';
-    toast(m.esClave?'⭐ Negocio Clave: datos cargados':'📋 Datos cargados ('+(m.numVisitas||0)+' visitas previas)');
-  } else {
-    setIf('kc_neg',m.negocio); setIf('kc_giro',m.giro); setIf('kc_enc',m.encargado);
-    setIf('kc_tel',m.telefono); setIf('kc_col',m.colonia); setIf('kc_em',m.email);
-    document.getElementById('kc_ac').style.display='none';
-    toast('📋 Datos cargados');
-  }
-}
-
+// v10: La función legacy ahora redirige a la nueva pestaña 🎉 Venta con el negocio
+// pre-cargado. Mantiene compatibilidad con los onclick de cartera y cotizador.
 function convertirVenta(neg,giro,contacto,tel,monto,folio){
-  // FIX v7: monto ya es total CON IVA. Desglosamos hacia atrás solo para mostrar.
-  const tot=parseFloat(monto);
-  const sub=tot/1.16;
-  const iva=tot-sub;
-  if(!confirm('¿Confirmar venta de '+neg+'?\nFolio: '+folio+'\nSubtotal: $'+sub.toFixed(2)+'\nIVA 16%: $'+iva.toFixed(2)+'\nTotal: $'+tot.toFixed(2)))return;
-  document.getElementById('histPop')?.remove();
-  const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳...';}
-  pf({
-    action:'registrar_venta',
-    agente:S.u.id,
-    agente_nombre:S.u.nm,
-    folioCotizacion:folio,
-    negocio:neg,giro:giro,
-    contacto:contacto,telefono:tel,
-    total:tot.toFixed(2),
-    productos:'Cotización previa · '+folio,
-    notas:'Venta cerrada desde historial'
-  }).then(()=>{
-    toast('🛒 ¡Venta cerrada! $'+tot.toFixed(2));
-    load().then(()=>R());
-  });
+  document.getElementById('carteraPop')?.remove();
+  document.getElementById('sm')?.remove();
+  S.vta = S.vta || {};
+  S.vta.modo = 'cartera';
+  S.vta.negocio = neg || '';
+  S.vta.giro = giro || '';
+  S.vta.contacto = contacto || '';
+  S.vta.telefono = tel || '';
+  if(folio) S.vta.folio = folio;
+  if(monto){
+    const tot = parseFloat(monto);
+    S.vta.total = tot.toFixed(2);
+    S.vta.subtotal = (tot/1.16).toFixed(2);
+    S.vta.iva = (tot - tot/1.16).toFixed(2);
+  }
+  S.v='venta';
+  R();
+  setTimeout(()=>{toast('🎉 Completa los datos de venta para '+neg);},150);
 }
 
 function convertirVentaManual(neg,giro,contacto,tel){
-  const folio=prompt('📋 Folio de cotización oficial (S-XXXX o COT-XXXX):');
-  if(!folio||!folio.trim()){toast('⚠️ Folio obligatorio','err');return;}
-  const monto=prompt('💰 Total CON IVA (tal cual aparece en la cotización oficial):');
-  if(!monto||parseFloat(monto)<=0){toast('⚠️ Ingresa un total válido','err');return;}
-  convertirVenta(neg,giro,contacto,tel,monto,folio.trim());
+  // Antes: pedía folio y monto en prompts. Ahora: abre el flujo Venta vacío con el negocio.
+  convertirVenta(neg,giro,contacto,tel,null,null);
 }
 
 
@@ -937,23 +711,30 @@ function vcc(i){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja'
 function addVQ(i,neg,giro,maps){const p=S.cos[i],t=document.getElementById('vct')?.value||'caja',q=parseInt(document.getElementById('vcq')?.value)||1;const pr=t==='caja'?p.precio_caja:p.precio_paq;ventaQItems.push({sku:p.sku,tipo:t,qty:q,pz:q,total:pr*q});document.getElementById('vcm')?.remove();toast('✅ '+p.sku);renderVenta(neg,giro,maps);}
 
 async function saveVenta(neg,giro,maps){
-  const folio=prompt('📋 Folio de cotización oficial (S-XXXX o COT-XXXX):');
-  if(!folio||!folio.trim()){toast('⚠️ Folio obligatorio','err');return;}
-  const b=document.getElementById('svb');if(b){b.disabled=true;b.textContent='⏳...';}
-  // FIX v7: total de items es subtotal SIN IVA. Sumamos IVA antes de mandar.
-  const sub=ventaQItems.reduce((s,i)=>s+i.total,0);
-  const totalConIVA=+(sub*1.16).toFixed(2);
-  await pf({action:'registrar_venta',
-    agente:S.u.id,
-    agente_nombre:S.u.nm,
-    folioCotizacion:folio.trim(),
-    negocio:neg,giro:giro,contacto:document.getElementById('vco')?.value||'',
-    productos:ventaQItems.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', '),
-    cantidad:ventaQItems.reduce((s,i)=>s+i.pz,0),
-    total:totalConIVA.toFixed(2),
-    forma_pago:document.getElementById('vfp')?.value||'',notas:document.getElementById('vno')?.value||'',maps:maps});
-  toast('🛒 ¡Venta registrada! $'+totalConIVA.toLocaleString('es-MX',{minimumFractionDigits:2}));
-  ventaQItems=[];document.getElementById('sm')?.remove();load();}
+  // v10: ahora el cierre de venta vive en la pestaña 🎉 Venta. Pasamos los items
+  // pre-cargados desde el cotizador para que el agente solo confirme.
+  document.getElementById('sm')?.remove();
+  S.vta = S.vta || {};
+  S.vta.modo = 'cartera';
+  S.vta.negocio = neg || '';
+  S.vta.giro = giro || '';
+  S.vta.contacto = document.getElementById('vco')?.value || '';
+  S.vta.formaPago = document.getElementById('vfp')?.value || '';
+  S.vta.notas = document.getElementById('vno')?.value || '';
+  // Los items de ventaQItems traen totales CON IVA (ya tipificados así en el calc)
+  S.vta.items = (typeof ventaQItems!=='undefined'&&ventaQItems.length)
+    ? ventaQItems.map(it=>({...it}))
+    : [];
+  // Recalcular subtotal/iva/total a partir de items
+  const totalConIVA = S.vta.items.reduce((s,i)=>s+(parseFloat(i.total)||0), 0);
+  S.vta.total = totalConIVA.toFixed(2);
+  S.vta.subtotal = (totalConIVA/1.16).toFixed(2);
+  S.vta.iva = (totalConIVA - totalConIVA/1.16).toFixed(2);
+  ventaQItems=[];
+  S.v='venta';
+  R();
+  setTimeout(()=>toast('🎉 Confirma el folio y los datos para cerrar venta'),120);
+}
 
 function useCotForVenta(idx,neg,giro,maps){
   if(!idx&&idx!==0)return;
@@ -1152,509 +933,52 @@ function copiarDatosBanco(){
 function fmtMoney(n){return '$'+(n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function fmtMoneyK(n){if(!n)return '$0';if(n>=1000)return '$'+(n/1000).toFixed(1)+'k';return '$'+Math.round(n);}
 
-// === VISTA ACUMULADO ===
-async function cargarAcumulado(agrupacion, force){
-  // Cache simple: si ya está cargado y no es force, devuelve lo cacheado
-  if(!force && S.acum && S.acum.agrupacion === agrupacion) return S.acum;
-  try{
-    const r = await gf('acumulado','&agrupacion='+agrupacion);
-    if(r && r.ok !== false){
-      S.acum = r;
-      return r;
-    }
-  } catch(e){
-    console.log('acumulado',e);
-  }
-  return null;
-}
-
-function acumuladoH(){
-  // Asegurar agrupacion default y disparar carga si falta
-  if(!S.acumAgrup) S.acumAgrup = 'mes';
-  if(!S.acum || S.acum.agrupacion !== S.acumAgrup){
-    cargarAcumulado(S.acumAgrup).then(()=>R());
-    return `<div class="empty"><div class="spin"></div>Cargando acumulado...</div>`;
-  }
-
-  const A = S.acum;
-  const ag = S.acumAgrup;
-  const periodos = A.periodos || [];
-  const agentes = Object.entries(A.agentes||{}).sort((a,b)=>(b[1].montoVentas||0)-(a[1].montoVentas||0));
-  const T = A.totales || {};
-
-  // Para mostrar en gráfico de barras (top 12 periodos)
-  const periodosGrafico = ag === 'full' ? periodos : periodos.slice(0, 12).reverse();
-  const maxMonto = Math.max(...periodosGrafico.map(p=>p.monto), 1);
-
-  return `<div class="fi" id="acumRoot">
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#7c2d12,#dc2626);color:#fff;padding:14px 12px;border-radius:12px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:800">📈 Acumulado de Ventas</div>
-          <div style="font-size:9px;opacity:.9;margin-top:3px">Histórico completo · Sin filtro de fecha</div>
-        </div>
-        <div style="display:flex;gap:5px;flex-shrink:0">
-          <button onclick="exportarAcumulado()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px" title="Exportar / Imprimir">🖨️</button>
-          <button onclick="cargarAcumulado('${ag}',true).then(()=>R())" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px" title="Actualizar">🔄</button>
-          <button onclick="cerrarSesion()" style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px" title="Cerrar sesión">🚪</button>
-        </div>
-      </div>
-      <!-- Sub-tabs día/semana/mes/full -->
-      <div style="display:flex;gap:4px">
-        ${[['dia','📅 DÍA'],['semana','📆 SEMANA'],['mes','📊 MES'],['full','🌐 FULL']].map(([k,l])=>`<button onclick="S.acumAgrup='${k}';S.acum=null;R()" style="flex:1;padding:9px;border-radius:8px;border:none;background:${ag===k?'#fff':'rgba(255,255,255,.18)'};color:${ag===k?'#7c2d12':'#fff'};font-size:11px;font-weight:800;cursor:pointer">${l}</button>`).join('')}
-      </div>
-    </div>
-
-    <!-- KPIs grandes -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
-      <div style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:10px;padding:14px;text-align:center">
-        <div style="font-size:9px;opacity:.9;font-weight:700;letter-spacing:.5px">💵 FACTURADO TOTAL</div>
-        <div style="font-size:26px;font-weight:800;line-height:1.1;margin-top:3px">${fmtMoney(T.monto||0)}</div>
-        <div style="font-size:9px;opacity:.85">${T.ventas||0} ventas cerradas</div>
-      </div>
-      <div style="background:#fff;border:2px solid #7c2d12;border-radius:10px;padding:14px;text-align:center">
-        <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">🎯 TICKET PROMEDIO</div>
-        <div style="font-size:24px;font-weight:800;color:#7c2d12;line-height:1.1;margin-top:3px">${fmtMoney(T.ticketPromedio||0)}</div>
-        <div style="font-size:9px;color:var(--t4)">por venta</div>
-      </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:10px;padding:11px;text-align:center">
-        <div style="font-size:8px;color:var(--t4);font-weight:700">📋 VISITAS</div>
-        <div style="font-size:18px;font-weight:800;color:var(--ac2);line-height:1.1">${T.visitas||0}</div>
-      </div>
-      <div style="background:#fff;border:1px solid var(--bd);border-radius:10px;padding:11px;text-align:center">
-        <div style="font-size:8px;color:var(--t4);font-weight:700">💰 COTIZ.</div>
-        <div style="font-size:18px;font-weight:800;color:#d97706;line-height:1.1">${T.cotizaciones||0}</div>
-      </div>
-    </div>
-
-    ${ag !== 'full' ? `
-    <!-- Gráfico de barras de los últimos periodos -->
-    <div class="sec">
-      <div class="sec-t">📊 Ventas $ por ${ag === 'dia' ? 'día' : ag === 'semana' ? 'semana' : 'mes'} ${periodosGrafico.length > 0 ? '· últimos '+periodosGrafico.length : ''}</div>
-      ${periodosGrafico.length === 0 ? '<div style="font-size:11px;color:var(--t4);padding:8px;text-align:center">Sin ventas registradas</div>' : `
-      <div style="display:flex;align-items:flex-end;gap:3px;height:120px;padding:5px 0;overflow-x:auto">
-        ${periodosGrafico.map(p=>{
-          const h = Math.max(2, Math.round((p.monto/maxMonto)*100));
-          return `<div style="min-width:38px;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="${p.etiqueta}: ${fmtMoney(p.monto)}">
-            <div style="font-size:8px;font-weight:800;color:#7c2d12;white-space:nowrap">${fmtMoneyK(p.monto)}</div>
-            <div style="width:100%;height:${h}px;background:linear-gradient(180deg,#dc2626,#7c2d12);border-radius:3px 3px 0 0;min-height:2px"></div>
-            <div style="font-size:7px;color:var(--t4);font-weight:700;text-align:center;line-height:1.1;word-break:break-word">${p.etiqueta.length>12?p.etiqueta.substring(0,11)+'…':p.etiqueta}</div>
-          </div>`;
-        }).join('')}
-      </div>`}
-    </div>` : ''}
-
-    <!-- Tabla por periodo -->
-    <div class="sec">
-      <div class="sec-t">📅 Detalle por ${ag === 'full' ? 'histórico' : ag === 'dia' ? 'día' : ag === 'semana' ? 'semana' : 'mes'}</div>
-      <div style="display:grid;grid-template-columns:1.4fr .55fr .55fr .55fr 1fr;gap:3px;padding:6px 4px;background:#fee2e2;border-radius:6px;font-size:8px;font-weight:800;color:#7c2d12;text-transform:uppercase;letter-spacing:.3px">
-        <div>Periodo</div>
-        <div style="text-align:center">Vis</div>
-        <div style="text-align:center">Cot</div>
-        <div style="text-align:center">Ven</div>
-        <div style="text-align:right">$ Facturado</div>
-      </div>
-      ${periodos.length === 0 ? '<div style="font-size:11px;color:var(--t4);padding:12px;text-align:center">Sin datos en el histórico</div>' : ''}
-      ${periodos.map(p=>`<div style="display:grid;grid-template-columns:1.4fr .55fr .55fr .55fr 1fr;gap:3px;padding:8px 4px;border-bottom:1px solid var(--bd);align-items:center">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.etiqueta}</div>
-        <div style="text-align:center;font-size:12px;font-weight:700;color:var(--ac2)">${p.visitas}</div>
-        <div style="text-align:center;font-size:12px;font-weight:700;color:#d97706">${p.cotizaciones}</div>
-        <div style="text-align:center;font-size:12px;font-weight:800;color:#16a34a">${p.ventas}</div>
-        <div style="text-align:right;font-size:12px;font-weight:800;color:#16a34a">${fmtMoney(p.monto)}</div>
-      </div>`).join('')}
-      ${periodos.length > 0 ? `<div style="display:grid;grid-template-columns:1.4fr .55fr .55fr .55fr 1fr;gap:3px;padding:9px 4px;background:#fffbeb;border-top:2px solid #f59e0b;font-weight:800;font-size:11px;align-items:center">
-        <div style="color:#92400e">TOTAL</div>
-        <div style="text-align:center;color:var(--ac2)">${T.visitas}</div>
-        <div style="text-align:center;color:#d97706">${T.cotizaciones}</div>
-        <div style="text-align:center;color:#16a34a">${T.ventas}</div>
-        <div style="text-align:right;color:#16a34a;font-size:13px">${fmtMoney(T.monto)}</div>
-      </div>`:''}
-    </div>
-
-    <!-- Ranking por agente acumulado total -->
-    <div class="sec">
-      <div class="sec-t">🏆 Ranking acumulado por asesor (todo el histórico)</div>
-      <div style="display:grid;grid-template-columns:1.5fr .55fr .55fr .55fr 1fr;gap:3px;padding:6px 4px;background:var(--ac3);border-radius:6px;font-size:8px;font-weight:800;color:var(--ac2);text-transform:uppercase;letter-spacing:.3px">
-        <div>Asesor</div>
-        <div style="text-align:center">Vis</div>
-        <div style="text-align:center">Ven</div>
-        <div style="text-align:center">Tkt</div>
-        <div style="text-align:right">$ Total</div>
-      </div>
-      ${agentes.map(([id,a],idx)=>{
-        const medalla = idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'';
-        return `<div style="display:grid;grid-template-columns:1.5fr .55fr .55fr .55fr 1fr;gap:3px;padding:8px 4px;border-bottom:1px solid var(--bd);align-items:center">
-          <div style="min-width:0">
-            <div style="font-size:11px;font-weight:700;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${medalla} ${a.nombre}</div>
-            <div style="font-size:8px;color:var(--t4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.zona} · conv ${a.tasaConversion}%</div>
-          </div>
-          <div style="text-align:center;font-size:11px;font-weight:700;color:var(--ac2)">${a.visitas}</div>
-          <div style="text-align:center;font-size:12px;font-weight:800;color:#16a34a">${a.ventas}</div>
-          <div style="text-align:center;font-size:10px;color:#7c2d12;font-weight:700">${fmtMoneyK(a.ticketPromedio)}</div>
-          <div style="text-align:right;font-size:12px;font-weight:800;color:#16a34a">${fmtMoney(a.montoVentas)}</div>
-        </div>`;
-      }).join('')}
-    </div>
-
-    <!-- Resumen ejecutivo -->
-    <div class="sec" style="background:#fffbeb;border:1px solid #f59e0b">
-      <div style="font-size:11px;color:#92400e;line-height:1.5">
-        <b>📊 Lectura ejecutiva:</b> El equipo ha facturado <b>${fmtMoney(T.monto)}</b> con <b>${T.ventas} ventas</b> cerradas a lo largo de <b>${T.visitas} visitas</b> realizadas. La conversión global visitas → ventas es <b>${T.visitas>0?(T.ventas/T.visitas*100).toFixed(1):0}%</b>. El ticket promedio es <b>${fmtMoney(T.ticketPromedio)}</b>.
-      </div>
-    </div>
-  </div>`;
-}
-
-// Exportar acumulado
-function exportarAcumulado(){
-  const A = S.acum;
-  if(!A){ toast('No hay datos cargados','err'); return; }
-  const T = A.totales || {};
-  const ag = A.agrupacion;
-  const labelAg = ag === 'dia' ? 'por día' : ag === 'semana' ? 'por semana' : ag === 'mes' ? 'por mes' : 'total histórico';
-  const fmtMx = n=>(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const fechaGen = new Date().toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'});
-
-  const agentes = Object.entries(A.agentes||{}).sort((a,b)=>(b[1].montoVentas||0)-(a[1].montoVentas||0));
-  const periodos = A.periodos || [];
-
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Acumulado Entelequia · ${labelAg}</title>
-<style>
-  @page{size:letter;margin:1.4cm}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#1a1a1a;background:#fff;padding:24px;line-height:1.5;font-size:12px;max-width:920px;margin:0 auto}
-  h1{font-size:24px;font-weight:600;color:#7c2d12;margin:0 0 4px}
-  h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #e5e7eb;padding-bottom:6px;margin:24px 0 10px}
-  .meta{color:#6b7280;font-size:11px;margin-bottom:20px}
-  .badge{display:inline-block;background:#7c2d12;color:#fff;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 24px}
-  .kpi{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:14px}
-  .kpi.big{background:linear-gradient(135deg,#f0fdf4,#fff);border-color:#16a34a}
-  .kpi-label{font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600;margin-bottom:4px}
-  .kpi-value{font-size:22px;font-weight:600;color:#111827}
-  .kpi.big .kpi-value{color:#15803d;font-size:26px}
-  table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
-  th{text-align:left;font-weight:600;background:#fee2e2;padding:8px 10px;border-bottom:1px solid #fca5a5;color:#7c2d12;font-size:10px;text-transform:uppercase}
-  td{padding:9px 10px;border-bottom:1px solid #f3f4f6}
-  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-  td.center,th.center{text-align:center}
-  .total-row{background:#fffbeb;font-weight:700}
-  .total-row td{border-top:2px solid #f59e0b;border-bottom:none}
-  .footer{margin-top:30px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#9ca3af;text-align:center}
-  .actions{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #e5e7eb;margin-bottom:18px;display:flex;gap:8px;justify-content:flex-end}
-  .actions button{background:#7c2d12;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
-  .actions button.secondary{background:#fff;color:#7c2d12;border:1px solid #7c2d12}
-  @media print{.actions{display:none}body{padding:0}}
-</style></head><body>
-<div class="actions">
-  <button onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-  <button class="secondary" onclick="window.close()">Cerrar</button>
-</div>
-
-<h1>Acumulado de Ventas Entelequia × Neostat</h1>
-<p class="meta">
-  <span class="badge">📈 ACUMULADO ${ag.toUpperCase()}</span>
-  &nbsp; ${labelAg.charAt(0).toUpperCase()+labelAg.slice(1)} · Generado ${fechaGen}
-</p>
-
-<h2>Totales globales del histórico</h2>
-<div class="kpis">
-  <div class="kpi big">
-    <div class="kpi-label">💵 Facturado</div>
-    <div class="kpi-value">$${fmtMx(T.monto)}</div>
-    <div style="font-size:10px;color:#15803d;margin-top:2px">${T.ventas} ventas cerradas</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">🎯 Ticket promedio</div>
-    <div class="kpi-value">$${fmtMx(T.ticketPromedio)}</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">📋 Visitas</div>
-    <div class="kpi-value">${T.visitas}</div>
-    <div style="font-size:10px;color:#6b7280;margin-top:2px">conv ${T.visitas>0?(T.ventas/T.visitas*100).toFixed(1):0}%</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">💰 Cotizaciones</div>
-    <div class="kpi-value">${T.cotizaciones}</div>
-  </div>
-</div>
-
-${ag !== 'full' && periodos.length > 0 ? `
-<h2>Detalle ${labelAg}</h2>
-<table>
-  <thead><tr>
-    <th>Periodo</th>
-    <th class="center num">Visitas</th>
-    <th class="center num">Cotiz.</th>
-    <th class="center num">Ventas</th>
-    <th class="num">Facturado</th>
-  </tr></thead>
-  <tbody>
-    ${periodos.map(p=>`<tr>
-      <td><strong>${p.etiqueta}</strong></td>
-      <td class="center num">${p.visitas}</td>
-      <td class="center num">${p.cotizaciones}</td>
-      <td class="center num" style="color:#15803d;font-weight:700">${p.ventas}</td>
-      <td class="num" style="font-weight:700">$${fmtMx(p.monto)}</td>
-    </tr>`).join('')}
-    <tr class="total-row">
-      <td><strong>TOTAL</strong></td>
-      <td class="center num">${T.visitas}</td>
-      <td class="center num">${T.cotizaciones}</td>
-      <td class="center num">${T.ventas}</td>
-      <td class="num">$${fmtMx(T.monto)}</td>
-    </tr>
-  </tbody>
-</table>` : ''}
-
-<h2>Ranking por asesor (acumulado total)</h2>
-<table>
-  <thead><tr>
-    <th>Asesor</th>
-    <th>Zona</th>
-    <th class="center num">Vis.</th>
-    <th class="center num">Cot.</th>
-    <th class="center num">Ven.</th>
-    <th class="center num">Conv %</th>
-    <th class="num">Ticket prom.</th>
-    <th class="num">Total facturado</th>
-  </tr></thead>
-  <tbody>
-    ${agentes.map(([id,a],idx)=>{
-      const medalla = idx===0?'🥇 ':idx===1?'🥈 ':idx===2?'🥉 ':'';
-      return `<tr>
-        <td><strong>${medalla}${a.nombre}</strong></td>
-        <td style="color:#6b7280">${a.zona}</td>
-        <td class="center num">${a.visitas}</td>
-        <td class="center num">${a.cotizaciones}</td>
-        <td class="center num" style="font-weight:700;color:#15803d">${a.ventas}</td>
-        <td class="center num">${a.tasaConversion}%</td>
-        <td class="num">$${fmtMx(a.ticketPromedio)}</td>
-        <td class="num" style="font-weight:700">$${fmtMx(a.montoVentas)}</td>
-      </tr>`;
-    }).join('')}
-    <tr class="total-row">
-      <td colspan="2"><strong>TOTAL EQUIPO</strong></td>
-      <td class="center num">${T.visitas}</td>
-      <td class="center num">${T.cotizaciones}</td>
-      <td class="center num">${T.ventas}</td>
-      <td class="center num">${T.visitas>0?(T.ventas/T.visitas*100).toFixed(1):0}%</td>
-      <td class="num">$${fmtMx(T.ticketPromedio)}</td>
-      <td class="num">$${fmtMx(T.monto)}</td>
-    </tr>
-  </tbody>
-</table>
-
-<div class="footer">
-  Entelequia® CRM × Neostat · Acumulado generado por ${S.u?.nm||'Supervisor'} el ${fechaGen}<br>
-  Datos consolidados de toda la base histórica
-</div>
-</body></html>`;
-
-  const w = window.open('','_blank','width=900,height=1000');
-  if(!w){ toast('⚠️ Permite las ventanas emergentes','err'); return; }
-  w.document.write(html);
-  w.document.close();
-  toast('📄 Acumulado exportado');
-}
-
-// === HELPERS DE FECHA / NAVEGACIÓN HISTÓRICA ===
-function fechaCorta(d){const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return d.getDate()+' '+meses[d.getMonth()]+' '+d.getFullYear();}
-function lunesDe(fecha){const d=new Date(fecha);const dia=d.getDay();const diff=d.getDate()-dia+(dia===0?-6:1);return new Date(d.getFullYear(),d.getMonth(),diff);}
-function etqSemana(fecha){const lun=lunesDe(fecha);const dom=new Date(lun.getFullYear(),lun.getMonth(),lun.getDate()+6);const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return lun.getDate()+' '+meses[lun.getMonth()]+' — '+dom.getDate()+' '+meses[dom.getMonth()];}
-function etqMes(fecha){const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];return meses[fecha.getMonth()]+' '+fecha.getFullYear();}
-
-// Calcula el siguiente corte (12pm o 12am) y cuánto falta
-function siguienteCorte(){
-  const ahora=new Date();
-  const h=ahora.getHours(), m=ahora.getMinutes(), s=ahora.getSeconds();
-  let proxH, etiqueta;
-  if(h<12){ proxH=12; etiqueta='12 pm'; }
-  else { proxH=24; etiqueta='12 am'; }
-  // Calcular ms hasta el siguiente corte
-  const target=new Date(ahora);
-  target.setHours(proxH===24?0:proxH, 0, 0, 0);
-  if(proxH===24) target.setDate(target.getDate()+1);
-  const diffMs=target-ahora;
-  const horas=Math.floor(diffMs/(1000*60*60));
-  const mins=Math.floor((diffMs%(1000*60*60))/(1000*60));
-  let faltan;
-  if(horas>0) faltan=horas+'h '+(mins<10?'0':'')+mins+'m';
-  else if(mins>0) faltan=mins+'m';
-  else faltan='<1m';
-  return {etiqueta:etiqueta, faltan:faltan, target:target};
-}
-
-// Cuánto tiempo pasó desde el último sync con el backend
-function tiempoDesdeSync(){
-  if(!S.lastSync) return 'sincronizando…';
-  const diff=(new Date()-S.lastSync)/1000; // segundos
-  if(diff<60) return 'sync hace <1 min';
-  const mins=Math.floor(diff/60);
-  if(mins<60) return 'sync hace '+mins+' min';
-  const horas=Math.floor(mins/60);
-  return 'sync hace '+horas+'h '+(mins%60)+'m';
-}
-
-// Cambiar periodo manteniendo offset 0 (volver a actual)
-function cambiarPeriodo(p){
-  S.dv=p;
-  S.dvOff=0;
-  S.hist=null;
-  R();
-}
-
-// Navegar al periodo anterior/siguiente
-async function navegarPeriodo(delta){
-  const newOff=(S.dvOff||0)+delta;
-  if(newOff>0) return; // No permitir ir al futuro
-  S.dvOff=newOff;
-  if(newOff===0){
-    S.hist=null;
-    R();
-    return;
-  }
-  // Cargar histórico
-  S.ld=true; R();
-  try{
-    const periodo=S.dv==='hoy'?'dia':S.dv;
-    const r=await gf('historico','&periodo='+periodo+'&offset='+newOff);
-    if(r&&r.ok!==false){ S.hist=r; }
-    else{ toast(r?.error||'Error cargando histórico','err'); S.dvOff=0; }
-  }catch(e){ toast('Error: '+e.message,'err'); S.dvOff=0; }
-  S.ld=false; R();
-}
-
-// Volver a la vista actual (cancela histórico)
-function volverActual(){
-  S.dvOff=0;
-  S.hist=null;
-  R();
-}
-
-// Refresh manual silencioso — el botón gira mientras carga, sin tapar la pantalla
-async function refrescarManual(btn){
-  if(btn){
-    btn.textContent='⏳';
-    btn.disabled=true;
-  }
-  await load(true); // silent mode
-  // Después del re-render el botón ya no existe, no hay que restaurarlo
-  toast('🔄 Datos actualizados');
-}
-
-// Cerrar sesión — usado desde header de Dash, Acumulado y desde la pestaña Admin
-function cerrarSesion(){
-  if(!confirm('¿Cerrar sesión?')) return;
-  ['ecrm','ecrm2','ecrm3','ecrm4'].forEach(k=>localStorage.removeItem(k));
-  S.u=null;
-  S.v='registrar';
-  S.ad=null;
-  S.acum=null;
-  S.hist=null;
-  R();
-}
-
 function dashboardH(){
-  // Solo mostrar el spinner GRANDE en la primera carga (cuando aún no hay datos)
-  if(S.ld && !S.ad) return `<div class="empty"><div class="spin"></div>Cargando datos en vivo...</div>`;
+  if(S.ld)return `<div class="empty"><div class="spin"></div>Cargando datos en vivo...</div>`;
   if(!S.ad)return `<div class="empty">Sin datos<br><button onclick="load()" class="btn btn-s" style="width:auto;padding:5px 10px;font-size:9px;margin-top:5px">🔄 Reintentar</button></div>`;
-  // === MODO HISTÓRICO vs ACTUAL ===
-  const offset=S.dvOff||0;
-  const usaHistorico=offset!==0;
-
-  // Decidir fuente de datos
-  let A, tVis=0, tCot=0, tVen=0, tMonto=0, tIA=0, totClaves=0;
-  let ventasRec=[], negsClave=[], pendsHoy=[];
-  let labelPeriodo='', etiquetaCorta='';
-  let serie=[0,0,0,0,0,0,0], dias7=[], diasCorta=[];
-  let agSorted=[];
-
-  if(usaHistorico && S.hist && S.hist.agents){
-    // Modo histórico: viene de getHistorico
-    A=S.hist.agents;
-    const T=S.hist.totales||{};
-    tVis=T.visitas||0; tCot=T.cotizaciones||0; tVen=T.ventas||0;
-    tMonto=T.montoVentas||0; tIA=T.intAlto||0; totClaves=T.claves||0;
-    ventasRec=S.hist.ventas||[];
-    negsClave=[]; // No mostramos claves activas en histórico (son estado actual)
-    pendsHoy=[];
-    labelPeriodo=S.hist.rango?.label||'';
-    etiquetaCorta=S.hist.rango?.etiquetaCorta||'';
-    // Sin serie7 en histórico — escondemos esa sección
-    agSorted=Object.entries(A).sort((a,b)=>(b[1].visitas||0)-(a[1].visitas||0));
-  } else {
-    // Modo actual: viene de supervisor_snapshot (lo de antes)
-    A=S.ad;
-    const periodo=S.dv;
-    const key=periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes';
-    const keyC=periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes';
-    const keyV=periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes';
-    Object.values(A).forEach(a=>{
-      tVis+=a[key]||0;
-      tCot+=a[keyC]||0;
-      tVen+=a[keyV]||0;
-      if(periodo==='mes')tMonto+=a.ventasMesMonto||0;
-      tIA+=a.intAlto||0;
-    });
-    if(periodo!=='mes')tMonto=Object.values(A).reduce((s,a)=>s+(a.ventasMesMonto||0),0);
-    Object.values(A).forEach(a=>{(a.serie7||[]).forEach((v,i)=>serie[i]+=v);});
-    dias7=S.dias7||[];
-    diasCorta=dias7.map(d=>{const dt=new Date(d+'T12:00:00');return ['D','L','M','M','J','V','S'][dt.getDay()];});
-    agSorted=Object.entries(A).sort((a,b)=>(b[1][key]||0)-(a[1][key]||0));
-    ventasRec=S.ventasRecientes||[];
-    negsClave=S.negociosClave||[];
-    pendsHoy=S.pendientesHoy||[];
-    totClaves=negsClave.length;
-    labelPeriodo=(S.dv==='hoy'?'HOY':S.dv==='semana'?'SEMANA ACTUAL':'MES ACTUAL');
-    etiquetaCorta=(S.dv==='hoy'?fechaCorta(new Date()):S.dv==='semana'?etqSemana(new Date()):etqMes(new Date()));
-  }
-  const maxSerie=Math.max(...serie,1);
-
-  // === INDICADOR DE CORTE (12am / 12pm) ===
-  const proxCorte=siguienteCorte();
-  const totVtaSem=usaHistorico?(S.hist?.totales?.montoVentas||0):(S.totalVentasSem||0);
-
-  // Periodo (key visible)
+  const A=S.ad;
   const periodo=S.dv;
   const key=periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes';
   const keyC=periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes';
   const keyV=periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes';
   
-  return `<div class="fi" id="dashRoot">
+  // Totales del equipo
+  let tVis=0,tCot=0,tVen=0,tMonto=0,tIA=0;
+  Object.values(A).forEach(a=>{
+    tVis+=a[key]||0;
+    tCot+=a[keyC]||0;
+    tVen+=a[keyV]||0;
+    if(periodo==='mes')tMonto+=a.ventasMesMonto||0;
+    else tMonto+=(a[keyV]||0)*0; // sólo mes tiene monto detallado
+    tIA+=a.intAlto||0;
+  });
+  // Para hoy/semana mostramos monto total del MES como referencia
+  if(periodo!=='mes')tMonto=Object.values(A).reduce((s,a)=>s+(a.ventasMesMonto||0),0);
+  
+  // Serie 7 días (suma equipo)
+  const serie=[0,0,0,0,0,0,0];
+  Object.values(A).forEach(a=>{(a.serie7||[]).forEach((v,i)=>serie[i]+=v);});
+  const maxSerie=Math.max(...serie,1);
+  const dias7=S.dias7||[];
+  const diasCorta=dias7.map(d=>{const dt=new Date(d+'T12:00:00');return ['D','L','M','M','J','V','S'][dt.getDay()];});
+  
+  // Ranking de agentes ordenado
+  const agSorted=Object.entries(A).sort((a,b)=>(b[1][key]||0)-(a[1][key]||0));
+  
+  const ahora=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  
+  return `<div class="fi">
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#1D7BA3,#2da0d1);color:#fff;padding:14px 12px;border-radius:12px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:800">📊 Panel de Supervisión</div>
-          <div style="font-size:9px;opacity:.9;margin-top:3px;line-height:1.4">
-            ${usaHistorico
-              ? `<span style="display:inline-block;width:7px;height:7px;background:#fbbf24;border-radius:50%;margin-right:4px"></span>📜 PERIODO CERRADO · ${etiquetaCorta}`
-              : `<span style="display:inline-block;width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 6px #10b981;animation:pulse 2s infinite;margin-right:4px"></span>EN VIVO · ${tiempoDesdeSync()} · corte ${proxCorte.etiqueta} en ${proxCorte.faltan}`
-            }
-          </div>
+        <div>
+          <div style="font-size:15px;font-weight:800">📊 Dashboard Supervisión</div>
+          <div style="font-size:9px;opacity:.85">Actualizado ${ahora} · Datos en vivo</div>
         </div>
-        <div style="display:flex;gap:5px;flex-shrink:0">
-          <button onclick="exportarDashboard()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px" title="Exportar / Imprimir">🖨️</button>
-          <button onclick="${usaHistorico?'volverActual()':'refrescarManual(this)'}" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px" title="${usaHistorico?'Volver al periodo actual':'Actualizar ahora'}">${usaHistorico?'⏎':'🔄'}</button>
-          <button onclick="cerrarSesion()" style="background:rgba(220,38,38,.25);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px" title="Cerrar sesión">🚪</button>
-        </div>
+        <button onclick="load()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px">🔄</button>
       </div>
-
-      <!-- Selector de periodo -->
-      <div style="display:flex;gap:4px;margin-bottom:6px">
-        ${[['hoy','📅 DÍA'],['semana','📆 SEMANA'],['mes','📊 MES']].map(([k,l])=>`<button onclick="cambiarPeriodo('${k}')" style="flex:1;padding:9px;border-radius:8px;border:none;background:${S.dv===k?'#fff':'rgba(255,255,255,.18)'};color:${S.dv===k?'#1D7BA3':'#fff'};font-size:11px;font-weight:800;cursor:pointer">${l}</button>`).join('')}
-      </div>
-
-      <!-- Navegación temporal con flechas -->
-      <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.15);padding:6px 8px;border-radius:8px">
-        <button onclick="navegarPeriodo(-1)" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:800" title="Periodo anterior">◀</button>
-        <div style="flex:1;text-align:center;font-size:11px;font-weight:800;color:#fff">
-          ${labelPeriodo}
-          ${usaHistorico?'<div style="font-size:9px;opacity:.85;font-weight:600">'+etiquetaCorta+'</div>':''}
-        </div>
-        <button onclick="navegarPeriodo(1)" ${offset>=0?'disabled style="background:rgba(255,255,255,.05);border:none;color:rgba(255,255,255,.3);width:32px;height:30px;border-radius:6px;cursor:not-allowed;font-size:14px;font-weight:800"':'style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:800"'} title="Periodo siguiente">▶</button>
+      <div style="display:flex;gap:4px">
+        ${[['hoy','📅 HOY'],['semana','📆 SEMANA'],['mes','📊 MES']].map(([k,l])=>`<button onclick="S.dv='${k}';R()" style="flex:1;padding:9px;border-radius:8px;border:none;background:${S.dv===k?'#fff':'rgba(255,255,255,.18)'};color:${S.dv===k?'#1D7BA3':'#fff'};font-size:11px;font-weight:800;cursor:pointer">${l}</button>`).join('')}
       </div>
     </div>
 
@@ -1663,26 +987,26 @@ function dashboardH(){
       <div style="background:#fff;border:2px solid var(--ac);border-radius:10px;padding:11px;text-align:center">
         <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">📋 VISITAS</div>
         <div style="font-size:28px;font-weight:800;color:var(--ac2);line-height:1.1">${tVis}</div>
-        <div style="font-size:8px;color:var(--t4)">${usaHistorico?etiquetaCorta:(periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes')}</div>
+        <div style="font-size:8px;color:var(--t4)">${periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes'}</div>
       </div>
       <div style="background:#fff;border:2px solid #f39c12;border-radius:10px;padding:11px;text-align:center">
         <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">💰 COTIZACIONES</div>
         <div style="font-size:28px;font-weight:800;color:#d97706;line-height:1.1">${tCot}</div>
-        <div style="font-size:8px;color:var(--t4)">${usaHistorico?etiquetaCorta:(periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes')}</div>
+        <div style="font-size:8px;color:var(--t4)">${periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes'}</div>
       </div>
       <div style="background:#fff;border:2px solid #27ae60;border-radius:10px;padding:11px;text-align:center">
         <div style="font-size:9px;color:var(--t4);font-weight:700;letter-spacing:.5px">🛒 VENTAS</div>
         <div style="font-size:28px;font-weight:800;color:#27ae60;line-height:1.1">${tVen}</div>
-        <div style="font-size:8px;color:var(--t4)">${usaHistorico?etiquetaCorta:(periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes')}</div>
+        <div style="font-size:8px;color:var(--t4)">${periodo==='hoy'?'hoy':periodo==='semana'?'esta semana':'este mes'}</div>
       </div>
       <div style="background:linear-gradient(135deg,#27ae60,#1abc9c);color:#fff;border-radius:10px;padding:11px;text-align:center">
-        <div style="font-size:9px;opacity:.9;font-weight:700;letter-spacing:.5px">💵 ${usaHistorico?'FACTURADO':'INGRESOS MES'}</div>
+        <div style="font-size:9px;opacity:.9;font-weight:700;letter-spacing:.5px">💵 INGRESOS MES</div>
         <div style="font-size:24px;font-weight:800;line-height:1.1">${fmtMoney(tMonto)}</div>
-        <div style="font-size:8px;opacity:.85">${usaHistorico?'total del periodo':'facturación del mes'}</div>
+        <div style="font-size:8px;opacity:.85">facturación del mes</div>
       </div>
     </div>
 
-    ${!usaHistorico?`<!-- Mini gráfico 7 días -->
+    <!-- Mini gráfico 7 días -->
     <div class="sec">
       <div class="sec-t">📈 Visitas — últimos 7 días (equipo)</div>
       <div style="display:flex;align-items:flex-end;gap:4px;height:80px;padding:5px 0">
@@ -1697,100 +1021,37 @@ function dashboardH(){
         }).join('')}
       </div>
       <div style="font-size:8px;color:var(--t4);text-align:center;margin-top:3px">Suma de visitas de todos los agentes</div>
-    </div>`:''}
+    </div>
 
     <!-- Tabla agentes -->
     <div class="sec">
-      <div class="sec-t">👥 Por agente — ${labelPeriodo}${usaHistorico?' · '+etiquetaCorta:''}</div>
-      <div style="display:grid;grid-template-columns:1.5fr .65fr .65fr .65fr .65fr 1fr;gap:3px;padding:6px 4px;background:var(--ac3);border-radius:6px;font-size:8px;font-weight:800;color:var(--ac2);text-transform:uppercase;letter-spacing:.3px">
+      <div class="sec-t">👥 Por agente — ${periodo==='hoy'?'Hoy':periodo==='semana'?'Esta Semana':'Este Mes'}</div>
+      <div style="display:grid;grid-template-columns:1.6fr .8fr .8fr .8fr 1.1fr;gap:4px;padding:6px 4px;background:var(--ac3);border-radius:6px;font-size:8px;font-weight:800;color:var(--ac2);text-transform:uppercase;letter-spacing:.4px">
         <div>Agente</div>
-        <div style="text-align:center">📋Vis</div>
-        <div style="text-align:center">💰Cot</div>
-        <div style="text-align:center">🛒Ven</div>
-        <div style="text-align:center">⭐Clv</div>
-        <div style="text-align:right">💵 $${usaHistorico?'':' Mes'}</div>
+        <div style="text-align:center">📋 Vis</div>
+        <div style="text-align:center">💰 Cot</div>
+        <div style="text-align:center">🛒 Ven</div>
+        <div style="text-align:right">💵 $ Mes</div>
       </div>
       ${agSorted.map(([id,a])=>{
-        // En histórico todos los campos están en .visitas/.cotizaciones/.ventas/.montoVentas/.claves
-        // En vivo dependen de S.dv (key/keyC/keyV)
-        const v = usaHistorico ? (a.visitas||0) : (a[key]||0);
-        const c = usaHistorico ? (a.cotizaciones||0) : (a[keyC]||0);
-        const vt = usaHistorico ? (a.ventas||0) : (a[keyV]||0);
-        const clv = usaHistorico ? (a.claves||0) : (a.clavesActivas||0);
-        const monto = usaHistorico ? (a.montoVentas||0) : (a.ventasMesMonto||0);
-        const sc = a.semaforo || (usaHistorico?'📜':'');
-        return `<div ${!usaHistorico?`onclick="abrirAgenteDetalle('${id}','${(a.nombre||'').replace(/'/g,'&#39;')}')"`:''} style="display:grid;grid-template-columns:1.5fr .65fr .65fr .65fr .65fr 1fr;gap:3px;padding:9px 4px;border-bottom:1px solid var(--bd);align-items:center;${!usaHistorico?'cursor:pointer':''}">
+        const v=a[key]||0,c=a[keyC]||0,vt=a[keyV]||0;
+        const sc=a.semaforo;
+        return `<div style="display:grid;grid-template-columns:1.6fr .8fr .8fr .8fr 1.1fr;gap:4px;padding:9px 4px;border-bottom:1px solid var(--bd);align-items:center">
           <div style="min-width:0">
             <div style="font-size:11px;font-weight:700;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sc} ${a.nombre}</div>
             <div style="font-size:8px;color:var(--t4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.zona}</div>
           </div>
-          <div style="text-align:center;font-size:13px;font-weight:800;color:var(--ac2)">${v}</div>
-          <div style="text-align:center;font-size:13px;font-weight:800;color:#d97706">${c}</div>
-          <div style="text-align:center;font-size:13px;font-weight:800;color:#27ae60">${vt}</div>
-          <div style="text-align:center;font-size:13px;font-weight:800;color:${clv>0?'#92400E':'var(--t4)'}">${clv}</div>
-          <div style="text-align:right;font-size:11px;font-weight:800;color:#27ae60">${fmtMoneyK(monto)}</div>
+          <div style="text-align:center;font-size:14px;font-weight:800;color:var(--ac2)">${v}</div>
+          <div style="text-align:center;font-size:14px;font-weight:800;color:#d97706">${c}</div>
+          <div style="text-align:center;font-size:14px;font-weight:800;color:#27ae60">${vt}</div>
+          <div style="text-align:right;font-size:11px;font-weight:800;color:#27ae60">${fmtMoneyK(a.ventasMesMonto||0)}</div>
         </div>`;
       }).join('')}
-      ${!usaHistorico?'<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:6px;font-style:italic">👆 Toca un agente para ver detalle y convertir negocios en Clave</div>':''}
     </div>
 
-    <!-- 🛒 ÚLTIMAS VENTAS EN VIVO -->
-    <div class="sec" style="border:2px solid #16a34a;background:linear-gradient(135deg,#f0fdf4 0%,#fff 100%)">
-      <div class="sec-t" style="color:#16a34a;display:flex;justify-content:space-between;align-items:center">
-        <span>🛒 ${usaHistorico?'Ventas del periodo':'Últimas ventas · sync directo'}</span>
-        <span style="font-size:9px;background:#16a34a;color:#fff;padding:3px 7px;border-radius:5px;font-weight:800">${fmtMoney(totVtaSem)} ${usaHistorico?'total':'sem'}</span>
-      </div>
-      ${ventasRec.length===0?'<div style="font-size:11px;color:var(--t4);padding:8px;text-align:center">Sin ventas en este periodo</div>':''}
-      ${ventasRec.slice(0,usaHistorico?20:6).map(v=>`<div style="display:grid;grid-template-columns:1fr auto;gap:6px;padding:7px 4px;border-bottom:1px solid #dcfce7;align-items:center">
-        <div style="min-width:0">
-          <div style="font-size:11px;font-weight:800;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.negocio||'—'}</div>
-          <div style="font-size:9px;color:var(--t4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.fecha} · ${v.agente}${v.folio?' · '+v.folio:''}</div>
-        </div>
-        <div style="font-size:13px;font-weight:800;color:#16a34a;text-align:right;flex-shrink:0">${fmtMoney(v.monto||0)}</div>
-      </div>`).join('')}
-      ${ventasRec.length>(usaHistorico?20:6)?`<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:4px">+ ${ventasRec.length-(usaHistorico?20:6)} más en el periodo</div>`:''}
-    </div>
-
-    ${!usaHistorico?`<!-- ⭐ NEGOCIOS CLAVE ACTIVOS (solo en vivo) -->
-    <div class="sec" style="border:2px solid #D4AF37;background:linear-gradient(135deg,#fffbeb 0%,#fff 100%)">
-      <div class="sec-t" style="color:#92400E;display:flex;justify-content:space-between;align-items:center">
-        <span>⭐ Negocios Clave activos</span>
-        <span style="font-size:9px;background:#D4AF37;color:#fff;padding:3px 7px;border-radius:5px;font-weight:800">${totClaves} total</span>
-      </div>
-      ${negsClave.length===0?'<div style="font-size:11px;color:var(--t4);padding:8px;text-align:center">Sin Negocios Clave marcados aún. Los agentes pueden marcarlos desde su pestaña ⭐ Clave.</div>':''}
-      ${negsClave.slice(0,5).map(c=>{
-        const catC={'Cadena':'#7c3aed','Alto Volumen':'#0891b2','Estratégico':'#d97706','VIP':'#be123c'}[c.categoriaClave]||'#D4AF37';
-        return `<div style="padding:8px 4px;border-bottom:1px solid #fef3c7">
-          <div style="display:flex;justify-content:space-between;align-items:start;gap:6px">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:11px;font-weight:800;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">⭐ ${c.negocio}</div>
-              <div style="font-size:9px;color:var(--t4)">${c.agente} · ${c.colonia||'—'}</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:9px;color:#fff;background:${catC};padding:2px 6px;border-radius:4px;font-weight:800">${(c.categoriaClave||'').toUpperCase()}</div>
-              ${c.potencial?`<div style="font-size:10px;font-weight:800;color:#16a34a;margin-top:2px">${fmtMoney(c.potencial)}/mes</div>`:''}
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-      ${negsClave.length>5?`<div style="font-size:9px;color:var(--t4);text-align:center;margin-top:4px">+ ${negsClave.length-5} más activos</div>`:''}
-    </div>`:''}
-
-    ${pendsHoy.length>0?`<!-- 🔔 SEGUIMIENTOS PENDIENTES -->
-    <div class="sec" style="border:2px solid #f59e0b;background:linear-gradient(135deg,#fef3c7 0%,#fff 100%)">
-      <div class="sec-t" style="color:#92400e">🔔 Seguimientos pendientes (próxima visita ≤ hoy)</div>
-      ${pendsHoy.slice(0,5).map(p=>`<div style="padding:6px 4px;border-bottom:1px solid #fef3c7;font-size:11px">
-        <div style="display:flex;justify-content:space-between">
-          <b>${p.negocio}</b>
-          <span style="color:#d97706;font-weight:700">${p.proxima}</span>
-        </div>
-        <div style="font-size:9px;color:var(--t4)">${p.agente}${p.encargado?' · '+p.encargado:''}${p.telefono?' · '+p.telefono:''}</div>
-      </div>`).join('')}
-    </div>`:''}
-
-    <!-- Métricas adicionales -->
+    <!-- Fila inferior: conversiones e interés alto -->
     <div class="sec">
-      <div class="sec-t">🎯 Conversión y calidad de pipeline</div>
+      <div class="sec-t">🎯 Métricas adicionales</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
         <div style="background:#f0fdf4;border:1px solid #27ae6033;border-radius:8px;padding:9px;text-align:center">
           <div style="font-size:8px;color:#27ae60;font-weight:700;letter-spacing:.5px">INT. ALTO</div>
@@ -1832,131 +1093,9 @@ function dashboardH(){
       </div>
     </div>
 
-    <button onclick="if(confirm('¿Cerrar sesión?')){['ecrm','ecrm2','ecrm3','ecrm4'].forEach(k=>localStorage.removeItem(k));S.u=null;S.v='registrar';R();}" style="width:100%;padding:13px;border-radius:10px;border:2px solid #e74c3c;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;font-family:inherit">🚪 CERRAR SESIÓN</button>
+    <button onclick="if(confirm('¿Cerrar sesión?')){['ecrm','ecrm2','ecrm3','ecrm4'].forEach(k=>localStorage.removeItem(k));S.u=null;S.v='nueva';R();}" style="width:100%;padding:13px;border-radius:10px;border:2px solid #e74c3c;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:800;cursor:pointer;margin-top:10px;font-family:inherit">🚪 CERRAR SESIÓN</button>
   </div>`;
 }
-// Modal de detalle del agente (vista supervisor) — permite convertir negocios en Clave
-async function abrirAgenteDetalle(agId,agNombre){
-  toast('⏳ Cargando datos del agente...');
-  // Traemos los registros del agente Y los claves del agente en paralelo
-  const [reg,kc]=await Promise.all([
-    gf('registros','&agente='+encodeURIComponent(agId)),
-    gf('negocios_clave','&agente='+encodeURIComponent(agId))
-  ]);
-  const registros=reg?.registros||[];
-  const claves=kc?.negocios||[];
-  const claveSet=new Set(claves.map(c=>c.negocio));
-
-  // Resumen por negocio
-  const byNeg={};
-  registros.forEach(r=>{
-    const k=r.negocio||'—';
-    if(!byNeg[k]) byNeg[k]={negocio:k,visitas:0,ultima:'',interes:'',resultado:'',cot:0,encargado:r.encargado||'',telefono:r.telefono||'',colonia:r.colonia||''};
-    byNeg[k].visitas++;
-    if((r.fecha||'')>byNeg[k].ultima){
-      byNeg[k].ultima=r.fecha||'';
-      byNeg[k].interes=r.interes||'';
-      byNeg[k].resultado=r.resultado||'';
-      if(r.encargado)byNeg[k].encargado=r.encargado;
-      if(r.telefono)byNeg[k].telefono=r.telefono;
-      if(r.colonia)byNeg[k].colonia=r.colonia;
-    }
-    byNeg[k].cot+=parseFloat(r.cotizacion_monto)||0;
-  });
-  const negs=Object.values(byNeg).sort((a,b)=>(b.ultima||'').localeCompare(a.ultima||''));
-
-  // KPIs del agente
-  const totV=negs.length;
-  const intAlto=negs.filter(n=>(n.interes||'').indexOf('Alto')>=0).length;
-  const totalPotencial=claves.reduce((s,c)=>s+(c.potencial||0),0);
-
-  const m=document.createElement('div');m.className='mbg';m.id='agDetPop';
-  m.onclick=e=>{if(e.target===m)m.remove();};
-  m.innerHTML=`<div class="mdl" style="max-width:560px;max-height:92vh;overflow-y:auto;padding:0">
-    <div style="background:linear-gradient(135deg,#1D7BA3,#2da0d1);padding:14px;border-radius:12px 12px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:start;gap:8px">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:16px;font-weight:800">${agNombre}</div>
-        <div style="font-size:11px;opacity:.9">${negs.length} negocios · ${claves.length} clave · ${intAlto} interés alto</div>
-      </div>
-      <button onclick="document.getElementById('agDetPop').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:16px">✕</button>
-    </div>
-
-    <div style="padding:14px">
-      ${claves.length>0?`
-        <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #D4AF37;border-radius:10px;padding:10px;margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-size:12px;font-weight:800;color:#92400E">⭐ Negocios Clave de ${agNombre.split(' ')[0]}</div>
-            <div style="font-size:11px;font-weight:800;color:#16a34a">${fmtMoney(totalPotencial)}/mes</div>
-          </div>
-          ${claves.map(c=>{
-            const catC={'Cadena':'#7c3aed','Alto Volumen':'#0891b2','Estratégico':'#d97706','VIP':'#be123c'}[c.categoriaClave]||'#D4AF37';
-            return `<div style="padding:6px 0;border-top:1px solid #fde68a;font-size:11px">
-              <div style="display:flex;justify-content:space-between"><b>⭐ ${c.negocio}</b><span style="font-size:9px;color:#fff;background:${catC};padding:2px 6px;border-radius:4px;font-weight:800">${(c.categoriaClave||'').toUpperCase()}</span></div>
-              ${c.razon?`<div style="font-size:10px;color:#78350f;font-style:italic;margin-top:2px">"${c.razon}"</div>`:''}
-            </div>`;
-          }).join('')}
-        </div>
-      `:''}
-
-      <div style="font-size:12px;font-weight:800;color:var(--t2);margin-bottom:8px">📋 Todos los negocios visitados (${negs.length})</div>
-      <div style="font-size:9px;color:var(--t4);margin-bottom:8px">Toca ⭐ para convertir un negocio en Clave</div>
-
-      ${negs.length===0?'<div class="empty" style="padding:20px">Sin visitas registradas</div>':''}
-      ${negs.map(n=>{
-        const isClave=claveSet.has(n.negocio);
-        const intColor=(n.interes||'').indexOf('Alto')>=0?'#16a34a':(n.interes||'').indexOf('Medio')>=0?'#d97706':'#94a3b8';
-        return `<div style="padding:8px;border:1px solid var(--bd);border-radius:8px;margin-bottom:5px;${isClave?'background:#fffbeb;border-color:#D4AF37':''}">
-          <div style="display:flex;justify-content:space-between;align-items:start;gap:6px">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${isClave?'⭐ ':''}${n.negocio}</div>
-              <div style="font-size:9px;color:var(--t4)">${n.visitas} visita(s) · ${n.ultima||'—'} · <span style="color:${intColor};font-weight:700">${(n.interes||'—').split('—')[0]}</span></div>
-              ${n.encargado?`<div style="font-size:9px;color:var(--t4)">${n.encargado}${n.telefono?' · '+n.telefono:''}</div>`:''}
-            </div>
-            <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
-              ${!isClave?`<button onclick="marcarClaveDesdeSupervisor('${n.negocio.replace(/'/g,'&#39;')}','${agNombre.replace(/'/g,'&#39;')}')" style="background:linear-gradient(135deg,#D4AF37,#92400E);color:#fff;border:none;padding:5px 9px;border-radius:5px;font-size:10px;font-weight:800;cursor:pointer">⭐ Marcar Clave</button>`:`<span style="font-size:9px;color:#92400E;font-weight:700">⭐ Ya es Clave</span>`}
-              ${n.cot>0?`<span style="font-size:10px;color:#16a34a;font-weight:700">${fmtMoney(n.cot)}</span>`:''}
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`;
-  document.body.appendChild(m);
-}
-
-// El supervisor marca como clave un negocio del agente
-async function marcarClaveDesdeSupervisor(negocio,agenteNombre){
-  // Reusa el prompt simple
-  const cat=prompt('🏆 Categoría Clave para "'+negocio+'":\n\n1 = 🔗 Cadena\n2 = 📦 Alto Volumen\n3 = 🎯 Estratégico\n4 = 👑 VIP\n\nEscribe el número:');
-  if(!cat)return;
-  const cats=['Cadena','Alto Volumen','Estratégico','VIP'];
-  const catName=cats[parseInt(cat)-1];
-  if(!catName){toast('Categoría inválida','err');return;}
-  const pot=prompt('💰 Potencial mensual estimado ($) — opcional, deja vacío si no sabes:');
-  const raz=prompt('📌 Razón de prioridad — opcional:');
-  // Buscar el id del agente
-  const ag=AG.find(a=>a.nm===agenteNombre);
-  if(!ag){toast('Agente no encontrado','err');return;}
-  const r=await pf({
-    action:'marcar_clave',
-    agente:ag.id, agente_nombre:agenteNombre,
-    negocio:negocio,
-    categoria_clave:catName,
-    potencial_mensual:pot||0,
-    razon_clave:raz||'',
-    marcado_por:S.u.nm+' (Supervisor)'
-  });
-  if(r&&r.ok){
-    toast('⭐ '+negocio+' → '+catName);
-    document.getElementById('agDetPop')?.remove();
-    await load();
-    R();
-  } else {
-    toast(r?.error||'Error','err');
-  }
-}
-
-
 async function verReporte(periodo){
   toast('⏳ Generando reporte...');
   const r=await gf('reporte','&periodo='+periodo);
@@ -1983,200 +1122,6 @@ function imprimirReporte(){
   w.document.close();
   setTimeout(()=>w.print(),300);
 }
-
-// === EXPORTAR DASHBOARD ===
-// Genera una versión imprimible del dashboard actual (en vivo o histórico)
-// y la abre en nueva ventana lista para "Guardar como PDF" o imprimir
-function exportarDashboard(){
-  const offset=S.dvOff||0;
-  const usaHistorico=offset!==0;
-  const A = usaHistorico ? (S.hist?.agents||{}) : (S.ad||{});
-  const periodo=S.dv;
-
-  // Calcular totales y datos según modo
-  let tVis=0,tCot=0,tVen=0,tMonto=0,tIA=0,totClaves=0;
-  let labelPeriodo='', etiquetaCorta='';
-  let ventasRec=[];
-
-  if(usaHistorico){
-    const T=S.hist?.totales||{};
-    tVis=T.visitas||0; tCot=T.cotizaciones||0; tVen=T.ventas||0;
-    tMonto=T.montoVentas||0; tIA=T.intAlto||0; totClaves=T.claves||0;
-    ventasRec=S.hist?.ventas||[];
-    labelPeriodo=S.hist?.rango?.label||'';
-    etiquetaCorta=S.hist?.rango?.etiquetaCorta||'';
-  } else {
-    const key=periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes';
-    const keyC=periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes';
-    const keyV=periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes';
-    Object.values(A).forEach(a=>{
-      tVis+=a[key]||0; tCot+=a[keyC]||0; tVen+=a[keyV]||0;
-      if(periodo==='mes')tMonto+=a.ventasMesMonto||0;
-      tIA+=a.intAlto||0;
-    });
-    if(periodo!=='mes')tMonto=Object.values(A).reduce((s,a)=>s+(a.ventasMesMonto||0),0);
-    ventasRec=S.ventasRecientes||[];
-    labelPeriodo=periodo==='hoy'?'HOY':periodo==='semana'?'SEMANA ACTUAL':'MES ACTUAL';
-    etiquetaCorta=periodo==='hoy'?fechaCorta(new Date()):periodo==='semana'?etqSemana(new Date()):etqMes(new Date());
-    totClaves=(S.negociosClave||[]).length;
-  }
-
-  // Tabla agentes
-  const agentes=Object.entries(A).map(([id,a])=>{
-    const v = usaHistorico ? (a.visitas||0) : (a[periodo==='hoy'?'hoy':periodo==='semana'?'semana':'mes']||0);
-    const c = usaHistorico ? (a.cotizaciones||0) : (a[periodo==='hoy'?'cotizHoy':periodo==='semana'?'cotizSem':'cotizMes']||0);
-    const vt = usaHistorico ? (a.ventas||0) : (a[periodo==='hoy'?'ventasHoy':periodo==='semana'?'ventasSem':'ventasMes']||0);
-    const clv = usaHistorico ? (a.claves||0) : (a.clavesActivas||0);
-    const monto = usaHistorico ? (a.montoVentas||0) : (a.ventasMesMonto||0);
-    const ratio = v>0 ? Math.round(c/v*100) : 0;
-    return {nombre:a.nombre, zona:a.zona, v:v, c:c, vt:vt, clv:clv, monto:monto, ratio:ratio};
-  }).sort((a,b)=>b.v-a.v);
-
-  const fmtMx=n=>(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const fechaGen=new Date().toLocaleString('es-MX',{dateStyle:'long',timeStyle:'short'});
-
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Entelequia · ${labelPeriodo}</title>
-<style>
-  @page{size:letter;margin:1.4cm}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1a1a1a;background:#fff;padding:24px;line-height:1.5;font-size:12px;max-width:920px;margin:0 auto}
-  h1{font-size:24px;font-weight:600;color:#1570a6;margin:0 0 4px;letter-spacing:-.01em}
-  h2{font-size:13px;font-weight:600;color:#1a1a1a;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #e5e7eb;padding-bottom:6px;margin:24px 0 10px}
-  .meta{color:#6b7280;font-size:11px;margin-bottom:20px}
-  .badge-period{display:inline-block;background:#1570a6;color:#fff;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
-  .badge-hist{background:#92400e}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 24px}
-  .kpi{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px}
-  .kpi-label{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;font-weight:600}
-  .kpi-value{font-size:24px;font-weight:600;color:#111827}
-  .kpi-foot{font-size:10px;color:#6b7280;margin-top:2px}
-  .kpi.green .kpi-value{color:#047857}
-  .kpi.amber .kpi-value{color:#b45309}
-  .kpi.gold .kpi-value{color:#92400e}
-  table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
-  th{text-align:left;font-weight:600;background:#f3f4f6;padding:8px 10px;border-bottom:1px solid #e5e7eb;color:#4b5563;font-size:10px;text-transform:uppercase;letter-spacing:.4px}
-  td{padding:9px 10px;border-bottom:1px solid #f3f4f6}
-  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-  td.center,th.center{text-align:center}
-  .total-row{background:#fffbeb;font-weight:700}
-  .total-row td{border-top:2px solid #f59e0b;border-bottom:none}
-  .footer{margin-top:30px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#9ca3af;text-align:center}
-  .actions{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #e5e7eb;margin-bottom:18px;display:flex;gap:8px;justify-content:flex-end}
-  .actions button{background:#1570a6;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
-  .actions button.secondary{background:#fff;color:#1570a6;border:1px solid #1570a6}
-  @media print{.actions{display:none}body{padding:0}}
-</style></head><body>
-
-<div class="actions">
-  <button onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-  <button class="secondary" onclick="window.close()">Cerrar</button>
-</div>
-
-<h1>Reporte Entelequia × Neostat</h1>
-<p class="meta">
-  <span class="badge-period ${usaHistorico?'badge-hist':''}">${usaHistorico?'📜 PERIODO CERRADO':'⚡ EN VIVO'}</span>
-  &nbsp; ${labelPeriodo} · ${etiquetaCorta} · Generado ${fechaGen}
-</p>
-
-<h2>KPIs del periodo</h2>
-<div class="kpis">
-  <div class="kpi">
-    <div class="kpi-label">📋 Visitas</div>
-    <div class="kpi-value">${tVis}</div>
-    <div class="kpi-foot">total del equipo</div>
-  </div>
-  <div class="kpi amber">
-    <div class="kpi-label">💰 Cotizaciones</div>
-    <div class="kpi-value">${tCot}</div>
-    <div class="kpi-foot">${tVis>0?Math.round(tCot/tVis*100):0}% conv. visitas</div>
-  </div>
-  <div class="kpi green">
-    <div class="kpi-label">🛒 Ventas</div>
-    <div class="kpi-value">${tVen}</div>
-    <div class="kpi-foot">${tCot>0?Math.round(tVen/tCot*100):0}% conv. cotiz.</div>
-  </div>
-  <div class="kpi green">
-    <div class="kpi-label">💵 Facturado</div>
-    <div class="kpi-value">$${fmtMx(tMonto)}</div>
-    <div class="kpi-foot">${tVen>0?'$'+fmtMx(tMonto/tVen)+' ticket prom.':'—'}</div>
-  </div>
-</div>
-
-<h2>Por asesor</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Asesor</th>
-      <th>Zona</th>
-      <th class="center num">📋 Vis</th>
-      <th class="center num">💰 Cot</th>
-      <th class="center num">🛒 Ven</th>
-      <th class="center num">⭐ Clv</th>
-      <th class="num">$ Facturado</th>
-      <th class="center num">% Conv</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${agentes.map(a=>`<tr>
-      <td><strong>${a.nombre}</strong></td>
-      <td style="color:#6b7280">${a.zona}</td>
-      <td class="center num">${a.v}</td>
-      <td class="center num">${a.c}</td>
-      <td class="center num" style="color:#047857;font-weight:700">${a.vt}</td>
-      <td class="center num" style="color:#92400e;font-weight:700">${a.clv||'—'}</td>
-      <td class="num" style="font-weight:700">$${fmtMx(a.monto)}</td>
-      <td class="center num">${a.ratio}%</td>
-    </tr>`).join('')}
-    <tr class="total-row">
-      <td colspan="2"><strong>TOTAL EQUIPO</strong></td>
-      <td class="center num">${tVis}</td>
-      <td class="center num">${tCot}</td>
-      <td class="center num">${tVen}</td>
-      <td class="center num">${totClaves}</td>
-      <td class="num">$${fmtMx(tMonto)}</td>
-      <td class="center num">${tVis>0?Math.round(tCot/tVis*100):0}%</td>
-    </tr>
-  </tbody>
-</table>
-
-${ventasRec.length>0?`
-<h2>Detalle de ventas (${ventasRec.length})</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Negocio</th>
-      <th>Asesor</th>
-      <th>Folio</th>
-      <th class="num">Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${ventasRec.map(v=>`<tr>
-      <td>${v.fecha||'—'}</td>
-      <td><strong>${v.negocio||'—'}</strong></td>
-      <td style="color:#6b7280">${v.agente||'—'}</td>
-      <td style="color:#6b7280;font-family:monospace;font-size:10px">${v.folio||'—'}</td>
-      <td class="num" style="color:#047857;font-weight:700">$${fmtMx(v.monto||0)}</td>
-    </tr>`).join('')}
-  </tbody>
-</table>`:''}
-
-<div class="footer">
-  Entelequia® CRM × Neostat · Reporte generado por ${S.u?.nm||'Supervisor'} el ${fechaGen}<br>
-  ${usaHistorico?'Periodo cerrado · datos consolidados':'Datos en vivo al momento de la exportación'}
-</div>
-
-</body></html>`;
-
-  const w=window.open('','_blank','width=900,height=1000');
-  if(!w){ toast('⚠️ Permite las ventanas emergentes','err'); return; }
-  w.document.write(html);
-  w.document.close();
-  // Sin auto-print: dejar que el usuario decida (puede revisar antes)
-  toast('📄 Reporte abierto en nueva ventana');
-}
-
 function stc(l,v,c){return `<div class="st"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${c};opacity:.5"></div><div class="st-l">${l}</div><div class="st-n" style="color:${c}">${v}</div></div>`;}
 
 // === COTIZAR ===
@@ -2812,20 +1757,840 @@ function showVisitPop(n){
   document.body.appendChild(p);
   setTimeout(()=>{try{p.remove();}catch(e){}},2500);
 }
-R();if(S.u)load();
-// Auto-refresh dashboard supervisor cada 5 minutos en SILENCIO (sin spinner que tape la pantalla).
-// Solo refresca cuando: es admin, está en dashboard, no hay modal abierto, está en modo actual (no histórico)
-setInterval(()=>{
-  if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)){
-    if(!document.querySelector('.mbg')) load(true);  // true = silent mode
-  }
-},300000); // 5 minutos = 300,000 ms
+// ═══════════════════════════════════════════════════════════════════════
+// v10: VISTA 🎉 VENTA — Formulario completo (cliente + productos + precios + sucursal + adjuntos)
+// ═══════════════════════════════════════════════════════════════════════
 
-// Refrescar SOLO el header cada 60s para actualizar contador de "próximo corte" y "última sync"
-// (no va al backend, solo re-renderiza)
-setInterval(()=>{
-  if(S.u?.r==='admin' && S.v==='dashboard' && !S.ld && !(S.dvOff && S.dvOff!==0)){
-    if(!document.querySelector('.mbg')) R();
+// Estado del formulario de venta. Se persiste en S.vta para no perder al cambiar de tab.
+if(!S.vta) S.vta = {
+  modo: 'cartera',           // 'cartera' | 'nuevo'
+  negocio: '', giro: '', contacto: '', telefono: '', email: '', rfc: '', colonia: '', direccion: '',
+  items: [],                  // [{sku, tipo, qty, pz, total}]
+  subtotal: '', iva: '', total: '',
+  folio: '', formaPago: 'Transferencia',
+  sucursal: 'ROMA',
+  adjuntoPago: null,          // base64 data URI
+  adjuntoCot: null,
+  notas: ''
+};
+
+function ventaH(){
+  if(S.u?.r==='admin') return `<div class="empty">🎉 La pestaña Venta es para agentes. Como supervisor, usa el Dashboard para ver las ventas cerradas.</div>`;
+  const v = S.vta;
+  const biz = getBiz();
+  const subAuto = v.items.reduce((s,i)=>s+(parseFloat(i.total)||0),0);
+  const itemsTotal = subAuto > 0 ? subAuto : (parseFloat(v.total)||0);
+
+  // Si hay items: subtotal = total/1.16; si no, lee del estado
+  const sub = parseFloat(v.subtotal) || (itemsTotal/1.16);
+  const ivaCalc = parseFloat(v.iva) || (itemsTotal - itemsTotal/1.16);
+  const tot = parseFloat(v.total) || itemsTotal;
+
+  return `<div class="fi">
+    <!-- HEADER -->
+    <div class="sec" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="font-size:17px;font-weight:800">🎉 Cerrar Venta</div>
+      <div style="font-size:11px;opacity:.9;margin-top:2px">Llena los pasos · Tu venta se registra en el momento</div>
+    </div>
+
+    <!-- PASO 1: CLIENTE -->
+    <div class="sec">
+      <div class="sec-t">1️⃣ Cliente</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button onclick="S.vta.modo='cartera';R()" class="dp ${v.modo==='cartera'?'on':''}" style="flex:1">📂 De cartera</button>
+        <button onclick="S.vta.modo='nuevo';R()" class="dp ${v.modo==='nuevo'?'on':''}" style="flex:1">➕ Nuevo cliente</button>
+      </div>
+      ${v.modo==='cartera' ? `
+        <div class="fld">
+          <label class="lbl">Selecciona negocio (${biz.length})</label>
+          <select class="inp" onchange="vtaPickBiz(this.value)">
+            <option value="">— Selecciona —</option>
+            ${biz.map(b=>`<option value="${b.negocio.replace(/"/g,'&quot;')}" ${v.negocio===b.negocio?'selected':''}>${b.negocio}${b.giro?' · '+b.giro:''}</option>`).join('')}
+          </select>
+        </div>
+        ${v.negocio?`<div style="background:var(--ac3);border-radius:8px;padding:10px;font-size:12px">
+          <div style="font-weight:800;color:var(--ac)">${v.negocio}</div>
+          ${v.giro?`<div style="color:var(--t3);font-size:11px">${v.giro}</div>`:''}
+          ${v.contacto?`<div style="font-size:11px;margin-top:3px">👤 ${v.contacto}${v.telefono?' · 📞 '+v.telefono:''}</div>`:''}
+        </div>`:''}
+      ` : `
+        <div class="fld"><label class="lbl">Nombre negocio *</label><input class="inp" id="vta_n" value="${v.negocio||''}" oninput="S.vta.negocio=this.value" placeholder="Ej. Restaurante La Casa"></div>
+        <div class="g2">
+          <div class="fld"><label class="lbl">Giro</label><select class="inp" id="vta_g" onchange="S.vta.giro=this.value"><option value="">—</option>${GIROS.map(g=>`<option ${v.giro===g?'selected':''}>${g}</option>`).join('')}</select></div>
+          <div class="fld"><label class="lbl">Contacto</label><input class="inp" id="vta_c" value="${v.contacto||''}" oninput="S.vta.contacto=this.value" placeholder="Nombre encargado"></div>
+        </div>
+        <div class="g2">
+          <div class="fld"><label class="lbl">Teléfono</label><input class="inp" type="tel" id="vta_t" value="${v.telefono||''}" oninput="S.vta.telefono=this.value" placeholder="55-..."></div>
+          <div class="fld"><label class="lbl">Email</label><input class="inp" type="email" id="vta_e" value="${v.email||''}" oninput="S.vta.email=this.value" placeholder="...@..."></div>
+        </div>
+        <div class="g2">
+          <div class="fld"><label class="lbl">RFC</label><input class="inp" id="vta_rfc" value="${v.rfc||''}" oninput="S.vta.rfc=this.value.toUpperCase()" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase"></div>
+          <div class="fld"><label class="lbl">Colonia</label><input class="inp" id="vta_col" value="${v.colonia||''}" oninput="S.vta.colonia=this.value" placeholder="Roma Norte"></div>
+        </div>
+      `}
+    </div>
+
+    <!-- PASO 2: PRODUCTOS -->
+    <div class="sec">
+      <div class="sec-t" style="display:flex;justify-content:space-between;align-items:center">
+        <span>2️⃣ Productos</span>
+        <button onclick="abrirSelectorVtaItems()" class="dp" style="padding:7px 11px;font-size:12px;background:var(--ac3);color:var(--ac);border:1px solid var(--ac)">+ Agregar SKU</button>
+      </div>
+      ${v.items.length===0
+        ? `<div class="empty" style="padding:18px 10px;font-size:12px">Sin productos. Toca <b>+ Agregar SKU</b> o escribe el total directamente abajo.</div>`
+        : `<div>${v.items.map((it,i)=>`
+            <div class="ql" style="border-bottom:1px solid var(--s2);padding:9px 0">
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:800;color:var(--ac2)">${it.sku}</div>
+                <div style="font-size:10px;color:var(--t3)">${it.qty} ${it.tipo}(s) · ${(it.pz||0).toLocaleString()} pz</div>
+              </div>
+              <div style="font-size:13px;font-weight:800">$${(it.total||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+              <button onclick="S.vta.items.splice(${i},1);vtaRecalc();R()" style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:var(--rd);width:32px;height:32px;cursor:pointer;font-weight:bold">✕</button>
+            </div>`).join('')}
+          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:11px;color:var(--t4)">
+            <span>${v.items.reduce((s,i)=>s+(i.pz||0),0).toLocaleString()} piezas</span>
+            <span>Total items: <b>$${subAuto.toLocaleString('es-MX',{minimumFractionDigits:2})}</b></span>
+          </div></div>`}
+    </div>
+
+    <!-- PASO 3: PRECIOS -->
+    <div class="sec">
+      <div class="sec-t">3️⃣ Precio (editable si difiere de la cotización oficial)</div>
+      <div class="g2">
+        <div class="fld">
+          <label class="lbl">Subtotal (sin IVA)</label>
+          <input class="inp" type="number" step="0.01" id="vta_sub" value="${sub.toFixed(2)}" oninput="vtaOnPriceEdit('sub',this.value)" inputmode="decimal">
+        </div>
+        <div class="fld">
+          <label class="lbl">IVA 16%</label>
+          <input class="inp" type="number" step="0.01" id="vta_iva" value="${ivaCalc.toFixed(2)}" oninput="vtaOnPriceEdit('iva',this.value)" inputmode="decimal">
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lbl" style="color:var(--gn);font-weight:900">TOTAL (con IVA)</label>
+        <input class="inp" type="number" step="0.01" id="vta_tot" value="${tot.toFixed(2)}" oninput="vtaOnPriceEdit('tot',this.value)" inputmode="decimal" style="font-size:20px;font-weight:900;color:var(--gn);border-color:var(--gn);border-width:2px">
+      </div>
+      ${v.items.length>0?`<button onclick="vtaSincronizaDeItems()" class="dp" style="width:100%;font-size:11px;padding:8px;background:#f0fdf4;color:#15803d;border:1px solid #16a34a">🔄 Recalcular desde productos ($${subAuto.toLocaleString('es-MX',{minimumFractionDigits:2})})</button>`:''}
+    </div>
+
+    <!-- PASO 4: LOGÍSTICA -->
+    <div class="sec">
+      <div class="sec-t">4️⃣ Logística</div>
+      <div class="fld">
+        <label class="lbl">Folio de cotización * (S-XXXX o COT-XXXX)</label>
+        <input class="inp" id="vta_folio" value="${v.folio||''}" oninput="S.vta.folio=this.value" placeholder="S01350 o COT-20260512-1234">
+      </div>
+      <div class="fld">
+        <label class="lbl">Forma de pago</label>
+        <select class="inp" id="vta_fp" onchange="S.vta.formaPago=this.value">
+          ${['Transferencia','Efectivo','Tarjeta','Depósito','Crédito','Pendiente'].map(p=>`<option ${v.formaPago===p?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fld">
+        <label class="lbl">Sucursal de recolección *</label>
+        <div style="display:flex;gap:8px">
+          <button onclick="S.vta.sucursal='ROMA';R()" class="dp ${v.sucursal==='ROMA'?'on':''}" style="flex:1;padding:14px">📍 ROMA</button>
+          <button onclick="S.vta.sucursal='POLANCO';R()" class="dp ${v.sucursal==='POLANCO'?'on':''}" style="flex:1;padding:14px">📍 POLANCO</button>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lbl">Notas (opcional)</label>
+        <textarea class="inp" id="vta_no" oninput="S.vta.notas=this.value" placeholder="Comentarios para el supervisor...">${v.notas||''}</textarea>
+      </div>
+    </div>
+
+    <!-- PASO 5: ADJUNTOS -->
+    <div class="sec">
+      <div class="sec-t">5️⃣ Adjuntos (foto o PDF)</div>
+      <div class="g2">
+        <div>
+          <label class="lbl">📄 Cotización</label>
+          <label class="gps-btn" style="margin-bottom:4px;cursor:pointer">
+            <span>📤</span> ${v.adjuntoCot?'Cambiar':'Subir archivo'}
+            <input type="file" accept="image/*,application/pdf" style="display:none" onchange="vtaAdjuntar(this,'cot')">
+          </label>
+          <div id="vta_prev_cot" style="font-size:10px;color:var(--gn);text-align:center;min-height:18px">${v.adjuntoCot?'✅ Adjunto cargado':''}</div>
+        </div>
+        <div>
+          <label class="lbl">💳 Pago</label>
+          <label class="gps-btn" style="margin-bottom:4px;cursor:pointer">
+            <span>📤</span> ${v.adjuntoPago?'Cambiar':'Subir archivo'}
+            <input type="file" accept="image/*,application/pdf" style="display:none" onchange="vtaAdjuntar(this,'pago')">
+          </label>
+          <div id="vta_prev_pago" style="font-size:10px;color:var(--gn);text-align:center;min-height:18px">${v.adjuntoPago?'✅ Adjunto cargado':''}</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--t4);margin-top:6px;text-align:center">Acepta JPG, PNG o PDF · max 5MB c/u</div>
+    </div>
+
+    <!-- BOTÓN FINAL -->
+    <button onclick="guardarVenta()" class="btn btn-p" id="vtaBtn" style="background:linear-gradient(135deg,#16a34a,#15803d);font-size:17px;padding:18px;margin-top:4px">
+      🎉 REGISTRAR VENTA · $${tot.toLocaleString('es-MX',{minimumFractionDigits:2})}
+    </button>
+    <button onclick="if(confirm('¿Limpiar todos los datos del formulario?')){vtaReset();R();}" class="btn btn-s" style="margin-top:6px;font-size:11px;padding:9px;color:var(--t4)">🗑️ Limpiar formulario</button>
+  </div>`;
+}
+
+// Selecciona un negocio de la cartera y pre-llena datos del cliente
+function vtaPickBiz(neg){
+  if(!neg){S.vta.negocio='';S.vta.giro='';S.vta.contacto='';S.vta.telefono='';S.vta.email='';S.vta.rfc='';R();return;}
+  const b = getBiz().find(x=>x.negocio===neg);
+  if(b){
+    S.vta.negocio = b.negocio;
+    S.vta.giro = b.giro||'';
+    S.vta.contacto = b.encargado||'';
+    S.vta.telefono = b.telefono||'';
+    S.vta.email = b.email||'';
+    S.vta.rfc = b.rfc||'';
+    S.vta.colonia = b.colonia||'';
+  } else {
+    S.vta.negocio = neg;
   }
-},60000);
+  R();
+}
+
+// Recalcula automáticamente cuando el usuario edita uno de los 3 campos de precio
+function vtaOnPriceEdit(campo, valor){
+  const v = parseFloat(valor) || 0;
+  if(campo==='sub'){
+    S.vta.subtotal = v.toFixed(2);
+    S.vta.iva = (v*0.16).toFixed(2);
+    S.vta.total = (v*1.16).toFixed(2);
+  } else if(campo==='iva'){
+    S.vta.iva = v.toFixed(2);
+    const sub = parseFloat(S.vta.subtotal)||0;
+    S.vta.total = (sub+v).toFixed(2);
+  } else if(campo==='tot'){
+    S.vta.total = v.toFixed(2);
+    S.vta.subtotal = (v/1.16).toFixed(2);
+    S.vta.iva = (v - v/1.16).toFixed(2);
+  }
+  // Actualizar inputs sin re-renderizar todo el form (evita perder el foco)
+  const elSub = document.getElementById('vta_sub');
+  const elIva = document.getElementById('vta_iva');
+  const elTot = document.getElementById('vta_tot');
+  const elBtn = document.getElementById('vtaBtn');
+  if(campo!=='sub' && elSub) elSub.value = parseFloat(S.vta.subtotal).toFixed(2);
+  if(campo!=='iva' && elIva) elIva.value = parseFloat(S.vta.iva).toFixed(2);
+  if(campo!=='tot' && elTot) elTot.value = parseFloat(S.vta.total).toFixed(2);
+  if(elBtn) elBtn.innerHTML = '🎉 REGISTRAR VENTA · $'+parseFloat(S.vta.total||0).toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+
+// Recalcula subtotal/iva/total a partir de la suma de items (los items traen total CON IVA)
+function vtaRecalc(){
+  const sub = S.vta.items.reduce((s,i)=>s+(parseFloat(i.total)||0), 0);
+  // Items se cotizan en precio CON IVA → desglosamos hacia atrás
+  S.vta.total = sub.toFixed(2);
+  S.vta.subtotal = (sub/1.16).toFixed(2);
+  S.vta.iva = (sub - sub/1.16).toFixed(2);
+}
+
+function vtaSincronizaDeItems(){ vtaRecalc(); R(); toast('🔄 Precio sincronizado'); }
+
+// Modal para agregar un SKU del catálogo a S.vta.items
+function abrirSelectorVtaItems(){
+  const m = document.createElement('div');
+  m.id = 'vtaPickerMdl'; m.className = 'mbg';
+  m.onclick = e=>{ if(e.target===m) m.remove(); };
+  vtaRenderPicker(m, '');
+  document.body.appendChild(m);
+}
+
+function vtaRenderPicker(mdl, q){
+  const Q = (q||'').toUpperCase();
+  const prods = Q ? S.cos.filter(p=>p.sku.toUpperCase().includes(Q)||p.producto.toUpperCase().includes(Q)) : S.cos;
+  mdl.innerHTML = `<div class="mdl" style="max-width:480px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:15px;font-weight:800;color:var(--ac)">📦 Agregar producto a venta</div>
+      <button onclick="document.getElementById('vtaPickerMdl').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--t4)">✕</button>
+    </div>
+    <input class="inp" placeholder="🔍 SKU o nombre..." id="vtaQ" oninput="vtaRenderPicker(document.getElementById('vtaPickerMdl'),this.value)" value="${q||''}" style="margin-bottom:8px">
+    <div style="max-height:55vh;overflow-y:auto">${prods.slice(0,50).map(p=>{
+      const idx = S.cos.indexOf(p);
+      return `<div class="prod-row" onclick="vtaAbrirCalc(${idx})">
+        <div style="font-size:10px;font-weight:700;color:var(--ac2);min-width:55px">${p.sku}</div>
+        <div style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.producto}</div>
+        <div style="font-size:11px;font-weight:700">$${(p.precio_caja||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+      </div>`;
+    }).join('')||'<div class="empty">Sin resultados</div>'}</div>
+  </div>`;
+  setTimeout(()=>{const i=document.getElementById('vtaQ');if(i)i.focus();},80);
+}
+
+function vtaAbrirCalc(idx){
+  const p = S.cos[idx]; if(!p) return;
+  document.getElementById('vtaPickerMdl')?.remove();
+  const c = document.createElement('div');
+  c.id = 'vtaCalc'; c.className = 'mbg';
+  c.onclick = e=>{if(e.target===c) c.remove();};
+  c.innerHTML = `<div class="mdl">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--gn)">${p.sku}</div>
+        <div style="font-size:11px;color:var(--t3)">${p.producto}</div>
+      </div>
+      <button onclick="document.getElementById('vtaCalc').remove()" style="background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div class="g2" style="margin-bottom:6px">
+      <div style="background:var(--ac3);border-radius:7px;padding:8px;text-align:center"><div style="font-size:8px;color:var(--ac2);font-weight:700">$/CAJA</div><div style="font-size:15px;font-weight:800;color:var(--ac2)">$${(p.precio_caja||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+      <div style="background:var(--ac3);border-radius:7px;padding:8px;text-align:center"><div style="font-size:8px;color:var(--ac2);font-weight:700">$/PAQ</div><div style="font-size:15px;font-weight:800;color:var(--ac2)">$${(p.precio_paq||0).toLocaleString('es-MX',{minimumFractionDigits:2})}</div></div>
+    </div>
+    <div class="g2">
+      <div class="fld"><label class="lbl">Compra por</label><select class="inp" id="vtaTipo" onchange="vtaCalcUpd(${idx})">${p.pz_emp>0?`<option value="empaque">Empaque (${p.pz_emp} pz)</option>`:''}${p.pz_caja>0?`<option value="caja" selected>Caja (${p.pz_caja} pz)</option>`:''}</select></div>
+      <div class="fld"><label class="lbl">Cantidad</label><input class="inp" type="number" id="vtaQty" value="1" min="1" oninput="vtaCalcUpd(${idx})" inputmode="numeric"></div>
+    </div>
+    <div style="background:var(--s2);border-radius:8px;padding:10px;margin:6px 0;display:flex;justify-content:space-between">
+      <div><div style="font-size:8px;color:var(--t4);font-weight:700">PIEZAS</div><div style="font-size:14px;font-weight:800" id="vtaPz">0</div></div>
+      <div style="text-align:right"><div style="font-size:8px;color:var(--t4);font-weight:700">TOTAL (IVA INCL.)</div><div style="font-size:18px;font-weight:800;color:var(--gn)" id="vtaTt">$0</div></div>
+    </div>
+    <button class="btn btn-p" style="background:linear-gradient(135deg,#16a34a,#15803d)" onclick="vtaAddItem(${idx})">➕ Agregar a venta</button>
+  </div>`;
+  document.body.appendChild(c);
+  vtaCalcUpd(idx);
+}
+
+function vtaCalcUpd(idx){
+  const p = S.cos[idx];
+  const t = document.getElementById('vtaTipo')?.value || 'caja';
+  const q = parseInt(document.getElementById('vtaQty')?.value) || 1;
+  const pr = t==='caja' ? p.precio_caja : p.precio_paq;
+  const pz = (t==='caja' ? p.pz_caja : p.pz_emp) * q;
+  document.getElementById('vtaPz').textContent = pz.toLocaleString();
+  document.getElementById('vtaTt').textContent = '$'+(pr*q).toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+
+function vtaAddItem(idx){
+  const p = S.cos[idx];
+  const t = document.getElementById('vtaTipo')?.value || 'caja';
+  const q = parseInt(document.getElementById('vtaQty')?.value) || 1;
+  const pr = t==='caja' ? p.precio_caja : p.precio_paq;
+  const pz = (t==='caja' ? p.pz_caja : p.pz_emp) * q;
+  S.vta.items.push({sku:p.sku, tipo:t, qty:q, pz:pz, total:pr*q});
+  vtaRecalc();
+  document.getElementById('vtaCalc')?.remove();
+  toast('✅ '+p.sku+' agregado');
+  R();
+}
+
+// Carga un archivo (img o pdf), valida tamaño, comprime imágenes y guarda en S.vta
+function vtaAdjuntar(input, tipo){
+  const f = input.files[0]; if(!f) return;
+  if(f.size > 5*1024*1024){ toast('⚠️ Archivo > 5MB','err'); return; }
+  const prevId = tipo==='cot' ? 'vta_prev_cot' : 'vta_prev_pago';
+  const prevEl = document.getElementById(prevId);
+  if(prevEl) prevEl.textContent = '⏳ Procesando...';
+  const r = new FileReader();
+  r.onload = e=>{
+    const dataUri = e.target.result;
+    // PDFs: guardar directo. Imágenes: comprimir a max 1200px / jpeg 70%
+    if(f.type === 'application/pdf'){
+      if(tipo==='cot') S.vta.adjuntoCot = dataUri; else S.vta.adjuntoPago = dataUri;
+      if(prevEl) prevEl.innerHTML = '✅ PDF cargado · '+(f.size/1024).toFixed(0)+' KB';
+      toast('✅ '+(tipo==='cot'?'Cotización':'Pago')+' adjuntada');
+      return;
+    }
+    const img = new Image();
+    img.onload = ()=>{
+      const max = 1200;
+      const sc = Math.min(max/img.width, max/img.height, 1);
+      const c = document.createElement('canvas');
+      c.width = img.width*sc; c.height = img.height*sc;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const out = c.toDataURL('image/jpeg', 0.7);
+      if(tipo==='cot') S.vta.adjuntoCot = out; else S.vta.adjuntoPago = out;
+      if(prevEl) prevEl.innerHTML = '✅ Imagen cargada · '+(out.length*0.75/1024).toFixed(0)+' KB';
+      toast('✅ '+(tipo==='cot'?'Cotización':'Pago')+' adjuntada');
+    };
+    img.src = dataUri;
+  };
+  r.readAsDataURL(f);
+}
+
+// Validar y enviar la venta al backend
+async function guardarVenta(){
+  const v = S.vta;
+  if(!v.negocio || !v.negocio.trim()){ toast('⚠️ Selecciona o ingresa un negocio','err'); return; }
+  if(!v.folio || !v.folio.trim()){ toast('⚠️ Folio de cotización obligatorio','err'); return; }
+  const tot = parseFloat(v.total)||0;
+  if(tot <= 0){ toast('⚠️ Total inválido','err'); return; }
+  if(!v.sucursal){ toast('⚠️ Selecciona sucursal de recolección','err'); return; }
+
+  const btn = document.getElementById('vtaBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Registrando venta...'; }
+
+  const productos = v.items.length
+    ? v.items.map(i=>i.sku+' ×'+i.qty+' '+i.tipo).join(', ')
+    : ('Venta manual · folio '+v.folio);
+  const cantidad = v.items.length
+    ? v.items.reduce((s,i)=>s+(i.pz||0), 0)
+    : 1;
+
+  const payload = {
+    action: 'registrar_venta',
+    agente: S.u.id,
+    agente_nombre: S.u.nm,
+    negocio: v.negocio,
+    giro: v.giro || '',
+    contacto: v.contacto || '',
+    telefono: v.telefono || '',
+    email: v.email || '',
+    rfc: v.rfc || '',
+    colonia: v.colonia || '',
+    direccion: v.direccion || '',
+    productos: productos,
+    cantidad: cantidad,
+    subtotal: parseFloat(v.subtotal||0).toFixed(2),
+    iva: parseFloat(v.iva||0).toFixed(2),
+    total: tot.toFixed(2),
+    folioCotizacion: v.folio.trim(),
+    forma_pago: v.formaPago || 'Pendiente',
+    sucursal_recoleccion: v.sucursal || 'ROMA',
+    notas: v.notas || ''
+  };
+  if(v.adjuntoPago) payload.adjunto_pago = v.adjuntoPago;
+  if(v.adjuntoCot) payload.adjunto_cotizacion = v.adjuntoCot;
+
+  const resp = await pf(payload);
+  if(resp && resp.ok){
+    // Confetti light + reset
+    mostrarConfetti();
+    toast('🎉 ¡Venta cerrada! $'+tot.toLocaleString('es-MX',{minimumFractionDigits:2}));
+    vtaReset();
+    await load();
+    S.v='cartera'; R();
+  } else {
+    if(btn){ btn.disabled=false; btn.innerHTML='🎉 REGISTRAR VENTA · $'+tot.toLocaleString('es-MX',{minimumFractionDigits:2}); }
+    toast('❌ '+(resp?.error||'Error al registrar venta'),'err');
+  }
+}
+
+function vtaReset(){
+  S.vta = {
+    modo:'cartera', negocio:'', giro:'', contacto:'', telefono:'', email:'', rfc:'', colonia:'', direccion:'',
+    items:[], subtotal:'', iva:'', total:'',
+    folio:'', formaPago:'Transferencia', sucursal:'ROMA',
+    adjuntoPago:null, adjuntoCot:null, notas:''
+  };
+}
+
+// Mini animación de confetti CSS para celebrar la venta (sin librerías)
+function mostrarConfetti(){
+  const wrap = document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden';
+  const colores=['#16a34a','#f59e0b','#dc2626','#1D7BA3','#8b5cf6','#ec4899'];
+  for(let i=0;i<40;i++){
+    const c=document.createElement('div');
+    const col=colores[Math.floor(Math.random()*colores.length)];
+    const left=Math.random()*100;
+    const delay=Math.random()*0.5;
+    const dur=1.5+Math.random()*1.5;
+    c.style.cssText=`position:absolute;top:-10px;left:${left}vw;width:10px;height:14px;background:${col};border-radius:2px;animation:cfFall ${dur}s ${delay}s ease-in forwards;transform:rotate(${Math.random()*360}deg)`;
+    wrap.appendChild(c);
+  }
+  if(!document.getElementById('cfStyle')){
+    const st=document.createElement('style'); st.id='cfStyle';
+    st.textContent='@keyframes cfFall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(()=>wrap.remove(),3000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// v10: VISTA 📅 PLAN (agente) — Calendario semanal editable
+// ═══════════════════════════════════════════════════════════════════════
+
+if(!S.pipe) S.pipe = { semana:null, eventos:[], cargando:false, weekOffset:0 };
+const PIPE_TIPOS = [
+  {k:'Visita',       i:'👋', c:'#1D7BA3'},
+  {k:'Seguimiento',  i:'🔁', c:'#7c3aed'},
+  {k:'Prospección',  i:'🎯', c:'#f59e0b'},
+  {k:'Cotización',   i:'💰', c:'#16a34a'},
+  {k:'Entrega',      i:'📦', c:'#0891b2'},
+  {k:'Otro',         i:'📌', c:'#64748b'}
+];
+const PIPE_ESTADOS = ['Planeado','Hecho','Reagendado','Cancelado'];
+const DIAS_SEMANA = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+function pipeIsoWeek(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return d.getUTCFullYear() + '-W' + (weekNum<10?'0'+weekNum:weekNum);
+}
+
+function pipeFechasSemana(weekOffset){
+  // Devuelve [fechaYYYY-MM-DD, ...] de lunes a domingo
+  const ahora = new Date();
+  ahora.setDate(ahora.getDate() + (weekOffset||0)*7);
+  const dia = ahora.getDay();
+  const diff = ahora.getDate() - dia + (dia===0?-6:1);  // lunes de esa semana
+  const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), diff);
+  const fechas = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(lunes.getFullYear(), lunes.getMonth(), lunes.getDate()+i);
+    fechas.push(d.toISOString().split('T')[0]);
+  }
+  return fechas;
+}
+
+async function cargarPipeline(){
+  S.pipe.cargando = true;
+  const fechas = pipeFechasSemana(S.pipe.weekOffset);
+  const desde = fechas[0], hasta = fechas[6];
+  const semana = pipeIsoWeek(new Date(fechas[0]+'T12:00:00'));
+  S.pipe.semana = semana;
+  try {
+    const params = `&desde=${desde}&hasta=${hasta}`;
+    const agParam = S.u?.r==='admin' ? '' : `&agente=${encodeURIComponent(S.u?.id||'')}`;
+    const r = await gf('pipeline', agParam + params);
+    if(r && r.ok) S.pipe.eventos = r.eventos || [];
+    else S.pipe.eventos = [];
+  } catch(e){ S.pipe.eventos = []; }
+  S.pipe.cargando = false;
+  R();
+}
+
+function planH(){
+  if(S.u?.r==='admin') return pipelineH();  // admin va al consolidado
+  if(S.pipe.cargando) return `<div class="empty"><div class="spin"></div>Cargando tu plan...</div>`;
+  if(S.pipe.eventos.length===0 && S.pipe.semana===null){
+    // primer render: dispara carga
+    setTimeout(cargarPipeline, 50);
+    return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
+  }
+  const fechas = pipeFechasSemana(S.pipe.weekOffset);
+  const hoy = new Date().toISOString().split('T')[0];
+  const semLabel = S.pipe.weekOffset===0?'esta semana':S.pipe.weekOffset===1?'próxima semana':S.pipe.weekOffset===-1?'semana pasada':`semana ${S.pipe.weekOffset>0?'+':''}${S.pipe.weekOffset}`;
+  const totalEventos = S.pipe.eventos.length;
+  const hechos = S.pipe.eventos.filter(e=>e.estado==='Hecho').length;
+  const pendientes = S.pipe.eventos.filter(e=>e.estado==='Planeado').length;
+
+  return `<div class="fi">
+    <!-- HEADER PLAN -->
+    <div class="sec" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-size:16px;font-weight:800">📅 Mi Plan Semanal</div>
+          <div style="font-size:11px;opacity:.9">${semLabel} · ${fechas[0]} → ${fechas[6]}</div>
+        </div>
+        <button onclick="abrirEditorPlan(null)" style="background:#fff;color:#7c3aed;border:none;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:13px">+ Evento</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button onclick="S.pipe.weekOffset--;cargarPipeline()" style="flex:1;background:rgba(255,255,255,.18);border:none;color:#fff;padding:8px;border-radius:7px;font-weight:700;cursor:pointer;font-size:11px">◀ Anterior</button>
+        <button onclick="S.pipe.weekOffset=0;cargarPipeline()" style="flex:1;background:${S.pipe.weekOffset===0?'#fff':'rgba(255,255,255,.18)'};color:${S.pipe.weekOffset===0?'#7c3aed':'#fff'};border:none;padding:8px;border-radius:7px;font-weight:800;cursor:pointer;font-size:11px">Hoy</button>
+        <button onclick="S.pipe.weekOffset++;cargarPipeline()" style="flex:1;background:rgba(255,255,255,.18);border:none;color:#fff;padding:8px;border-radius:7px;font-weight:700;cursor:pointer;font-size:11px">Siguiente ▶</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+      <div style="background:#fff;border:2px solid #7c3aed;border-radius:9px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--t4);font-weight:700">EVENTOS</div><div style="font-size:22px;font-weight:800;color:#7c3aed">${totalEventos}</div></div>
+      <div style="background:#fff;border:2px solid #16a34a;border-radius:9px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--t4);font-weight:700">HECHOS</div><div style="font-size:22px;font-weight:800;color:#16a34a">${hechos}</div></div>
+      <div style="background:#fff;border:2px solid #f59e0b;border-radius:9px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--t4);font-weight:700">PENDIENTES</div><div style="font-size:22px;font-weight:800;color:#f59e0b">${pendientes}</div></div>
+    </div>
+
+    <!-- DÍAS LUN-DOM -->
+    ${fechas.map((fec,i)=>{
+      const eventosDia = S.pipe.eventos.filter(e=>e.fecha===fec).sort((a,b)=>(a.horaIni||'').localeCompare(b.horaIni||''));
+      const esHoy = fec===hoy;
+      const d = new Date(fec+'T12:00:00');
+      const numDia = d.getDate();
+      const mesCorto = d.toLocaleDateString('es-MX',{month:'short'});
+      return `<div class="sec" style="padding:11px;${esHoy?'border-color:#7c3aed;border-width:2px;background:#faf5ff':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="background:${esHoy?'#7c3aed':'var(--ac3)'};color:${esHoy?'#fff':'var(--ac)'};border-radius:8px;padding:6px 10px;font-weight:800;font-size:11px;min-width:50px;text-align:center">
+              <div style="font-size:9px;opacity:.85">${DIAS_SEMANA[i].substring(0,3).toUpperCase()}</div>
+              <div style="font-size:16px;line-height:1">${numDia}</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--t2)">${DIAS_SEMANA[i]}${esHoy?' · HOY':''}</div>
+          </div>
+          <button onclick="abrirEditorPlan(null,'${fec}')" style="background:none;border:1px dashed var(--bd);color:var(--t4);border-radius:6px;padding:5px 9px;font-size:11px;cursor:pointer;font-weight:700">+ Agregar</button>
+        </div>
+        ${eventosDia.length===0
+          ? `<div style="font-size:11px;color:var(--t4);text-align:center;padding:8px 0;font-style:italic">Sin eventos planeados</div>`
+          : eventosDia.map(ev=>{
+            const tipoInfo = PIPE_TIPOS.find(t=>t.k===ev.tipo) || PIPE_TIPOS[5];
+            const estadoColor = ev.estado==='Hecho'?'#16a34a':ev.estado==='Cancelado'?'#dc2626':ev.estado==='Reagendado'?'#f59e0b':'#1D7BA3';
+            const opac = ev.estado==='Cancelado'?0.5:ev.estado==='Hecho'?0.85:1;
+            return `<div style="border-left:4px solid ${tipoInfo.c};background:#fff;border:1px solid var(--bd2);border-left:4px solid ${tipoInfo.c};border-radius:7px;padding:9px 10px;margin-bottom:5px;opacity:${opac}">
+              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+                <div style="flex:1;min-width:0;cursor:pointer" onclick="abrirEditorPlan('${ev.id.replace(/'/g,"\\u0027")}')">
+                  <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t4);font-weight:700">
+                    ${ev.horaIni?`<span style="background:var(--s2);padding:2px 7px;border-radius:4px;font-variant-numeric:tabular-nums">${ev.horaIni}${ev.horaFin?'–'+ev.horaFin:''}</span>`:''}
+                    <span style="color:${tipoInfo.c}">${tipoInfo.i} ${ev.tipo}</span>
+                  </div>
+                  <div style="font-size:13px;font-weight:800;color:var(--t2);margin-top:3px;${ev.estado==='Hecho'?'text-decoration:line-through;color:var(--t4)':''}">${ev.negocio||'(sin negocio)'}</div>
+                  ${ev.zona?`<div style="font-size:10px;color:var(--t4);margin-top:1px">📍 ${ev.zona}</div>`:''}
+                  ${ev.notas?`<div style="font-size:11px;color:var(--t3);margin-top:3px;font-style:italic">${ev.notas}</div>`:''}
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="background:${estadoColor}15;color:${estadoColor};padding:2px 8px;border-radius:5px;font-size:9px;font-weight:800">${ev.estado}</span>
+                  ${ev.estado==='Planeado'?`<button onclick="marcarPlanHecho('${ev.id.replace(/'/g,"\\u0027")}')" style="background:#dcfce7;border:1px solid #16a34a;color:#15803d;border-radius:5px;padding:3px 6px;font-size:10px;cursor:pointer;font-weight:800">✓ Hecho</button>`:''}
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// Editor modal para crear/editar evento del plan
+function abrirEditorPlan(eventoId, fechaDefault){
+  const ev = eventoId ? S.pipe.eventos.find(e=>e.id===eventoId) : null;
+  const hoy = new Date().toISOString().split('T')[0];
+  const fec = ev?.fecha || fechaDefault || hoy;
+  const negocios = [...new Set(S.reg.map(r=>r.negocio).filter(Boolean))].sort();
+
+  const m = document.createElement('div');
+  m.id = 'planEditor'; m.className = 'mbg';
+  m.onclick = e=>{if(e.target===m) m.remove();};
+  m.innerHTML = `<div class="mdl" style="max-width:480px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:15px;font-weight:800;color:#7c3aed">${ev?'✏️ Editar evento':'+ Nuevo evento'}</div>
+      <button onclick="document.getElementById('planEditor').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--t4)">✕</button>
+    </div>
+    <div class="g2">
+      <div class="fld"><label class="lbl">Fecha *</label><input class="inp" type="date" id="pe_fec" value="${fec}"></div>
+      <div class="fld"><label class="lbl">Tipo *</label><select class="inp" id="pe_tipo">${PIPE_TIPOS.map(t=>`<option value="${t.k}" ${ev?.tipo===t.k?'selected':''}>${t.i} ${t.k}</option>`).join('')}</select></div>
+    </div>
+    <div class="g2">
+      <div class="fld"><label class="lbl">Hora inicio</label><input class="inp" type="time" id="pe_hi" value="${ev?.horaIni||''}"></div>
+      <div class="fld"><label class="lbl">Hora fin</label><input class="inp" type="time" id="pe_hf" value="${ev?.horaFin||''}"></div>
+    </div>
+    <div class="fld">
+      <label class="lbl">Negocio</label>
+      <input class="inp" id="pe_neg" list="pe_neg_list" value="${(ev?.negocio||'').replace(/"/g,'&quot;')}" placeholder="Nombre o nuevo prospecto">
+      <datalist id="pe_neg_list">${negocios.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">`).join('')}</datalist>
+    </div>
+    <div class="g2">
+      <div class="fld"><label class="lbl">Zona</label><input class="inp" id="pe_zona" value="${ev?.zona||S.u?.z||''}" placeholder="Polanco, Roma..."></div>
+      <div class="fld"><label class="lbl">Estado</label><select class="inp" id="pe_est">${PIPE_ESTADOS.map(s=>`<option ${ev?.estado===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    </div>
+    <div class="fld">
+      <label class="lbl">Notas</label>
+      <textarea class="inp" id="pe_no" placeholder="Llevar muestras, hablar con Juan, etc.">${ev?.notas||''}</textarea>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      ${ev?`<button onclick="borrarPlanItem('${ev.id.replace(/'/g,"\\u0027")}')" class="btn btn-s" style="flex:1;background:#fef2f2;color:var(--rd);border-color:var(--rd)">🗑️ Borrar</button>`:''}
+      <button onclick="guardarPlanItem(${ev?`'${ev.id.replace(/'/g,"\\u0027")}'`:'null'})" class="btn btn-p" id="peSaveBtn" style="flex:2;background:#7c3aed">💾 Guardar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function guardarPlanItem(eventoId){
+  const fec = document.getElementById('pe_fec').value;
+  const tipo = document.getElementById('pe_tipo').value;
+  const hi = document.getElementById('pe_hi').value;
+  const hf = document.getElementById('pe_hf').value;
+  const neg = document.getElementById('pe_neg').value.trim();
+  const zona = document.getElementById('pe_zona').value.trim();
+  const est = document.getElementById('pe_est').value;
+  const no = document.getElementById('pe_no').value.trim();
+
+  if(!fec){ toast('⚠️ Fecha obligatoria','err'); return; }
+  if(!tipo){ toast('⚠️ Tipo obligatorio','err'); return; }
+
+  const btn = document.getElementById('peSaveBtn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳...'; }
+
+  const payload = {
+    action:'save_pipeline_item',
+    agente: S.u.id,
+    agente_nombre: S.u.nm,
+    fecha: fec,
+    tipo: tipo,
+    horaIni: hi,
+    horaFin: hf,
+    negocio: neg,
+    zona: zona,
+    estado: est,
+    notas: no
+  };
+  if(eventoId) payload.id = eventoId;
+
+  const r = await pf(payload);
+  if(r && r.ok){
+    toast('✅ '+(eventoId?'Evento actualizado':'Evento agregado'));
+    document.getElementById('planEditor')?.remove();
+    cargarPipeline();
+  } else {
+    if(btn){ btn.disabled=false; btn.textContent='💾 Guardar'; }
+    toast('❌ '+(r?.error||'Error al guardar'),'err');
+  }
+}
+
+async function borrarPlanItem(id){
+  if(!confirm('¿Borrar este evento del plan?')) return;
+  const r = await pf({action:'delete_pipeline_item', id:id, agente:S.u.id, agente_nombre:S.u.nm});
+  if(r && r.ok){
+    toast('🗑️ Evento eliminado');
+    document.getElementById('planEditor')?.remove();
+    cargarPipeline();
+  } else {
+    toast('❌ '+(r?.error||'Error al borrar'),'err');
+  }
+}
+
+async function marcarPlanHecho(id){
+  const r = await pf({action:'toggle_pipeline_estado', id:id, estado:'Hecho', agente:S.u.id, agente_nombre:S.u.nm});
+  if(r && r.ok){ toast('✅ Marcado como Hecho'); cargarPipeline(); }
+  else toast('❌ '+(r?.error||'Error'),'err');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// v10: VISTA 📅 PIPELINE (admin/supervisor) — Consolidado de todos los agentes
+// ═══════════════════════════════════════════════════════════════════════
+
+function pipelineH(){
+  if(S.u?.r!=='admin') return planH();
+  if(S.pipe.cargando) return `<div class="empty"><div class="spin"></div>Cargando pipeline del equipo...</div>`;
+  if(S.pipe.eventos.length===0 && S.pipe.semana===null){
+    setTimeout(cargarPipeline, 50);
+    return `<div class="empty"><div class="spin"></div>Cargando...</div>`;
+  }
+
+  const fechas = pipeFechasSemana(S.pipe.weekOffset);
+  const hoy = new Date().toISOString().split('T')[0];
+  const semLabel = S.pipe.weekOffset===0?'esta semana':S.pipe.weekOffset===1?'próxima':`${S.pipe.weekOffset>0?'+':''}${S.pipe.weekOffset} sem`;
+
+  // Filtro de agente
+  if(!S.pipe.filtroAg) S.pipe.filtroAg = 'TODOS';
+  const eventos = S.pipe.filtroAg==='TODOS'
+    ? S.pipe.eventos
+    : S.pipe.eventos.filter(e=>e.agenteId===S.pipe.filtroAg);
+
+  // Agrupar por agente para vista resumen
+  const porAgente = {};
+  eventos.forEach(e=>{
+    if(!porAgente[e.agenteId]) porAgente[e.agenteId] = {nombre:e.agente, zona:'', eventos:[], hechos:0, planeados:0};
+    porAgente[e.agenteId].eventos.push(e);
+    if(e.estado==='Hecho') porAgente[e.agenteId].hechos++;
+    if(e.estado==='Planeado') porAgente[e.agenteId].planeados++;
+  });
+  // Anexar zona desde AG
+  Object.keys(porAgente).forEach(k=>{
+    const ag = AG.find(a=>a.id===k);
+    if(ag) porAgente[k].zona = ag.z;
+  });
+
+  const totalEv = eventos.length;
+  const totalHechos = eventos.filter(e=>e.estado==='Hecho').length;
+  const totalPlaneados = eventos.filter(e=>e.estado==='Planeado').length;
+
+  return `<div class="fi">
+    <!-- HEADER -->
+    <div class="sec" style="background:linear-gradient(135deg,#1D7BA3,#0F4C5C);color:#fff;padding:14px 12px;border-radius:12px">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+        <div>
+          <div style="font-size:16px;font-weight:800">📅 Pipeline Semanal · Equipo</div>
+          <div style="font-size:11px;opacity:.9">${semLabel} · ${fechas[0]} → ${fechas[6]}</div>
+        </div>
+        <button onclick="cargarPipeline()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px">🔄</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="S.pipe.weekOffset--;cargarPipeline()" style="flex:1;background:rgba(255,255,255,.18);border:none;color:#fff;padding:8px;border-radius:7px;font-weight:700;cursor:pointer;font-size:11px">◀ Ant</button>
+        <button onclick="S.pipe.weekOffset=0;cargarPipeline()" style="flex:1;background:${S.pipe.weekOffset===0?'#fff':'rgba(255,255,255,.18)'};color:${S.pipe.weekOffset===0?'#1D7BA3':'#fff'};border:none;padding:8px;border-radius:7px;font-weight:800;cursor:pointer;font-size:11px">Esta</button>
+        <button onclick="S.pipe.weekOffset++;cargarPipeline()" style="flex:1;background:rgba(255,255,255,.18);border:none;color:#fff;padding:8px;border-radius:7px;font-weight:700;cursor:pointer;font-size:11px">Sig ▶</button>
+      </div>
+    </div>
+
+    <!-- KPIs equipo -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+      <div style="background:#fff;border:2px solid #1D7BA3;border-radius:9px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--t4);font-weight:700">EVENTOS</div><div style="font-size:22px;font-weight:800;color:#1D7BA3">${totalEv}</div></div>
+      <div style="background:#fff;border:2px solid #16a34a;border-radius:9px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--t4);font-weight:700">HECHOS</div><div style="font-size:22px;font-weight:800;color:#16a34a">${totalHechos}</div></div>
+      <div style="background:#fff;border:2px solid #f59e0b;border-radius:9px;padding:10px;text-align:center"><div style="font-size:9px;color:var(--t4);font-weight:700">PENDIENTES</div><div style="font-size:22px;font-weight:800;color:#f59e0b">${totalPlaneados}</div></div>
+    </div>
+
+    <!-- Filtro de agente -->
+    <div class="sec">
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <button onclick="S.pipe.filtroAg='TODOS';R()" class="dp ${S.pipe.filtroAg==='TODOS'?'on':''}" style="font-size:11px;padding:7px 11px">👥 Todos (${S.pipe.eventos.length})</button>
+        ${AG.filter(a=>!a.r&&a.id!=='Vacante').map(a=>{
+          const ct=S.pipe.eventos.filter(e=>e.agenteId===a.id).length;
+          return `<button onclick="S.pipe.filtroAg='${a.id}';R()" class="dp ${S.pipe.filtroAg===a.id?'on':''}" style="font-size:11px;padding:7px 11px">${a.nm.split(' ')[0]} (${ct})</button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    ${totalEv===0
+      ? `<div class="empty" style="padding:30px 14px"><div style="font-size:38px;margin-bottom:8px">📅</div>Sin eventos planeados para esta semana<br><span style="font-size:11px;color:var(--t4)">Los agentes pueden agregar su plan desde su pestaña 📅 Plan</span></div>`
+      : `<!-- Vista calendario por día -->
+        ${fechas.map((fec,i)=>{
+          const evsDia = eventos.filter(e=>e.fecha===fec).sort((a,b)=>{
+            const ka = (a.horaIni||'99:99')+' '+a.agente;
+            const kb = (b.horaIni||'99:99')+' '+b.agente;
+            return ka.localeCompare(kb);
+          });
+          if(evsDia.length===0 && S.pipe.weekOffset!==0) return '';  // semanas sin actividad: omitir días vacíos
+          const esHoy = fec===hoy;
+          const d = new Date(fec+'T12:00:00');
+          return `<div class="sec" style="padding:11px;${esHoy?'border-color:#1D7BA3;border-width:2px;background:#f0f9ff':''}">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--s2)">
+              <div style="background:${esHoy?'#1D7BA3':'var(--ac3)'};color:${esHoy?'#fff':'var(--ac)'};border-radius:8px;padding:6px 10px;font-weight:800;font-size:11px;min-width:50px;text-align:center">
+                <div style="font-size:9px;opacity:.85">${DIAS_SEMANA[i].substring(0,3).toUpperCase()}</div>
+                <div style="font-size:16px;line-height:1">${d.getDate()}</div>
+              </div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:700;color:var(--t2)">${DIAS_SEMANA[i]}${esHoy?' · HOY':''}</div>
+                <div style="font-size:10px;color:var(--t4)">${evsDia.length} evento${evsDia.length===1?'':'s'}</div>
+              </div>
+            </div>
+            ${evsDia.length===0
+              ? `<div style="font-size:11px;color:var(--t4);text-align:center;padding:6px 0;font-style:italic">Sin eventos</div>`
+              : evsDia.map(ev=>{
+                const tipoInfo = PIPE_TIPOS.find(t=>t.k===ev.tipo) || PIPE_TIPOS[5];
+                const estadoColor = ev.estado==='Hecho'?'#16a34a':ev.estado==='Cancelado'?'#dc2626':ev.estado==='Reagendado'?'#f59e0b':'#1D7BA3';
+                const opac = ev.estado==='Cancelado'?0.5:ev.estado==='Hecho'?0.85:1;
+                return `<div style="border-left:4px solid ${tipoInfo.c};background:#fff;border:1px solid var(--bd2);border-left:4px solid ${tipoInfo.c};border-radius:7px;padding:9px 10px;margin-bottom:5px;opacity:${opac}">
+                  <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t4);font-weight:700;flex-wrap:wrap">
+                        ${ev.horaIni?`<span style="background:var(--s2);padding:2px 7px;border-radius:4px;font-variant-numeric:tabular-nums">${ev.horaIni}${ev.horaFin?'–'+ev.horaFin:''}</span>`:''}
+                        <span style="color:${tipoInfo.c}">${tipoInfo.i} ${ev.tipo}</span>
+                        <span style="background:#ddd6fe;color:#5b21b6;padding:2px 7px;border-radius:4px;font-weight:800">${ev.agente.split(' ')[0]}</span>
+                      </div>
+                      <div style="font-size:13px;font-weight:800;color:var(--t2);margin-top:3px;${ev.estado==='Hecho'?'text-decoration:line-through;color:var(--t4)':''}">${ev.negocio||'(sin negocio)'}</div>
+                      ${ev.zona?`<div style="font-size:10px;color:var(--t4);margin-top:1px">📍 ${ev.zona}</div>`:''}
+                      ${ev.notas?`<div style="font-size:11px;color:var(--t3);margin-top:3px;font-style:italic">${ev.notas}</div>`:''}
+                    </div>
+                    <span style="background:${estadoColor}15;color:${estadoColor};padding:2px 8px;border-radius:5px;font-size:9px;font-weight:800;white-space:nowrap">${ev.estado}</span>
+                  </div>
+                </div>`;
+              }).join('')}
+          </div>`;
+        }).join('')}
+
+        <!-- Tabla resumen por agente -->
+        <div class="sec">
+          <div class="sec-t">🏆 Resumen por agente</div>
+          <div style="font-size:11px">
+            ${Object.entries(porAgente).sort((a,b)=>b[1].eventos.length-a[1].eventos.length).map(([id,info])=>{
+              const ratio = info.eventos.length>0?Math.round(info.hechos/info.eventos.length*100):0;
+              return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--s2)">
+                <div style="flex:1">
+                  <div style="font-weight:800;color:var(--t2);font-size:12px">${info.nombre}</div>
+                  <div style="font-size:9px;color:var(--t4)">${info.zona||'—'}</div>
+                </div>
+                <div style="display:flex;gap:10px;font-size:11px;text-align:center">
+                  <div><div style="font-weight:800;color:#1D7BA3">${info.eventos.length}</div><div style="font-size:8px;color:var(--t4)">Plan</div></div>
+                  <div><div style="font-weight:800;color:#16a34a">${info.hechos}</div><div style="font-size:8px;color:var(--t4)">Hechos</div></div>
+                  <div><div style="font-weight:800;color:${ratio>=70?'#16a34a':ratio>=40?'#f59e0b':'#dc2626'}">${ratio}%</div><div style="font-size:8px;color:var(--t4)">Avance</div></div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `}
+  </div>`;
+}
+
+R();if(S.u)load();
+// Auto-refresh dashboard supervisor cada 60 segundos
+setInterval(()=>{if(S.u?.r==='admin'&&S.v==='dashboard'&&!S.ld)load();},60000);
 </script></body></html>
